@@ -1,0 +1,60 @@
+﻿Project Blueprint: AI-Powered Financial Expense Tracker
+
+
+Target Audience: Engineering Student Portfolio / Hackathon Project
+Core Feature: Automated Transaction Sync via SMS Parsing
+
+
+1. Features
+1. Automated Real-Time Transaction Extraction
+2. Smart AI Categorization
+3. Personal Financial Insights & Advice 
+4. Simple Visual Dashboards 
+5. High Security & Privacy 
+2. Production Tech Stack (Zero-Cost Blueprint)
+This production stack is optimized for engineering students. It uses enterprise-grade technologies that offer robust free developer tiers in 2026, requiring zero upfront cloud costs or credit card additions.
+
+
+* Mobile Client Platform: [Kotlin + Jetpack Compose] OR [Flutter + Dart]
+   * Communicates via HTTPS JSON Payload to:
+* Backend API Service: Python 3.11+ (FastAPI) | Hosted Free on Render/Railway
+   * Internal connections:
+      * AI Engine: Google AI Studio (Gemini 2.5 Flash)
+      * Database & Auth: Supabase Cloud (PostgreSQL Engine)
+________________
+Detailed Component Specifications
+A. Frontend Mobile Client
+* Framework Options: Kotlin utilizing Jetpack Compose for structural declarative layouts.
+* Sync Execution Pattern: Sync on App Open. To ensure maximum battery efficiency and zero friction from background execution limiters, the app queries the local Android SMS system database immediately upon app launch, processing only the differential delta since the last sync timestamp.
+B. Backend API Gateway
+* Framework: Python with FastAPI.
+* Responsibilities: Handles client API requests, executes Regular Expression (Regex) input sanitation to isolate financial transaction details, signs communications, and routes transaction processing arrays safely.
+* Hosting: Render (render.com) or Railway (railway.app) free resource tiers.
+C. Cloud Database & User Management
+* Provider: Supabase Cloud.
+* Engine: Relational PostgreSQL.
+* Free Tier Allowances: 500 MB relational storage (capable of scaling to millions of text-based financial transaction rows), fully integrated JWT User Authentication (Google Sign-In), and Row-Level Security (RLS) policies to keep user data isolated.
+D. Semantic AI Classification Engine
+* Provider: Google AI Studio (Gemini API).
+* Core Model: gemini-2.5-flash or gemini-flash-lite.
+* Free Tier Allocation: 1,000 free structured request tokens per day.
+* Utility: Accepts sanitized string arrays representing merchants and purchase values, classifications are parsed into structured JSON schemas mapping strictly to budgetary configurations (e.g., Food, Utilities, Transport, Rent) alongside real-time financial coaching insights.
+
+
+3. Core Implementation Data Workflow
+To protect the client UI thread from freezing or dropping frames when processing large chunks of historical transactions, execution shifts entirely off the main thread.
+
+
+1. App Launch: The system initializes the application environment.
+2. Show Loading Spinner: A visual indicator is displayed while the UI thread remains free at 60 FPS to ensure a smooth user experience.
+3. Query Local System SMS DB: The app pulls messages matching Bank IDs received since the last synchronization timestamp.
+4. Thread Switch / Offload: Execution shifts off the main thread to background workers (using Isolates in Flutter or Coroutine Dispatchers in Kotlin).
+5. Run Regex Parser: The system extracts the transaction amount, merchant text, and account identifiers from the raw SMS data.
+6. API Request to Backend: The processed payload is sent to the FastAPI backend and forwarded to Gemini AI Studio.
+7. AI JSON Categorization: The AI returns structured categories such as "Food" or "Bills" based on the transaction content.
+8. Update Supabase & Local DB: The categorized records are saved permanently in both cloud and local storage.
+9. Switch back to Main UI Thread: Control is returned to the primary thread to update the interface.
+10. Hide Spinner & Update Charts: The loading indicator is removed, and the financial dashboards are refreshed with the new data.
+
+
+3.1) Workflow Chart

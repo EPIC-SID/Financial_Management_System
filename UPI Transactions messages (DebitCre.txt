@@ -1,0 +1,192 @@
+Problem Statement
+
+Title
+
+AI-Powered Personal Finance Management System Using UPI Transaction Messages
+
+Problem Description
+
+Many people use UPI applications such as Google Pay, PhonePe, Paytm, and bank apps for daily transactions. However, users often struggle to track where their money is being spent and how much they are saving each month.
+
+The proposed system aims to automatically analyze UPI transaction messages (SMS) received on a user's mobile device and convert them into meaningful financial insights. The system will extract transaction details such as amount, date, transaction type (debit/credit), and merchant information from SMS messages.
+
+Users will enter their monthly income or salary. The system will then use Artificial Intelligence and Machine Learning techniques to categorize expenses into different categories such as:
+
+Food & Dining (Swiggy, Zomato, Restaurants)
+
+Travel & Transport
+
+Entertainment (Movies, OTT subscriptions)
+
+Shopping
+
+Bills & Utilities
+
+Investments
+
+Savings
+
+Miscellaneous
+
+
+The AI model will continuously learn from user behavior and spending patterns. Based on the analysis, the system will generate personalized recommendations such as:
+
+Categories where overspending is occurring
+
+Potential monthly savings opportunities
+
+Budget suggestions
+
+Spending trend analysis
+
+Financial improvement recommendations
+
+
+The system will present all information through an interactive dashboard containing graphs, reports, notifications, and monthly summaries.
+
+
+---
+
+Objectives
+
+1. Read and process UPI transaction SMS messages.
+
+
+2. Identify debit and credit transactions automatically.
+
+
+3. Store transaction data in a structured database.
+
+
+4. Categorize transactions using AI/ML techniques.
+
+
+5. Allow users to enter salary/income details.
+
+
+6. Generate monthly expense reports.
+
+
+7. Analyze spending habits.
+
+
+8. Suggest areas for saving money.
+
+
+9. Provide financial insights through dashboards and notifications.
+
+
+10. Continuously improve categorization accuracy using AI learning.
+
+
+
+
+---
+
+Expected Features
+
+User Module
+
+User registration/login
+
+Enter monthly salary/income
+
+View profile
+
+
+SMS Transaction Module
+
+Read UPI transaction SMS
+
+Extract amount, merchant, date, and type
+
+Store transactions
+
+
+AI Categorization Module
+
+Automatic expense classification
+
+Learning from user corrections
+
+Smart tagging of merchants
+
+
+Financial Analysis Module
+
+Monthly expense tracking
+
+Income vs expenditure comparison
+
+Savings calculation
+
+Budget tracking
+
+
+AI Recommendation Module
+
+"You spent 25% more on food this month."
+
+"Reducing food delivery expenses by ₹1,500 can increase savings by 10%."
+
+"Travel expenses are higher than average."
+
+
+Dashboard
+
+Expense pie chart
+
+Monthly trend graph
+
+Category-wise spending
+
+Savings and investment tracking
+
+Notifications and alerts
+
+
+
+---
+
+Suggested Technologies
+
+Frontend
+
+HTML
+
+CSS
+
+JavaScript
+
+
+Backend
+
+Python (Flask/FastAPI)
+
+
+Database
+
+SQLite (for simple version)
+
+MySQL (for advanced version)
+
+
+AI/ML
+
+Python
+
+Scikit-Learn
+
+Pandas
+
+NLP for SMS processing
+
+
+
+---
+
+One-Line Project Summary
+
+An AI-based personal finance management system that analyzes UPI transaction SMS messages, automatically categorizes expenses, tracks income and spending, and provides intelligent recommendations to improve users' financial habits and savings.
+
+This looks like a strong 2nd-year Computer Science mini-project because it combines web development, databases, AI, data analysis, and real-world financial applications without being overly complex.

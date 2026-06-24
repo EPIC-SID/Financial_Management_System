@@ -1,0 +1,94 @@
+# General
+.DS_Store
+Thumbs.db
+*.bak
+*.swp
+*~
+
+# IDEs / Editors
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.idea/
+*.iml
+*.iws
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Python / FastAPI (Backend)
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Python Virtual environments
+venv/
+.venv/
+env/
+ENV/
+
+# Python Pytest / Coverage
+.tox/
+.coverage
+.coverage.*
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+
+# Kotlin / Android / Gradle (Frontend)
+*.apk
+*.ap_
+*.aab
+*.dex
+*.class
+bin/
+gen/
+out/
+.gradle/
+# build/ is already ignored above, but specific to Android:
+app/build/
+local.properties
+proguard/
+*.log
+*.jks
+*.keystore
+
+# Flutter / Dart (Frontend - Alternative)
+.dart_tool/
+.packages
+.pub-cache/
+.pub/
+# /build/ is ignored
+*.pbxuser
+*.mode1v3
+*.mode2v3
+*.perspectivev3
+*.xcuserstate
+project.xcworkspace/
+xcuserdata/
+
+# Supabase Local
+supabase/.temp/
