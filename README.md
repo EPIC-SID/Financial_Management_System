@@ -51,22 +51,31 @@ To maintain a smooth 60 FPS user experience, processing of historical transactio
 ### Workflow Diagram
 
 ```mermaid
-flowchart LR
-    A["🚀 1. App Launch<br/><br/>System initializes the<br/>application environment."]
-    B["⏳ 2. Show Loading Spinner<br/><br/>Visual indicator displays;<br/>UI thread free at 60 FPS."]
-    C["🗄️ 3. Query Local System SMS DB<br/><br/>Pulls bank messages received<br/>since last sync timestamp."]
-    D["⚙️ 4. Thread Switch / Offload<br/><br/>Shifts off main thread to<br/>background worker/Isolates."]
-    E["🔍 5. Run Regex Parser<br/><br/>Extracts transaction amount,<br/>merchant, and account ID."]
+flowchart TB
+    subgraph Row1[" "]
+        direction LR
+        A["🚀 1. App Launch<br/><br/>System initializes the<br/>application environment."]
+        B["⏳ 2. Show Loading Spinner<br/><br/>Visual indicator displays;<br/>UI thread free at 60 FPS."]
+        C["🗄️ 3. Query Local System SMS DB<br/><br/>Pulls bank messages received<br/>since last sync timestamp."]
+        D["⚙️ 4. Thread Switch / Offload<br/><br/>Shifts off main thread to<br/>background worker/Isolates."]
+        E["🔍 5. Run Regex Parser<br/><br/>Extracts transaction amount,<br/>merchant, and account ID."]
+        A --> B --> C --> D --> E
+    end
     
-    F["🌐 6. API Request to Backend<br/><br/>Processes payload and forwards<br/>to FastAPI & Gemini AI."]
-    G["🧠 7. AI JSON Categorization<br/><br/>AI returns structured<br/>categories ('Food', 'Bills')."]
-    H["☁️ 8. Update Supabase & Local DB<br/><br/>Saves records permanently<br/>to cloud and local."]
-    I["🔄 9. Switch back to Main UI Thread<br/><br/>Control is returned to<br/>primary thread for the UI."]
-    J["📊 10. Hide Spinner & Update Charts<br/><br/>Removes loading indicator;<br/>refreshes dashboards."]
+    subgraph Row2[" "]
+        direction LR
+        F["🌐 6. API Request to Backend<br/><br/>Processes payload and forwards<br/>to FastAPI & Gemini AI."]
+        G["🧠 7. AI JSON Categorization<br/><br/>AI returns structured<br/>categories ('Food', 'Bills')."]
+        H["☁️ 8. Update Supabase & Local DB<br/><br/>Saves records permanently<br/>to cloud and local."]
+        I["🔄 9. Switch back to Main UI Thread<br/><br/>Control is returned to<br/>primary thread for the UI."]
+        J["📊 10. Hide Spinner & Update Charts<br/><br/>Removes loading indicator;<br/>refreshes dashboards."]
+        F --> G --> H --> I --> J
+    end
 
-    A --> B --> C --> D --> E
     E --> F
-    F --> G --> H --> I --> J
+
+    style Row1 fill:none,stroke:none
+    style Row2 fill:none,stroke:none
 
     style A fill:#e6f3ff,stroke:#333,stroke-width:2px,color:#000
     style B fill:#eaffea,stroke:#333,stroke-width:2px,color:#000
