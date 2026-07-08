@@ -1,7 +1,9 @@
 package com.example.financeapp.ui.screens
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -12,23 +14,27 @@ import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.financeapp.data.TransactionData
+import com.example.financeapp.data.TransactionRepository
+import com.example.financeapp.data.UserProfile
+import com.example.financeapp.data.UserRepository
 import com.example.financeapp.ui.theme.*
-
-data class Transaction(val id: Int, val merchant: String, val amount: String, val category: String, val description: String)
-
-val sampleTransactions = listOf(
-    Transaction(1, "Swiggy", "- ₹350.00", "Food", "Food Delivery • Today"),
-    Transaction(2, "Zomato", "- ₹1,200.00", "Food", "Dining • Yesterday"),
-    Transaction(3, "Uber", "- ₹180.00", "Transport", "Transport • Mar 12")
-)
+import java.text.NumberFormat
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Date
+import java.util.Locale
+import java.util.TimeZone
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -36,6 +42,38 @@ fun HomeScreen(
     onNavigateToTransactions: () -> Unit,
     onNavigateToProfile: () -> Unit
 ) {
+    val context = LocalContext.current
+
+    var transactions by remember { mutableStateOf<List<TransactionData>>(emptyList()) }
+    var profile by remember { mutableStateOf<UserProfile?>(null) }
+    var isLoading by remember { mutableStateOf(true) }
+
+    // Fetch transactions & profile on load
+    LaunchedEffect(Unit) {
+        isLoading = true
+        try {
+            profile = UserRepository.getProfile()
+            transactions = TransactionRepository.getTransactions()
+        } catch (e: Exception) {
+            Toast.makeText(context, "Failed to load dashboard data", Toast.LENGTH_SHORT).show()
+        } finally {
+            isLoading = false
+        }
+    }
+
+    // Calculations based on real data
+    val monthlyIncomeValue = profile?.monthlyIncome ?: 0.0
+    val totalNetTxnFlow = transactions.sumOf { it.amount }
+    val totalBalance = monthlyIncomeValue + totalNetTxnFlow
+
+    // Current month calculations
+    val currentMonthTxns = transactions.filter { isCurrentMonth(it.transactionDate) }
+    val monthlyIn = currentMonthTxns.filter { it.amount > 0 }.sumOf { it.amount }
+    val monthlyOut = currentMonthTxns.filter { it.amount < 0 }.sumOf { kotlin.math.abs(it.amount) }
+
+    // Recent activity: top 3 transactions
+    val recentTxns = transactions.take(3)
+
     Scaffold(
         containerColor = BackgroundWhite,
         topBar = {
@@ -80,79 +118,126 @@ fun HomeScreen(
         },
         floatingActionButton = {
             FloatingActionButton(
-                onClick = { /* Add manual txn */ },
+                onClick = onNavigateToTransactions, // Navigate to transaction sync
                 containerColor = BronzePrimary,
                 contentColor = Color.White,
                 shape = CircleShape
             ) {
-                Icon(Icons.Filled.Add, contentDescription = "Add")
+                Icon(Icons.Filled.List, contentDescription = "Sync/View")
             }
         }
     ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .padding(horizontal = 24.dp)
-        ) {
-            Spacer(modifier = Modifier.height(16.dp))
-            
+        if (isLoading) {
+            Box(modifier = Modifier.fillMaxSize().padding(paddingValues), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator(color = BronzePrimary)
+            }
+        } else {
             Column(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+                    .padding(horizontal = 24.dp)
             ) {
-                Text("TOTAL BALANCE", color = TextGray, fontSize = 12.sp, fontWeight = FontWeight.Bold)
-                Spacer(modifier = Modifier.height(4.dp))
-                Text("₹24,000.00", fontSize = 40.sp, fontWeight = FontWeight.Bold, color = TextBlack)
                 Spacer(modifier = Modifier.height(16.dp))
-                Button(
-                    onClick = { },
-                    colors = ButtonDefaults.buttonColors(containerColor = BronzePrimary, contentColor = Color.White),
-                    shape = RectangleShape,
-                    modifier = Modifier.height(40.dp)
+                
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Text("ADD FUNDS", fontSize = 12.sp, fontWeight = FontWeight.Bold)
-                }
-            }
-            
-            Spacer(modifier = Modifier.height(32.dp))
-            
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                // Monthly In
-                Box(modifier = Modifier.weight(1f).border(1.dp, BorderBlack).padding(16.dp)) {
-                    Column {
-                        Text("↗", color = TextGray)
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text("MONTHLY IN", fontSize = 10.sp, color = TextGray, fontWeight = FontWeight.Bold)
-                        Text("₹3,400", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = TealPositive)
+                    Text("TOTAL BALANCE", color = TextGray, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "₹${NumberFormat.getNumberInstance(Locale("en", "IN")).format(totalBalance)}",
+                        fontSize = 40.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = TextBlack
+                    )
+                    
+                    // Show a warning/link if monthly income is not set
+                    if (profile?.monthlyIncome == null || profile?.monthlyIncome == 0.0) {
+                        Spacer(modifier = Modifier.height(6.dp))
+                        Text(
+                            text = "Monthly income not set. Tap here to set it.",
+                            color = BronzePrimary,
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            modifier = Modifier.clickable { onNavigateToProfile() }
+                        )
                     }
                 }
-                // Monthly Out
-                Box(modifier = Modifier.weight(1f).border(1.dp, BorderBlack).padding(16.dp)) {
-                    Column {
-                        Text("↘", color = TextGray)
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text("MONTHLY OUT", fontSize = 10.sp, color = TextGray, fontWeight = FontWeight.Bold)
-                        Text("₹1,730", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = TextBlack)
+                
+                Spacer(modifier = Modifier.height(32.dp))
+                
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                    // Monthly In
+                    Box(modifier = Modifier.weight(1f).border(1.dp, BorderBlack).padding(16.dp)) {
+                        Column {
+                            Text("↗", color = TextGray)
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text("MONTHLY IN", fontSize = 10.sp, color = TextGray, fontWeight = FontWeight.Bold)
+                            Text(
+                                text = "₹${NumberFormat.getNumberInstance(Locale("en", "IN")).format(monthlyIn)}",
+                                fontSize = 18.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = TealPositive
+                            )
+                        }
+                    }
+                    // Monthly Out
+                    Box(modifier = Modifier.weight(1f).border(1.dp, BorderBlack).padding(16.dp)) {
+                        Column {
+                            Text("↘", color = TextGray)
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text("MONTHLY OUT", fontSize = 10.sp, color = TextGray, fontWeight = FontWeight.Bold)
+                            Text(
+                                text = "₹${NumberFormat.getNumberInstance(Locale("en", "IN")).format(monthlyOut)}",
+                                fontSize = 18.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = TextBlack
+                            )
+                        }
                     }
                 }
-            }
-            
-            Spacer(modifier = Modifier.height(32.dp))
-            
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.Bottom
-            ) {
-                Text("RECENT ACTIVITY", fontWeight = FontWeight.Bold, fontSize = 14.sp, color = TextBlack)
-                Text("VIEW ALL", color = BronzePrimary, fontSize = 12.sp, fontWeight = FontWeight.Bold)
-            }
-            Divider(color = BorderBlack, thickness = 2.dp, modifier = Modifier.padding(top = 8.dp, bottom = 16.dp))
-            
-            LazyColumn(verticalArrangement = Arrangement.spacedBy(0.dp)) {
-                items(sampleTransactions) { txn ->
-                    TransactionRow(txn)
+                
+                Spacer(modifier = Modifier.height(32.dp))
+                
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.Bottom
+                ) {
+                    Text("RECENT ACTIVITY", fontWeight = FontWeight.Bold, fontSize = 14.sp, color = TextBlack)
+                    Text(
+                        text = "VIEW ALL",
+                        color = BronzePrimary,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.clickable { onNavigateToTransactions() }
+                    )
+                }
+                Divider(color = BorderBlack, thickness = 2.dp, modifier = Modifier.padding(top = 8.dp, bottom = 16.dp))
+                
+                if (recentTxns.isEmpty()) {
+                    Box(
+                        modifier = Modifier.fillMaxWidth().weight(1f),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "No recent transactions.\nGo to Transactions screen and sync.",
+                            color = TextGray,
+                            fontSize = 14.sp,
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                } else {
+                    LazyColumn(
+                        modifier = Modifier.weight(1f),
+                        verticalArrangement = Arrangement.spacedBy(0.dp)
+                    ) {
+                        items(recentTxns) { txn ->
+                            TransactionRow(txn)
+                        }
+                    }
                 }
             }
         }
@@ -160,7 +245,8 @@ fun HomeScreen(
 }
 
 @Composable
-fun TransactionRow(txn: Transaction) {
+fun TransactionRow(txn: TransactionData) {
+    val isPositive = txn.amount > 0
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -180,10 +266,42 @@ fun TransactionRow(txn: Transaction) {
             Spacer(modifier = Modifier.width(16.dp))
             Column {
                 Text(txn.merchant, fontWeight = FontWeight.Bold, fontSize = 14.sp, color = TextBlack)
-                Text(txn.description, fontSize = 12.sp, color = TextGray)
+                Text(
+                    text = "${txn.category} • ${formatTransactionDate(txn.transactionDate)}",
+                    fontSize = 12.sp,
+                    color = TextGray
+                )
             }
         }
-        Text(txn.amount, fontWeight = FontWeight.Bold, fontSize = 14.sp, color = TextBlack)
+        Text(
+            text = if (isPositive) {
+                "+ ₹${NumberFormat.getNumberInstance(Locale("en", "IN")).format(txn.amount)}"
+            } else {
+                "- ₹${NumberFormat.getNumberInstance(Locale("en", "IN")).format(kotlin.math.abs(txn.amount))}"
+            },
+            fontWeight = FontWeight.Bold,
+            fontSize = 14.sp,
+            color = if (isPositive) TealPositive else TextBlack
+        )
     }
     Divider(color = SurfaceGray, thickness = 1.dp)
+}
+
+// Check if transaction happened in current month/year
+fun isCurrentMonth(dateStr: String): Boolean {
+    return try {
+        val isoParser = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.US)
+        isoParser.timeZone = TimeZone.getTimeZone("UTC")
+        val txnDate = isoParser.parse(dateStr) ?: return false
+        
+        val calTxn = Calendar.getInstance()
+        calTxn.time = txnDate
+        
+        val calNow = Calendar.getInstance()
+        
+        calTxn.get(Calendar.YEAR) == calNow.get(Calendar.YEAR) &&
+        calTxn.get(Calendar.MONTH) == calNow.get(Calendar.MONTH)
+    } catch (e: Exception) {
+        false
+    }
 }
