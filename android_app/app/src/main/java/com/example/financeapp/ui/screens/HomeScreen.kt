@@ -32,7 +32,10 @@ val sampleTransactions = listOf(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen(onNavigateToTransactions: () -> Unit) {
+fun HomeScreen(
+    onNavigateToTransactions: () -> Unit,
+    onNavigateToProfile: () -> Unit
+) {
     Scaffold(
         containerColor = BackgroundWhite,
         topBar = {
@@ -70,7 +73,7 @@ fun HomeScreen(onNavigateToTransactions: () -> Unit) {
                     icon = { Icon(Icons.Filled.Person, contentDescription = "Profile") },
                     label = { Text("Profile") },
                     selected = false,
-                    onClick = { },
+                    onClick = onNavigateToProfile,
                     colors = NavigationBarItemDefaults.colors(unselectedIconColor = TextGray, unselectedTextColor = TextGray)
                 )
             }

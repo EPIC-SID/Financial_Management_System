@@ -26,7 +26,10 @@ import com.example.financeapp.ui.theme.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TransactionsScreen(onNavigateBack: () -> Unit) {
+fun TransactionsScreen(
+    onNavigateBack: () -> Unit,
+    onNavigateToProfile: () -> Unit
+) {
     Scaffold(
         containerColor = BackgroundWhite,
         topBar = {
@@ -71,7 +74,7 @@ fun TransactionsScreen(onNavigateBack: () -> Unit) {
                     icon = { Icon(Icons.Filled.Person, contentDescription = "Profile") },
                     label = { Text("Profile") },
                     selected = false,
-                    onClick = { },
+                    onClick = onNavigateToProfile,
                     colors = NavigationBarItemDefaults.colors(unselectedIconColor = TextGray, unselectedTextColor = TextGray)
                 )
             }

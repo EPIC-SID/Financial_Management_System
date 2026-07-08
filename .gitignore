@@ -26,7 +26,6 @@ __pycache__/
 *$py.class
 *.so
 .Python
-build/
 develop-eggs/
 dist/
 downloads/
@@ -58,7 +57,7 @@ coverage.xml
 .hypothesis/
 .pytest_cache/
 
-# Kotlin / Android / Gradle (Frontend)
+# Android / Gradle
 *.apk
 *.ap_
 *.aab
@@ -67,42 +66,28 @@ coverage.xml
 bin/
 gen/
 out/
+build/
 .gradle/
-# build/ is already ignored above, but specific to Android:
-app/build/
 local.properties
 proguard/
 *.log
 *.jks
 *.keystore
 
-# Flutter / Dart (Frontend - Alternative)
-.dart_tool/
-.packages
-.pub-cache/
-.pub/
-# /build/ is ignored
-*.pbxuser
-*.mode1v3
-*.mode2v3
-*.perspectivev3
-*.xcuserstate
-project.xcworkspace/
-xcuserdata/
-
-# Supabase Local
-supabase/.temp/
-
-# Ignored documents
-F-Internship Proposal Form for Internship under Faculty Mentorship.doc
-
-# Local Gradle Wrapper cache
+# Gradle Wrapper cache
 android_app/wrapper/dists/
 
-# Generator Scripts
+# Generator / Scaffolding scripts (not needed in production)
 android_app/*.py
 
-# Documentation
+# Documents & Specs (keep locally, not in version control)
 *.pdf
 *.docx
+*.doc
 Supabase_details.txt
+Financial Management System.txt
+UPI Transactions messages (DebitCre.txt
+
+# Misc
+*.tmp
+*.bak
