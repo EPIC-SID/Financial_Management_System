@@ -15,7 +15,7 @@ Core Feature: Automated Transaction Sync via SMS Parsing
 This production stack is optimized for engineering students. It uses enterprise-grade technologies that offer robust free developer tiers in 2026, requiring zero upfront cloud costs or credit card additions.
 
 
-* Mobile Client Platform: [Kotlin + Jetpack Compose] OR [Flutter + Dart]
+* Mobile Client Platform: [Kotlin + Jetpack Compose] 
    * Communicates via HTTPS JSON Payload to:
 * Backend API Service: Python 3.11+ (FastAPI) | Hosted Free on Render/Railway
    * Internal connections:

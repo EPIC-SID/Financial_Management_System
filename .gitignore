@@ -95,3 +95,13 @@ supabase/.temp/
 
 # Ignored documents
 F-Internship Proposal Form for Internship under Faculty Mentorship.doc
+
+# Local Gradle Wrapper cache
+android_app/wrapper/dists/
+
+# Generator Scripts
+android_app/*.py
+
+# Documentation
+*.pdf
+*.docx
