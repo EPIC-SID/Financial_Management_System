@@ -242,7 +242,7 @@ fun TransactionsScreen(
                 actions = {
                     IconButton(onClick = { startSyncFlow() }, enabled = !isSyncing) {
                         if (isSyncing) {
-                            CircularProgressIndicator(size = 20.dp, color = BronzePrimary, strokeWidth = 2.dp)
+                            CircularProgressIndicator(modifier = Modifier.size(20.dp), color = BronzePrimary, strokeWidth = 2.dp)
                         } else {
                             Icon(Icons.Filled.Refresh, contentDescription = "Sync SMS", tint = BronzePrimary)
                         }
