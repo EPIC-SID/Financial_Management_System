@@ -105,3 +105,4 @@ android_app/*.py
 # Documentation
 *.pdf
 *.docx
+Supabase_details.txt
