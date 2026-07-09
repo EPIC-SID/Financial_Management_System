@@ -87,6 +87,7 @@ android_app/*.py
 Supabase_details.txt
 Financial Management System.txt
 UPI Transactions messages (DebitCre.txt
+Codebase_Overview.txt
 
 # Misc
 *.tmp
