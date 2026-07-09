@@ -1,5 +1,6 @@
 package com.example.financeapp.data
 
+import android.util.Log
 import io.github.jan.supabase.gotrue.providers.builtin.Email
 import io.github.jan.supabase.postgrest.postgrest
 import io.github.jan.supabase.postgrest.query.Columns
@@ -11,6 +12,8 @@ import kotlinx.serialization.json.put
  * Uses Supabase Auth (GoTrue) for authentication and Postgrest for the user_profiles table.
  */
 object UserRepository {
+
+    private const val TAG = "UserRepository"
 
     // ──────────────────────────────────────────────
     //  Authentication
@@ -88,30 +91,42 @@ object UserRepository {
 
     /**
      * Fetch the current user's profile from the `user_profiles` table.
-     * Returns null if not found.
+     * Returns [Resource.Success] with the profile (or null if not found),
+     * or [Resource.Error] on failure.
      */
-    suspend fun getProfile(): UserProfile? {
-        val userId = SupabaseClient.auth.currentUserOrNull()?.id ?: return null
+    suspend fun getProfile(): Resource<UserProfile?> {
+        val userId = SupabaseClient.auth.currentUserOrNull()?.id
+            ?: return Resource.Error("User not authenticated")
         return try {
-            SupabaseClient.client.postgrest["user_profiles"]
+            val profile = SupabaseClient.client.postgrest["user_profiles"]
                 .select {
                     filter { eq("id", userId) }
                 }
                 .decodeSingleOrNull<UserProfile>()
+            Resource.Success(profile)
         } catch (e: Exception) {
-            null
+            Log.e(TAG, "Failed to fetch profile", e)
+            Resource.Error("Failed to load profile: ${e.localizedMessage}", e)
         }
     }
 
     /**
      * Update the current user's profile with the given fields.
      * Only non-null fields in [update] will be sent to Supabase.
+     * Returns [Resource.Success] on success, or [Resource.Error] on failure.
      */
-    suspend fun updateProfile(update: UserProfileUpdate) {
-        val userId = SupabaseClient.auth.currentUserOrNull()?.id ?: return
-        SupabaseClient.client.postgrest["user_profiles"]
-            .update(update) {
-                filter { eq("id", userId) }
-            }
+    suspend fun updateProfile(update: UserProfileUpdate): Resource<Unit> {
+        val userId = SupabaseClient.auth.currentUserOrNull()?.id
+            ?: return Resource.Error("User not authenticated")
+        return try {
+            SupabaseClient.client.postgrest["user_profiles"]
+                .update(update) {
+                    filter { eq("id", userId) }
+                }
+            Resource.Success(Unit)
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to update profile", e)
+            Resource.Error("Failed to update profile: ${e.localizedMessage}", e)
+        }
     }
 }

@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -30,15 +31,26 @@ fun FinanceAppNavGraph() {
     val navController = rememberNavController()
 
     // Check if the user is already signed in
-    var startDestination by remember { mutableStateOf("login") }
+    var startDestination by remember { mutableStateOf(Screen.Login.route) }
     var isCheckingAuth by remember { mutableStateOf(true) }
 
     LaunchedEffect(Unit) {
         val sessionStatus = SupabaseClient.auth.sessionStatus.value
         if (sessionStatus is SessionStatus.Authenticated) {
-            startDestination = "home"
+            startDestination = Screen.Home.route
         }
         isCheckingAuth = false
+    }
+
+    // Monitor session status — redirect to login on token expiry or sign out
+    val sessionStatus by SupabaseClient.auth.sessionStatus.collectAsState()
+    LaunchedEffect(sessionStatus) {
+        if (!isCheckingAuth && sessionStatus is SessionStatus.NotAuthenticated) {
+            // Session expired or user was signed out — redirect to login
+            navController.navigate(Screen.Login.route) {
+                popUpTo(0) { inclusive = true }
+            }
+        }
     }
 
     if (isCheckingAuth) {
@@ -50,23 +62,23 @@ fun FinanceAppNavGraph() {
     }
 
     NavHost(navController = navController, startDestination = startDestination) {
-        composable("login") {
+        composable(Screen.Login.route) {
             LoginScreen(
                 onNavigateToHome = {
-                    navController.navigate("home") {
-                        popUpTo("login") { inclusive = true }
+                    navController.navigate(Screen.Home.route) {
+                        popUpTo(Screen.Login.route) { inclusive = true }
                     }
                 },
                 onNavigateToSignUp = {
-                    navController.navigate("signup")
+                    navController.navigate(Screen.SignUp.route)
                 }
             )
         }
-        composable("signup") {
+        composable(Screen.SignUp.route) {
             SignUpScreen(
                 onNavigateToHome = {
-                    navController.navigate("home") {
-                        popUpTo("login") { inclusive = true }
+                    navController.navigate(Screen.Home.route) {
+                        popUpTo(Screen.Login.route) { inclusive = true }
                     }
                 },
                 onNavigateBackToLogin = {
@@ -74,54 +86,54 @@ fun FinanceAppNavGraph() {
                 }
             )
         }
-        composable("home") {
+        composable(Screen.Home.route) {
             HomeScreen(
                 onNavigateToTransactions = {
-                    navController.navigate("transactions")
+                    navController.navigate(Screen.Transactions.route)
                 },
                 onNavigateToProfile = {
-                    navController.navigate("profile")
+                    navController.navigate(Screen.Profile.route)
                 }
             )
         }
-        composable("transactions") {
+        composable(Screen.Transactions.route) {
             TransactionsScreen(
                 onNavigateBack = {
-                    navController.popBackStack() // Or navigate("home")
+                    navController.popBackStack()
                 },
                 onNavigateToProfile = {
-                    navController.navigate("profile")
+                    navController.navigate(Screen.Profile.route)
                 }
             )
         }
-        composable("profile") {
+        composable(Screen.Profile.route) {
             ProfileScreen(
                 onNavigateToHome = {
-                    navController.navigate("home") {
-                        popUpTo("home") { inclusive = false }
+                    navController.navigate(Screen.Home.route) {
+                        popUpTo(Screen.Home.route) { inclusive = false }
                     }
                 },
                 onNavigateToTransactions = {
-                    navController.navigate("transactions")
+                    navController.navigate(Screen.Transactions.route)
                 },
                 onNavigateToLogin = {
-                    navController.navigate("login") {
+                    navController.navigate(Screen.Login.route) {
                         popUpTo(0) { inclusive = true } // Clear entire backstack on sign out
                     }
                 },
                 onNavigateToEditProfile = {
-                    navController.navigate("edit_profile")
+                    navController.navigate(Screen.EditProfile.route)
                 }
             )
         }
-        composable("edit_profile") {
+        composable(Screen.EditProfile.route) {
             EditProfileScreen(
                 onNavigateBack = {
                     navController.popBackStack()
                 }
             )
         }
-        composable("ai_review") {
+        composable(Screen.AiReview.route) {
             AiReviewScreen(
                 onDismiss = {
                     navController.popBackStack()

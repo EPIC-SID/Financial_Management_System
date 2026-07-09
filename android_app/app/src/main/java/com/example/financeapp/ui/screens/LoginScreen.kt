@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.financeapp.data.UserRepository
 import com.example.financeapp.ui.theme.*
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @Composable
@@ -43,10 +44,32 @@ fun LoginScreen(
     var emailError by remember { mutableStateOf<String?>(null) }
     var passwordError by remember { mutableStateOf<String?>(null) }
 
+    // Rate limiting state
+    var failedAttempts by remember { mutableIntStateOf(0) }
+    var lockoutSecondsRemaining by remember { mutableIntStateOf(0) }
+    val isLockedOut = lockoutSecondsRemaining > 0
+
+    // Countdown timer for lockout
+    LaunchedEffect(lockoutSecondsRemaining) {
+        if (lockoutSecondsRemaining > 0) {
+            delay(1000L)
+            lockoutSecondsRemaining--
+        }
+    }
+
     // Forgot password dialog state
     var showForgotPasswordDialog by remember { mutableStateOf(false) }
     var forgotPasswordEmail by remember { mutableStateOf("") }
     var isSendingReset by remember { mutableStateOf(false) }
+    var resetCooldownSeconds by remember { mutableIntStateOf(0) }
+
+    // Cooldown timer for password reset
+    LaunchedEffect(resetCooldownSeconds) {
+        if (resetCooldownSeconds > 0) {
+            delay(1000L)
+            resetCooldownSeconds--
+        }
+    }
 
     fun validateEmail(): Boolean {
         return if (emailInput.isBlank()) {
@@ -118,10 +141,15 @@ fun LoginScreen(
                             Toast.makeText(context, "Please enter a valid email", Toast.LENGTH_SHORT).show()
                             return@Button
                         }
+                        if (resetCooldownSeconds > 0) {
+                            Toast.makeText(context, "Please wait ${resetCooldownSeconds}s before requesting another reset.", Toast.LENGTH_SHORT).show()
+                            return@Button
+                        }
                         isSendingReset = true
                         coroutineScope.launch {
                             try {
                                 UserRepository.resetPassword(forgotPasswordEmail)
+                                resetCooldownSeconds = 60 // 60-second cooldown
                                 Toast.makeText(context, "Password reset email sent! Check your inbox.", Toast.LENGTH_LONG).show()
                                 showForgotPasswordDialog = false
                             } catch (e: Exception) {
@@ -272,8 +300,21 @@ fun LoginScreen(
             Spacer(modifier = Modifier.height(24.dp))
 
             // Login button
+            // Lockout warning
+            if (isLockedOut) {
+                Text(
+                    text = "Too many failed attempts. Try again in ${lockoutSecondsRemaining}s",
+                    color = MaterialTheme.colorScheme.error,
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+            }
+
             Button(
                 onClick = {
+                    if (isLockedOut) return@Button
+
                     val isEmailValid = validateEmail()
                     val isPasswordValid = validatePassword()
                     if (!isEmailValid || !isPasswordValid) return@Button
@@ -282,8 +323,14 @@ fun LoginScreen(
                     coroutineScope.launch {
                         try {
                             UserRepository.signIn(emailInput.trim(), passwordInput)
+                            failedAttempts = 0 // Reset on success
                             onNavigateToHome()
                         } catch (e: Exception) {
+                            failedAttempts++
+                            if (failedAttempts >= 3) {
+                                lockoutSecondsRemaining = 30
+                                failedAttempts = 0
+                            }
                             val message = when {
                                 e.message?.contains("Invalid login credentials", ignoreCase = true) == true ->
                                     "Incorrect email or password. Please try again."
@@ -304,7 +351,7 @@ fun LoginScreen(
                     .height(56.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = BronzePrimary, contentColor = Color.White),
                 shape = RectangleShape,
-                enabled = !isLoading
+                enabled = !isLoading && !isLockedOut
             ) {
                 if (isLoading) {
                     CircularProgressIndicator(color = Color.White, modifier = Modifier.size(24.dp))

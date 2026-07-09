@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.financeapp.data.UserRepository
 import com.example.financeapp.ui.theme.*
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @Composable
@@ -44,6 +45,17 @@ fun SignUpScreen(
     var isLoading by remember { mutableStateOf(false) }
     var passwordVisible by remember { mutableStateOf(false) }
     var confirmPasswordVisible by remember { mutableStateOf(false) }
+
+    // Rate limiting state
+    var signUpCooldownSeconds by remember { mutableIntStateOf(0) }
+
+    // Cooldown timer
+    LaunchedEffect(signUpCooldownSeconds) {
+        if (signUpCooldownSeconds > 0) {
+            delay(1000L)
+            signUpCooldownSeconds--
+        }
+    }
 
     // Validation states
     var fullNameError by remember { mutableStateOf<String?>(null) }
@@ -79,8 +91,17 @@ fun SignUpScreen(
         if (passwordInput.isBlank()) {
             passwordError = "Password is required"
             isValid = false
-        } else if (passwordInput.length < 6) {
-            passwordError = "Password must be at least 6 characters"
+        } else if (passwordInput.length < 8) {
+            passwordError = "Password must be at least 8 characters"
+            isValid = false
+        } else if (!passwordInput.any { it.isUpperCase() }) {
+            passwordError = "Password must contain at least one uppercase letter"
+            isValid = false
+        } else if (!passwordInput.any { it.isDigit() }) {
+            passwordError = "Password must contain at least one digit"
+            isValid = false
+        } else if (!passwordInput.any { !it.isLetterOrDigit() }) {
+            passwordError = "Password must contain at least one special character"
             isValid = false
         } else {
             passwordError = null
@@ -294,9 +315,11 @@ fun SignUpScreen(
             // Create Account button
             Button(
                 onClick = {
+                    if (signUpCooldownSeconds > 0) return@Button
                     if (!validate()) return@Button
 
                     isLoading = true
+                    signUpCooldownSeconds = 5 // 5-second cooldown between attempts
                     coroutineScope.launch {
                         try {
                             val income = monthlyIncomeInput.toDoubleOrNull()
@@ -329,7 +352,7 @@ fun SignUpScreen(
                     .height(56.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = BronzePrimary, contentColor = Color.White),
                 shape = RectangleShape,
-                enabled = !isLoading
+                enabled = !isLoading && signUpCooldownSeconds == 0
             ) {
                 if (isLoading) {
                     CircularProgressIndicator(color = Color.White, modifier = Modifier.size(24.dp))
@@ -366,9 +389,9 @@ enum class PasswordStrength(val label: String, val color: Color, val progress: F
 }
 
 fun calculatePasswordStrength(password: String): PasswordStrength {
-    if (password.length < 6) return PasswordStrength.WEAK
+    if (password.length < 8) return PasswordStrength.WEAK
     var score = 0
-    if (password.length >= 8) score++
+    if (password.length >= 10) score++
     if (password.any { it.isUpperCase() }) score++
     if (password.any { it.isDigit() }) score++
     if (password.any { !it.isLetterOrDigit() }) score++

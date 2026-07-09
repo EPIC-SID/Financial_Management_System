@@ -1,0 +1,137 @@
+# ═══════════════════════════════════════════════════════════════
+#  RupAI — TODO List
+#  Created: 2026-07-09
+# ═══════════════════════════════════════════════════════════════
+
+
+# ──────────────────────────────────────────────────────────────
+#  CODE IMPROVEMENTS (Architecture & Quality)
+# ──────────────────────────────────────────────────────────────
+
+[ ] Add ViewModel layer for each screen (LoginViewModel, HomeViewModel, etc.)
+    - Move business logic out of Composables
+    - Survive configuration changes (rotation)
+    - Use viewModelScope for coroutines instead of rememberCoroutineScope
+
+[ ] Add Dependency Injection (Hilt or manual DI)
+    - Create interfaces for UserRepository, TransactionRepository
+    - Enables unit testing with mocks
+    - Decouple screens from Supabase implementation
+
+[ ] Add phone number format validation in EditProfileScreen
+    - Regex: ^\+?[0-9]{7,15}$
+    - Show error message for invalid formats
+
+[ ] Add name length validation in EditProfileScreen
+    - Max 100 characters
+    - Trim and sanitize before saving
+
+[ ] Add offline support / caching
+    - Add Room database as local cache
+    - Load from cache first, then sync from Supabase
+    - Show "No internet" UI state explicitly
+
+[ ] Add proper Loading/Error/Empty state pattern
+    - Use sealed class UiState<T> { Loading, Success, Error }
+    - Consistent across all screens
+
+[ ] Upgrade Compose BOM version
+    - Current: 2023.10.01 (Material3 1.1.x)
+    - Target: 2024.06.00+ (Material3 1.2.x+)
+    - Enables HorizontalDivider, Icons.AutoMirrored, and other newer APIs
+    - Will also need to update kotlinCompilerExtensionVersion
+
+
+# ──────────────────────────────────────────────────────────────
+#  SECURITY IMPROVEMENTS
+# ──────────────────────────────────────────────────────────────
+
+[ ] Add certificate pinning for Supabase Ktor client
+    - Prevents MITM attacks on API calls
+
+[ ] Ensure Row Level Security (RLS) is strictly enforced on ALL Supabase tables
+    - Verify user_profiles and transactions tables have proper RLS policies
+    - Test that users cannot access other users' data
+
+[ ] Add biometric authentication (fingerprint/face unlock)
+    - Use BiometricPrompt API
+    - Protect app access for financial data
+
+
+# ──────────────────────────────────────────────────────────────
+#  NEW FEATURES — High Priority (Core Financial)
+# ──────────────────────────────────────────────────────────────
+
+[ ] Budget Management
+    - Set monthly budgets per category (Food, Travel, Shopping, etc.)
+    - Progress bars showing spending vs budget
+    - Overspending alerts / notifications
+
+[ ] Manual Transaction Entry
+    - Allow users to add cash transactions manually
+    - Support bank transfers not captured by SMS
+
+[ ] Expense Charts & Analytics
+    - Pie chart for category breakdown
+    - Line graph for spending trends over time
+    - Use MPAndroidChart or Vico library
+
+[ ] Recurring Transaction Detection
+    - Auto-detect subscriptions (Netflix, Spotify, rent, etc.)
+    - Track and display recurring expenses separately
+
+[ ] Complete the AI Review Screen
+    - Currently a static placeholder with hardcoded values (AiReviewScreen.kt)
+    - Connect to Gemini API for real spending analysis
+    - AI-powered savings tips and category corrections
+    - Confidence-based category suggestions
+
+
+# ──────────────────────────────────────────────────────────────
+#  NEW FEATURES — Medium Priority (User Experience)
+# ──────────────────────────────────────────────────────────────
+
+[ ] Dark Mode Support
+    - Theme.kt only has light color scheme
+    - Add dark color scheme and system preference toggle
+
+[ ] Transaction Search
+    - Search by merchant name, amount range, date range
+    - Full-text search across descriptions
+
+[ ] Export to CSV/PDF
+    - Export transaction history for tax filing or personal records
+    - Date range selection for exports
+
+[ ] Bill Reminders & Notifications
+    - Scheduled notifications for upcoming bills (rent, EMI, subscriptions)
+    - Push notification integration
+
+[ ] Multi-Currency Support
+    - currency field exists in UserProfile but is never used
+    - Add currency conversion and display
+
+
+# ──────────────────────────────────────────────────────────────
+#  NEW FEATURES — Nice-to-Have (Engagement)
+# ──────────────────────────────────────────────────────────────
+
+[ ] Savings Goals
+    - Set targets (e.g., "Save ₹50,000 for vacation")
+    - Visual progress tracking with milestones
+
+[ ] Split Expenses
+    - Track shared expenses with friends/roommates
+    - Settlement tracking
+
+[ ] Receipt Scanner
+    - OCR to capture and categorize paper receipts
+    - Use CameraX + ML Kit
+
+[ ] Home Screen Widgets
+    - Glance widgets showing balance and recent transactions
+    - Quick-glance spending summary
+
+[ ] Onboarding Flow
+    - First-time user tutorial
+    - Guided setup for income, categories, and SMS sync

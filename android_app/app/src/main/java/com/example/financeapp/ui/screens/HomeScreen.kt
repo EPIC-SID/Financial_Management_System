@@ -9,10 +9,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.List
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -24,10 +21,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.financeapp.data.Resource
 import com.example.financeapp.data.TransactionData
 import com.example.financeapp.data.TransactionRepository
 import com.example.financeapp.data.UserProfile
 import com.example.financeapp.data.UserRepository
+import com.example.financeapp.ui.components.AppBottomBar
+import com.example.financeapp.ui.components.Tab
 import com.example.financeapp.ui.theme.*
 import java.text.NumberFormat
 import java.text.SimpleDateFormat
@@ -52,8 +52,16 @@ fun HomeScreen(
     LaunchedEffect(Unit) {
         isLoading = true
         try {
-            profile = UserRepository.getProfile()
-            transactions = TransactionRepository.getTransactions()
+            val profileResult = UserRepository.getProfile()
+            if (profileResult is Resource.Success) {
+                profile = profileResult.data
+            }
+            val txnResult = TransactionRepository.getTransactions()
+            if (txnResult is Resource.Success) {
+                transactions = txnResult.data
+            } else if (txnResult is Resource.Error) {
+                Toast.makeText(context, txnResult.message, Toast.LENGTH_SHORT).show()
+            }
         } catch (e: Exception) {
             Toast.makeText(context, "Failed to load dashboard data", Toast.LENGTH_SHORT).show()
         } finally {
@@ -92,29 +100,16 @@ fun HomeScreen(
             )
         },
         bottomBar = {
-            NavigationBar(containerColor = BackgroundWhite, modifier = Modifier.border(1.dp, SurfaceGray, RectangleShape)) {
-                NavigationBarItem(
-                    icon = { Icon(Icons.Filled.Home, contentDescription = "Home") },
-                    label = { Text("Home") },
-                    selected = true,
-                    onClick = { },
-                    colors = NavigationBarItemDefaults.colors(selectedIconColor = BronzePrimary, selectedTextColor = BronzePrimary, indicatorColor = BackgroundWhite)
-                )
-                NavigationBarItem(
-                    icon = { Icon(Icons.Filled.List, contentDescription = "Transactions") },
-                    label = { Text("Transactions") },
-                    selected = false,
-                    onClick = onNavigateToTransactions,
-                    colors = NavigationBarItemDefaults.colors(unselectedIconColor = TextGray, unselectedTextColor = TextGray)
-                )
-                NavigationBarItem(
-                    icon = { Icon(Icons.Filled.Person, contentDescription = "Profile") },
-                    label = { Text("Profile") },
-                    selected = false,
-                    onClick = onNavigateToProfile,
-                    colors = NavigationBarItemDefaults.colors(unselectedIconColor = TextGray, unselectedTextColor = TextGray)
-                )
-            }
+            AppBottomBar(
+                selectedTab = Tab.HOME,
+                onTabSelected = { tab ->
+                    when (tab) {
+                        Tab.TRANSACTIONS -> onNavigateToTransactions()
+                        Tab.PROFILE -> onNavigateToProfile()
+                        else -> { }
+                    }
+                }
+            )
         },
         floatingActionButton = {
             FloatingActionButton(

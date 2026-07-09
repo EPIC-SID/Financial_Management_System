@@ -19,6 +19,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.financeapp.data.Resource
 import com.example.financeapp.data.SupabaseClient
 import com.example.financeapp.data.UserProfile
 import com.example.financeapp.data.UserProfileUpdate
@@ -49,20 +50,25 @@ fun EditProfileScreen(
     // Load current profile
     LaunchedEffect(Unit) {
         try {
-            val fetchedProfile = UserRepository.getProfile()
-            profile = fetchedProfile
-            if (fetchedProfile != null) {
-                fullName = fetchedProfile.fullName
-                phoneNumber = fetchedProfile.phoneNumber ?: ""
-                monthlyIncome = if (fetchedProfile.monthlyIncome != null && fetchedProfile.monthlyIncome > 0) {
-                    fetchedProfile.monthlyIncome.toLong().toString()
+            val result = UserRepository.getProfile()
+            if (result is Resource.Success) {
+                val fetchedProfile = result.data
+                profile = fetchedProfile
+                if (fetchedProfile != null) {
+                    fullName = fetchedProfile.fullName
+                    phoneNumber = fetchedProfile.phoneNumber ?: ""
+                    monthlyIncome = if (fetchedProfile.monthlyIncome != null && fetchedProfile.monthlyIncome > 0) {
+                        fetchedProfile.monthlyIncome.toLong().toString()
+                    } else {
+                        ""
+                    }
                 } else {
-                    ""
+                    // Fallback to auth metadata
+                    val user = SupabaseClient.auth.currentUserOrNull()
+                    fullName = user?.userMetadata?.get("full_name")?.toString()?.replace("\"", "") ?: ""
                 }
-            } else {
-                // Fallback to auth metadata
-                val user = SupabaseClient.auth.currentUserOrNull()
-                fullName = user?.userMetadata?.get("full_name")?.toString()?.replace("\"", "") ?: ""
+            } else if (result is Resource.Error) {
+                Toast.makeText(context, result.message, Toast.LENGTH_SHORT).show()
             }
         } catch (e: Exception) {
             Toast.makeText(context, "Failed to load profile", Toast.LENGTH_SHORT).show()
@@ -131,6 +137,7 @@ fun EditProfileScreen(
                 Divider(color = BorderBlack, thickness = 2.dp, modifier = Modifier.padding(top = 4.dp, bottom = 16.dp))
 
                 // Full Name
+                // TODO: Add name length validation (max 100 characters)
                 OutlinedTextField(
                     value = fullName,
                     onValueChange = {
@@ -180,6 +187,7 @@ fun EditProfileScreen(
                 Spacer(modifier = Modifier.height(12.dp))
 
                 // Phone Number
+                // TODO: Add phone number format validation (e.g., ^\+?[0-9]{7,15}$)
                 OutlinedTextField(
                     value = phoneNumber,
                     onValueChange = { phoneNumber = it },
@@ -253,9 +261,13 @@ fun EditProfileScreen(
                                     phoneNumber = phoneNumber.trim().takeIf { it.isNotBlank() },
                                     monthlyIncome = monthlyIncome.toDoubleOrNull()
                                 )
-                                UserRepository.updateProfile(update)
-                                Toast.makeText(context, "Profile updated successfully!", Toast.LENGTH_SHORT).show()
-                                onNavigateBack()
+                                val result = UserRepository.updateProfile(update)
+                                if (result is Resource.Success) {
+                                    Toast.makeText(context, "Profile updated successfully!", Toast.LENGTH_SHORT).show()
+                                    onNavigateBack()
+                                } else if (result is Resource.Error) {
+                                    Toast.makeText(context, result.message, Toast.LENGTH_LONG).show()
+                                }
                             } catch (e: Exception) {
                                 Toast.makeText(context, "Failed to update: ${e.message}", Toast.LENGTH_LONG).show()
                             } finally {

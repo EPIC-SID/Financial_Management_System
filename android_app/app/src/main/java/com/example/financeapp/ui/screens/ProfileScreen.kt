@@ -8,9 +8,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.List
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -21,9 +18,12 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.financeapp.data.Resource
 import com.example.financeapp.data.SupabaseClient
 import com.example.financeapp.data.UserProfile
 import com.example.financeapp.data.UserRepository
+import com.example.financeapp.ui.components.AppBottomBar
+import com.example.financeapp.ui.components.Tab
 import com.example.financeapp.ui.theme.*
 import kotlinx.coroutines.launch
 import java.text.NumberFormat
@@ -46,7 +46,12 @@ fun ProfileScreen(
     // Fetch profile from Supabase on load
     LaunchedEffect(Unit) {
         try {
-            profile = UserRepository.getProfile()
+            val result = UserRepository.getProfile()
+            if (result is Resource.Success) {
+                profile = result.data
+            } else if (result is Resource.Error) {
+                Toast.makeText(context, result.message, Toast.LENGTH_SHORT).show()
+            }
         } catch (e: Exception) {
             // Fallback to auth metadata if profile fetch fails
         } finally {
@@ -85,29 +90,16 @@ fun ProfileScreen(
             )
         },
         bottomBar = {
-            NavigationBar(containerColor = BackgroundWhite, modifier = Modifier.border(1.dp, SurfaceGray, RectangleShape)) {
-                NavigationBarItem(
-                    icon = { Icon(Icons.Filled.Home, contentDescription = "Home") },
-                    label = { Text("Home") },
-                    selected = false,
-                    onClick = onNavigateToHome,
-                    colors = NavigationBarItemDefaults.colors(unselectedIconColor = TextGray, unselectedTextColor = TextGray)
-                )
-                NavigationBarItem(
-                    icon = { Icon(Icons.Filled.List, contentDescription = "Transactions") },
-                    label = { Text("Transactions") },
-                    selected = false,
-                    onClick = onNavigateToTransactions,
-                    colors = NavigationBarItemDefaults.colors(unselectedIconColor = TextGray, unselectedTextColor = TextGray)
-                )
-                NavigationBarItem(
-                    icon = { Icon(Icons.Filled.Person, contentDescription = "Profile") },
-                    label = { Text("Profile") },
-                    selected = true,
-                    onClick = { },
-                    colors = NavigationBarItemDefaults.colors(selectedIconColor = BronzePrimary, selectedTextColor = BronzePrimary, indicatorColor = BackgroundWhite)
-                )
-            }
+            AppBottomBar(
+                selectedTab = Tab.PROFILE,
+                onTabSelected = { tab ->
+                    when (tab) {
+                        Tab.HOME -> onNavigateToHome()
+                        Tab.TRANSACTIONS -> onNavigateToTransactions()
+                        else -> { }
+                    }
+                }
+            )
         }
     ) { paddingValues ->
         if (isLoadingProfile) {

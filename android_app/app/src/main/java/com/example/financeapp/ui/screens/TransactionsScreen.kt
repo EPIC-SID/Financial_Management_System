@@ -14,13 +14,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.List
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -33,9 +28,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
+import com.example.financeapp.data.Resource
 import com.example.financeapp.data.SmsParser
 import com.example.financeapp.data.TransactionData
 import com.example.financeapp.data.TransactionRepository
+import com.example.financeapp.ui.components.AppBottomBar
+import com.example.financeapp.ui.components.Tab
 import com.example.financeapp.ui.theme.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -77,13 +75,13 @@ fun TransactionsScreen(
     // Load transactions from database on start
     LaunchedEffect(Unit) {
         isLoading = true
-        try {
-            transactions = TransactionRepository.getTransactions()
-        } catch (e: Exception) {
-            Toast.makeText(context, "Failed to load transactions", Toast.LENGTH_SHORT).show()
-        } finally {
-            isLoading = false
+        val result = TransactionRepository.getTransactions()
+        when (result) {
+            is Resource.Success -> transactions = result.data
+            is Resource.Error -> Toast.makeText(context, result.message, Toast.LENGTH_SHORT).show()
+            else -> { }
         }
+        isLoading = false
     }
 
     // Helper: Perform SMS inbox query and parsing
@@ -127,9 +125,15 @@ fun TransactionsScreen(
                 }
 
                 if (parsedTxns.isNotEmpty()) {
-                    TransactionRepository.insertTransactions(parsedTxns)
+                    val insertResult = TransactionRepository.insertTransactions(parsedTxns)
+                    if (insertResult is Resource.Error) {
+                        Toast.makeText(context, insertResult.message, Toast.LENGTH_LONG).show()
+                    }
                     // Refresh from database
-                    transactions = TransactionRepository.getTransactions()
+                    val refreshResult = TransactionRepository.getTransactions()
+                    if (refreshResult is Resource.Success) {
+                        transactions = refreshResult.data
+                    }
                     Toast.makeText(context, "Synced ${parsedTxns.size} transactions!", Toast.LENGTH_SHORT).show()
                 } else {
                     Toast.makeText(context, "No new transaction messages found.", Toast.LENGTH_SHORT).show()
@@ -252,29 +256,16 @@ fun TransactionsScreen(
             )
         },
         bottomBar = {
-            NavigationBar(containerColor = BackgroundWhite, modifier = Modifier.border(1.dp, SurfaceGray, RectangleShape)) {
-                NavigationBarItem(
-                    icon = { Icon(Icons.Filled.Home, contentDescription = "Home") },
-                    label = { Text("Home") },
-                    selected = false,
-                    onClick = onNavigateBack,
-                    colors = NavigationBarItemDefaults.colors(unselectedIconColor = TextGray, unselectedTextColor = TextGray)
-                )
-                NavigationBarItem(
-                    icon = { Icon(Icons.Filled.List, contentDescription = "Transactions") },
-                    label = { Text("Transactions") },
-                    selected = true,
-                    onClick = { },
-                    colors = NavigationBarItemDefaults.colors(selectedIconColor = BronzePrimary, selectedTextColor = BronzePrimary, indicatorColor = BackgroundWhite)
-                )
-                NavigationBarItem(
-                    icon = { Icon(Icons.Filled.Person, contentDescription = "Profile") },
-                    label = { Text("Profile") },
-                    selected = false,
-                    onClick = onNavigateToProfile,
-                    colors = NavigationBarItemDefaults.colors(unselectedIconColor = TextGray, unselectedTextColor = TextGray)
-                )
-            }
+            AppBottomBar(
+                selectedTab = Tab.TRANSACTIONS,
+                onTabSelected = { tab ->
+                    when (tab) {
+                        Tab.HOME -> onNavigateBack()
+                        Tab.PROFILE -> onNavigateToProfile()
+                        else -> { }
+                    }
+                }
+            )
         }
     ) { paddingValues ->
         val filteredTransactions = remember(transactions, selectedCategoryFilter) {

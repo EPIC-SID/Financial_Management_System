@@ -1,42 +1,53 @@
 package com.example.financeapp.data
 
+import android.util.Log
 import io.github.jan.supabase.postgrest.postgrest
 import io.github.jan.supabase.postgrest.query.Order
 
 object TransactionRepository {
-    
+
+    private const val TAG = "TransactionRepository"
+
     /**
      * Fetches all transactions for the current user from Supabase.
+     * Returns [Resource.Success] with the list, or [Resource.Error] on failure.
      */
-    suspend fun getTransactions(): List<TransactionData> {
-        val userId = SupabaseClient.auth.currentUserOrNull()?.id ?: return emptyList()
+    suspend fun getTransactions(): Resource<List<TransactionData>> {
+        val userId = SupabaseClient.auth.currentUserOrNull()?.id
+            ?: return Resource.Error("User not authenticated")
         return try {
-            SupabaseClient.client.postgrest["transactions"]
+            val data = SupabaseClient.client.postgrest["transactions"]
                 .select {
                     filter { eq("user_id", userId) }
                     order(column = "transaction_date", order = Order.DESCENDING)
                 }
                 .decodeList<TransactionData>()
+            Resource.Success(data)
         } catch (e: Exception) {
-            emptyList()
+            Log.e(TAG, "Failed to fetch transactions", e)
+            Resource.Error("Failed to load transactions: ${e.localizedMessage}", e)
         }
     }
 
     /**
      * Inserts list of transaction records into Supabase.
      * Uses upsert to skip duplicate records matching the unique `sms_id` constraint.
+     * Returns [Resource.Success] with count of inserted transactions, or [Resource.Error] on failure.
      */
-    suspend fun insertTransactions(transactions: List<TransactionData>) {
-        val userId = SupabaseClient.auth.currentUserOrNull()?.id ?: return
-        if (transactions.isEmpty()) return
-        
+    suspend fun insertTransactions(transactions: List<TransactionData>): Resource<Int> {
+        val userId = SupabaseClient.auth.currentUserOrNull()?.id
+            ?: return Resource.Error("User not authenticated")
+        if (transactions.isEmpty()) return Resource.Success(0)
+
         val txnsWithUser = transactions.map { it.copy(userId = userId) }
-        
-        try {
+
+        return try {
             SupabaseClient.client.postgrest["transactions"]
                 .upsert(txnsWithUser)
+            Resource.Success(txnsWithUser.size)
         } catch (e: Exception) {
-            // Log or ignore errors from duplicate keys if they fail to upsert
+            Log.e(TAG, "Failed to insert transactions", e)
+            Resource.Error("Failed to sync transactions: ${e.localizedMessage}", e)
         }
     }
 }

@@ -90,10 +90,26 @@ object SmsParser {
             merchant = merchant,
             amount = finalAmount,
             category = category,
-            description = smsBody.take(150), // save first 150 chars of SMS as description
+            description = sanitizeDescription(smsBody.take(150)),
             transactionDate = dateStr,
             smsId = smsId
         )
+    }
+
+    /**
+     * Strips sensitive data (account numbers, UPI VPAs, reference numbers)
+     * from SMS text before storing as description.
+     */
+    private fun sanitizeDescription(text: String): String {
+        var sanitized = text
+        // Mask bank account numbers (sequences of 8+ digits)
+        sanitized = sanitized.replace(Regex("\\b\\d{8,}\\b"), "****")
+        // Mask UPI VPAs (e.g., user@bank)
+        sanitized = sanitized.replace(Regex("[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+"), "***@***")
+        // Mask card numbers (4 groups of 4 digits or ending in XX1234)
+        sanitized = sanitized.replace(Regex("\\b(?:\\d{4}[\\s-]?){3}\\d{4}\\b"), "****-****-****-****")
+        sanitized = sanitized.replace(Regex("(?i)(?:XX|xx)\\d{4,}"), "XX****")
+        return sanitized
     }
 
     private fun cleanMerchantName(name: String): String {
