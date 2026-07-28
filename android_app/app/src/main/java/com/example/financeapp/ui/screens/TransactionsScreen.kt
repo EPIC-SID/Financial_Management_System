@@ -7,6 +7,8 @@ import android.net.Uri
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -14,7 +16,9 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -28,6 +32,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
+import com.example.financeapp.data.GeminiCategorizer
 import com.example.financeapp.data.Resource
 import com.example.financeapp.data.SmsParser
 import com.example.financeapp.data.TransactionData
@@ -87,6 +92,8 @@ fun TransactionsScreen(
 
     // Load transactions from database on start
     LaunchedEffect(Unit) {
+        // Pre-load the Gemini vendor cache so first sync is fast
+        GeminiCategorizer.loadCache(context)
         isLoading = true
         val result = TransactionRepository.getTransactions()
         when (result) {
@@ -102,8 +109,8 @@ fun TransactionsScreen(
         isSyncing = true
         coroutineScope.launch {
             try {
-                val parsedTxns = withContext(Dispatchers.IO) {
-                    val list = mutableListOf<TransactionData>()
+                val parsedRaw = withContext(Dispatchers.IO) {
+                    val list = mutableListOf<Triple<String, String, Long>>() // (body, id, date)
                     val uri = Uri.parse("content://sms/inbox")
                     val projection = arrayOf("_id", "body", "date", "address")
                     val selection = "date >= ?"
@@ -121,20 +128,25 @@ fun TransactionsScreen(
                         val idCol = c.getColumnIndexOrThrow("_id")
                         val bodyCol = c.getColumnIndexOrThrow("body")
                         val dateCol = c.getColumnIndexOrThrow("date")
-                        val addressCol = c.getColumnIndexOrThrow("address")
                         
                         while (c.moveToNext()) {
-                            val id = c.getString(idCol)
-                            val body = c.getString(bodyCol)
-                            val date = c.getLong(dateCol)
-                            
-                            val parsed = SmsParser.parse(body, id, date)
-                            if (parsed != null) {
-                                list.add(parsed)
-                            }
+                            list.add(
+                                Triple(
+                                    c.getString(bodyCol),
+                                    c.getString(idCol),
+                                    c.getLong(dateCol)
+                                )
+                            )
                         }
                     }
                     list
+                }
+
+                // AI parsing runs on Default dispatcher (handles its own network calls)
+                val parsedTxns = mutableListOf<TransactionData>()
+                parsedRaw.forEach { (body, id, date) ->
+                    val parsed = SmsParser.parseWithAi(context, body, id, date)
+                    if (parsed != null) parsedTxns.add(parsed)
                 }
 
                 if (parsedTxns.isNotEmpty()) {
@@ -142,15 +154,38 @@ fun TransactionsScreen(
                     if (insertResult is Resource.Error) {
                         Toast.makeText(context, insertResult.message, Toast.LENGTH_LONG).show()
                     }
-                    // Refresh from database
-                    val refreshResult = TransactionRepository.getTransactions()
-                    if (refreshResult is Resource.Success) {
-                        transactions = refreshResult.data
-                    }
-                    Toast.makeText(context, "Synced ${parsedTxns.size} transactions!", Toast.LENGTH_SHORT).show()
-                } else {
-                    Toast.makeText(context, "No new transaction messages found.", Toast.LENGTH_SHORT).show()
                 }
+
+                // Re-categorize ALL existing MISCELLANEOUS transactions using Gemini
+                val allTxns = TransactionRepository.getTransactions()
+                if (allTxns is Resource.Success) {
+                    val miscTxns = allTxns.data.filter { it.category == "MISCELLANEOUS" && it.id != null }
+                    miscTxns.forEach { txn ->
+                        // Pass 1: try the fast regex (catches mithai, vending, etc.)
+                        val regexCategory = SmsParser.determineCategory(txn.merchant, isCredit = false)
+                        val newCategory = if (regexCategory != "MISCELLANEOUS") {
+                            regexCategory
+                        } else {
+                            // Pass 2: force a fresh Gemini call (bypasses stale cache)
+                            GeminiCategorizer.recategorize(
+                                context = context,
+                                merchantName = txn.merchant,
+                                smsSnippet = txn.description ?: txn.merchant
+                            )
+                        }
+                        if (newCategory != "MISCELLANEOUS") {
+                            TransactionRepository.updateTransactionCategory(txn.id!!, newCategory)
+                        }
+                    }
+                }
+
+                // Refresh UI from database
+                val refreshResult = TransactionRepository.getTransactions()
+                if (refreshResult is Resource.Success) {
+                    transactions = refreshResult.data
+                }
+                Toast.makeText(context, "Sync complete!", Toast.LENGTH_SHORT).show()
+
                 
                 // Save last sync time
                 sharedPrefs.edit().putLong("last_sms_sync_time", System.currentTimeMillis()).apply()
@@ -289,8 +324,13 @@ fun TransactionsScreen(
             val byCategory = when (selectedCategoryFilter) {
                 "All" -> transactions
                 "Income" -> transactions.filter { it.amount > 0 }
-                "Expenses" -> transactions.filter { it.amount < 0 }
                 "Food" -> transactions.filter { it.category == "FOOD" }
+                "Travel" -> transactions.filter { it.category == "TRAVEL" }
+                "Shopping" -> transactions.filter { it.category == "SHOPPING" }
+                "Bills" -> transactions.filter { it.category == "BILLS" }
+                "Entertainment" -> transactions.filter { it.category == "ENTERTAINMENT" }
+                "Health" -> transactions.filter { it.category == "HEALTH" }
+                "Education" -> transactions.filter { it.category == "EDUCATION" }
                 else -> transactions
             }
             if (displayStartTime > 0L) {
@@ -333,8 +373,11 @@ fun TransactionsScreen(
                 Spacer(modifier = Modifier.height(24.dp))
                 
                 // Filter tabs
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    val filters = listOf("All", "Income", "Expenses", "Food")
+                val filters = listOf("All", "Income", "Food", "Travel", "Shopping", "Bills", "Entertainment", "Health", "Education")
+                Row(
+                    modifier = Modifier.horizontalScroll(rememberScrollState()),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
                     filters.forEach { filter ->
                         FilterChip(
                             selected = selectedCategoryFilter == filter,
@@ -371,6 +414,81 @@ fun TransactionsScreen(
                     }
                 }
             } else {
+                var selectedTransaction by remember { mutableStateOf<TransactionData?>(null) }
+
+                // Transaction detail bottom sheet
+                selectedTransaction?.let { txn ->
+                    val amountFormatted = if (txn.amount > 0) {
+                        "+ ₹${NumberFormat.getNumberInstance(Locale("en", "IN")).format(txn.amount)}"
+                    } else {
+                        "- ₹${NumberFormat.getNumberInstance(Locale("en", "IN")).format(kotlin.math.abs(txn.amount))}"
+                    }
+                    AlertDialog(
+                        onDismissRequest = { selectedTransaction = null },
+                        shape = RoundedCornerShape(16.dp),
+                        containerColor = BackgroundWhite,
+                        title = {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text("Transaction Details", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = TextBlack)
+                                IconButton(onClick = { selectedTransaction = null }) {
+                                    Icon(Icons.Default.Close, contentDescription = "Close", tint = TextGray)
+                                }
+                            }
+                        },
+                        text = {
+                            Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                                // Amount display
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .background(if (txn.amount > 0) TealPositive.copy(alpha = 0.1f) else BronzePrimary.copy(alpha = 0.08f), RoundedCornerShape(12.dp))
+                                        .padding(16.dp),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text(
+                                        amountFormatted,
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 28.sp,
+                                        color = if (txn.amount > 0) TealPositive else TextBlack
+                                    )
+                                }
+                                // Details rows
+                                DetailRow(label = "Merchant", value = txn.merchant)
+                                DetailRow(label = "Category", value = txn.category)
+                                DetailRow(label = "Date", value = formatTransactionDate(txn.transactionDate))
+                                DetailRow(label = "Time", value = formatTransactionTime(txn.transactionDate))
+                                if (!txn.description.isNullOrBlank()) {
+                                    Divider(color = SurfaceGray)
+                                    Text("SMS Snippet", fontSize = 11.sp, color = TextGray, fontWeight = FontWeight.Bold)
+                                    Text(txn.description, fontSize = 12.sp, color = TextGray, lineHeight = 18.sp)
+                                }
+                            }
+                        },
+                        confirmButton = {}
+                    )
+                }
+
+                if (groupedTransactions.isEmpty()) {
+                    Box(
+                        modifier = Modifier.weight(1f).fillMaxWidth().padding(24.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text("No Transactions Yet", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = TextBlack)
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                "No transactions found for the \"$selectedCategoryFilter\" category in this period.",
+                                color = TextGray,
+                                fontSize = 14.sp,
+                                textAlign = TextAlign.Center
+                            )
+                        }
+                    }
+                } else {
                 LazyColumn(
                     modifier = Modifier.weight(1f).fillMaxWidth(),
                     verticalArrangement = Arrangement.spacedBy(0.dp)
@@ -381,18 +499,12 @@ fun TransactionsScreen(
                         }
                         items(txnsForDate) { txn ->
                             TransactionListItem(
-                                merchant = txn.merchant,
-                                amount = if (txn.amount > 0) {
-                                    "+ ₹${NumberFormat.getNumberInstance(Locale("en", "IN")).format(txn.amount)}"
-                                } else {
-                                    "- ₹${NumberFormat.getNumberInstance(Locale("en", "IN")).format(kotlin.math.abs(txn.amount))}"
-                                },
-                                category = txn.category,
-                                time = formatTransactionTime(txn.transactionDate),
-                                isPositive = txn.amount > 0
+                                txn = txn,
+                                onClick = { selectedTransaction = txn }
                             )
                         }
                     }
+                }
                 }
             }
         }
@@ -466,38 +578,115 @@ fun DateHeader(text: String) {
 }
 
 @Composable
-fun TransactionListItem(merchant: String, amount: String, category: String, time: String, isPositive: Boolean) {
+fun DetailRow(label: String, value: String) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Text(label, fontSize = 13.sp, color = TextGray)
+        Text(value, fontSize = 13.sp, fontWeight = FontWeight.Bold, color = TextBlack)
+    }
+}
+
+
+@Composable
+fun TransactionListItem(txn: TransactionData, onClick: () -> Unit) {
+    val isPositive = txn.amount > 0
+    val amountStr = if (isPositive) {
+        "+ ₹${NumberFormat.getNumberInstance(Locale("en", "IN")).format(txn.amount)}"
+    } else {
+        "- ₹${NumberFormat.getNumberInstance(Locale("en", "IN")).format(kotlin.math.abs(txn.amount))}"
+    }
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 24.dp, vertical = 16.dp),
+            .clickable { onClick() }
+            .padding(horizontal = 24.dp, vertical = 14.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
+        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.weight(1f)) {
+            // Category icon box
+            val iconBg = when (txn.category) {
+                "FOOD" -> Color(0xFFE8F5E9)
+                "TRAVEL" -> Color(0xFFE3F2FD)
+                "SHOPPING" -> Color(0xFFF3E5F5)
+                "BILLS" -> Color(0xFFFFF8E1)
+                "ENTERTAINMENT" -> Color(0xFFFCE4EC)
+                "INVESTMENTS" -> Color(0xFFE8F5E9)
+                "HEALTH" -> Color(0xFFE0F7FA)
+                "EDUCATION" -> Color(0xFFFFF3E0)
+                "INCOME" -> TealPositive.copy(alpha = 0.15f)
+                else -> SurfaceGray
+            }
+            val iconEmoji = when (txn.category) {
+                "FOOD" -> "🍽"; "TRAVEL" -> "🚗"; "SHOPPING" -> "🛍"
+                "BILLS" -> "⚡"; "ENTERTAINMENT" -> "🎬"; "INVESTMENTS" -> "📈"
+                "HEALTH" -> "💊"; "EDUCATION" -> "📚"; "INCOME" -> "💰"
+                else -> txn.merchant.take(1).uppercase()
+            }
             Box(
                 modifier = Modifier
-                    .size(48.dp)
-                    .background(if (isPositive) TealPositive.copy(alpha = 0.2f) else SurfaceGray, RectangleShape)
-                    .border(1.dp, if (isPositive) TealPositive else Color.Transparent),
+                    .size(46.dp)
+                    .background(iconBg, RoundedCornerShape(10.dp)),
                 contentAlignment = Alignment.Center
             ) {
-                Text(category.take(1), fontWeight = FontWeight.Bold, color = if (isPositive) TealPositive else TextGray)
+                Text(iconEmoji, fontSize = 20.sp)
             }
-            Spacer(modifier = Modifier.width(16.dp))
+            Spacer(modifier = Modifier.width(14.dp))
             Column {
-                Text(merchant, fontWeight = FontWeight.Bold, fontSize = 16.sp, color = TextBlack)
+                Text(
+                    txn.merchant,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 15.sp,
+                    color = TextBlack,
+                    maxLines = 1
+                )
                 Spacer(modifier = Modifier.height(4.dp))
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Box(modifier = Modifier.border(1.dp, SurfaceGray).padding(horizontal = 4.dp, vertical = 2.dp)) {
-                        Text(category, fontSize = 10.sp, color = TextGray, fontWeight = FontWeight.Bold)
+                    // Colored category pill
+                    val pillBg = when (txn.category) {
+                        "FOOD" -> Color(0xFFE8F5E9)
+                        "TRAVEL" -> Color(0xFFE3F2FD)
+                        "SHOPPING" -> Color(0xFFF3E5F5)
+                        "BILLS" -> Color(0xFFFFF8E1)
+                        "ENTERTAINMENT" -> Color(0xFFFCE4EC)
+                        "INVESTMENTS" -> Color(0xFFE8F5E9)
+                        "HEALTH" -> Color(0xFFE0F7FA)
+                        "EDUCATION" -> Color(0xFFFFF3E0)
+                        "INCOME" -> Color(0xFFE8F5E9)
+                        else -> SurfaceGray
+                    }
+                    val pillText = when (txn.category) {
+                        "FOOD" -> Color(0xFF2E7D32)
+                        "TRAVEL" -> Color(0xFF1565C0)
+                        "SHOPPING" -> Color(0xFF6A1B9A)
+                        "BILLS" -> Color(0xFFF57F17)
+                        "ENTERTAINMENT" -> Color(0xFFC62828)
+                        "INVESTMENTS" -> Color(0xFF1B5E20)
+                        "HEALTH" -> Color(0xFF006064)
+                        "EDUCATION" -> Color(0xFFE65100)
+                        "INCOME" -> Color(0xFF2E7D32)
+                        else -> TextGray
+                    }
+                    Box(
+                        modifier = Modifier
+                            .background(pillBg, RoundedCornerShape(4.dp))
+                            .padding(horizontal = 6.dp, vertical = 2.dp)
+                    ) {
+                        Text(txn.category, fontSize = 10.sp, color = pillText, fontWeight = FontWeight.Bold)
                     }
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text(time, fontSize = 12.sp, color = TextGray)
+                    Text(formatTransactionTime(txn.transactionDate), fontSize = 12.sp, color = TextGray)
                 }
             }
         }
-        Text(amount, fontWeight = FontWeight.Bold, fontSize = 16.sp, color = if (isPositive) TealPositive else TextBlack)
+        Text(
+            amountStr,
+            fontWeight = FontWeight.Bold,
+            fontSize = 15.sp,
+            color = if (isPositive) TealPositive else TextBlack
+        )
     }
     Divider(color = SurfaceGray, thickness = 1.dp)
 }

@@ -27,9 +27,11 @@ android {
         }
         val supabaseUrl = properties.getProperty("SUPABASE_URL") ?: ""
         val supabaseAnonKey = properties.getProperty("SUPABASE_ANON_KEY") ?: ""
+        val geminiApiKey = properties.getProperty("GEMINI_API_KEY") ?: ""
         
         buildConfigField("String", "SUPABASE_URL", "\"$supabaseUrl\"")
         buildConfigField("String", "SUPABASE_ANON_KEY", "\"$supabaseAnonKey\"")
+        buildConfigField("String", "GEMINI_API_KEY", "\"$geminiApiKey\"")
     }
 
     buildTypes {
@@ -78,4 +80,7 @@ dependencies {
     
     // Coroutines for Supabase
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
+
+    // Gemini AI SDK
+    implementation("com.google.ai.client.generativeai:generativeai:0.9.0")
 }

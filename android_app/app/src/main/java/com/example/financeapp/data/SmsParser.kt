@@ -1,5 +1,6 @@
 package com.example.financeapp.data
 
+import android.content.Context
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -97,6 +98,28 @@ object SmsParser {
     }
 
     /**
+     * AI-enhanced version of [parse].
+     * Runs the fast regex parser first. If the result is MISCELLANEOUS,
+     * it calls [GeminiCategorizer] to get a smarter category using Gemini.
+     * Results are cached so each unique merchant is only ever sent to the API once.
+     */
+    suspend fun parseWithAi(context: Context, smsBody: String, smsId: String, timestamp: Long): TransactionData? {
+        val transaction = parse(smsBody, smsId, timestamp) ?: return null
+
+        // Only call AI if the fast regex couldn't figure out the category
+        return if (transaction.category == "MISCELLANEOUS") {
+            val aiCategory = GeminiCategorizer.categorize(
+                context = context,
+                merchantName = transaction.merchant,
+                smsSnippet = smsBody
+            )
+            transaction.copy(category = aiCategory)
+        } else {
+            transaction
+        }
+    }
+
+    /**
      * Strips sensitive data (account numbers, UPI VPAs, reference numbers)
      * from SMS text before storing as description.
      */
@@ -130,32 +153,66 @@ object SmsParser {
         return words.joinToString(" ").trim().ifEmpty { "Unknown Merchant" }
     }
 
-    private fun determineCategory(merchant: String, isCredit: Boolean): String {
+    internal fun determineCategory(merchant: String, isCredit: Boolean): String {
         if (isCredit) return "INCOME"
-        
-        val mLower = merchant.lowercase()
+        val m = merchant.lowercase()
         return when {
-            mLower.contains("swiggy") || mLower.contains("zomato") || mLower.contains("starbucks") || 
-            mLower.contains("restaurant") || mLower.contains("cafe") || mLower.contains("food") || mLower.contains("eats") -> "FOOD"
-            
-            mLower.contains("uber") || mLower.contains("ola") || mLower.contains("rapido") || 
-            mLower.contains("metro") || mLower.contains("petrol") || mLower.contains("fuel") || 
-            mLower.contains("hpcl") || mLower.contains("bpcl") || mLower.contains("cab") -> "TRAVEL"
-            
-            mLower.contains("amazon") || mLower.contains("flipkart") || mLower.contains("myntra") || 
-            mLower.contains("nykaa") || mLower.contains("shopping") || mLower.contains("retail") || 
-            mLower.contains("decathlon") || mLower.contains("store") || mLower.contains("supermarket") || mLower.contains("grocery") -> "SHOPPING"
-            
-            mLower.contains("jio") || mLower.contains("airtel") || mLower.contains("vi") || 
-            mLower.contains("recharge") || mLower.contains("electricity") || mLower.contains("bill") || 
-            mLower.contains("water") || mLower.contains("gas") || mLower.contains("utility") || mLower.contains("bescom") -> "BILLS"
-            
-            mLower.contains("movie") || mLower.contains("netflix") || mLower.contains("prime") || 
-            mLower.contains("hotstar") || mLower.contains("spotify") || mLower.contains("entertainment") || mLower.contains("cinema") -> "ENTERTAINMENT"
-            
-            mLower.contains("invest") || mLower.contains("mutual") || mLower.contains("groww") || 
-            mLower.contains("zerodha") || mLower.contains("shares") || mLower.contains("stock") || mLower.contains("fund") -> "INVESTMENTS"
-            
+            m.contains("swiggy") || m.contains("zomato") || m.contains("starbucks") ||
+            m.contains("restaurant") || m.contains("cafe") || m.contains("food") ||
+            m.contains("eats") || m.contains("kitchen") || m.contains("dhaba") ||
+            m.contains("mithai") || m.contains("sweet") || m.contains("bakery") ||
+            m.contains("bakers") || m.contains("pizza") || m.contains("burger") ||
+            m.contains("dominos") || m.contains("mcdonalds") || m.contains("kfc") ||
+            m.contains("subway") || m.contains("haldiram") || m.contains("blinkit") ||
+            m.contains("zepto") || m.contains("instamart") || m.contains("bigbasket") ||
+            m.contains("grofers") || m.contains("chai") || m.contains("tea") ||
+            m.contains("juice") || m.contains("vending") || m.contains("canteen") ||
+            m.contains("tiffin") || m.contains("mess") || m.contains("snacks") -> "FOOD"
+
+            m.contains("uber") || m.contains("ola") || m.contains("rapido") ||
+            m.contains("metro") || m.contains("petrol") || m.contains("fuel") ||
+            m.contains("hpcl") || m.contains("bpcl") || m.contains("iocl") ||
+            m.contains("cab") || m.contains("taxi") || m.contains("bus") ||
+            m.contains("irctc") || m.contains("railway") || m.contains("train") ||
+            m.contains("flight") || m.contains("airline") || m.contains("airport") ||
+            m.contains("indigo") || m.contains("spicejet") || m.contains("parking") ||
+            m.contains("fastag") || m.contains("toll") || m.contains("auto") -> "TRAVEL"
+
+            m.contains("amazon") || m.contains("flipkart") || m.contains("myntra") ||
+            m.contains("nykaa") || m.contains("shopping") || m.contains("retail") ||
+            m.contains("decathlon") || m.contains("store") || m.contains("supermarket") ||
+            m.contains("grocery") || m.contains("meesho") || m.contains("ajio") ||
+            m.contains("croma") || m.contains("dmart") || m.contains("ikea") -> "SHOPPING"
+
+            m.contains("jio") || m.contains("airtel") || m.contains("vodafone") ||
+            m.contains("bsnl") || m.contains("recharge") || m.contains("electricity") ||
+            m.contains("bill") || m.contains("water") || m.contains("gas") ||
+            m.contains("utility") || m.contains("bescom") || m.contains("msedcl") ||
+            m.contains("broadband") || m.contains("wifi") || m.contains("rent") ||
+            m.contains("emi") || m.contains("insurance") || m.contains("premium") -> "BILLS"
+
+            m.contains("movie") || m.contains("netflix") || m.contains("prime") ||
+            m.contains("hotstar") || m.contains("spotify") || m.contains("youtube") ||
+            m.contains("entertainment") || m.contains("cinema") || m.contains("pvr") ||
+            m.contains("inox") || m.contains("bookmyshow") || m.contains("gaming") ||
+            m.contains("steam") || m.contains("playstation") -> "ENTERTAINMENT"
+
+            m.contains("invest") || m.contains("groww") || m.contains("zerodha") ||
+            m.contains("shares") || m.contains("stock") || m.contains("sip") ||
+            m.contains("ppf") || m.contains("nps") || m.contains("upstox") ||
+            m.contains("smallcase") -> "INVESTMENTS"
+
+            m.contains("pharmacy") || m.contains("medical") || m.contains("hospital") ||
+            m.contains("clinic") || m.contains("doctor") || m.contains("apollo") ||
+            m.contains("medplus") || m.contains("1mg") || m.contains("pharmeasy") ||
+            m.contains("netmeds") || m.contains("diagnostic") ||
+            m.contains("health") || m.contains("chemist") || m.contains("medicine") -> "HEALTH"
+
+            m.contains("school") || m.contains("college") || m.contains("university") ||
+            m.contains("tuition") || m.contains("udemy") || m.contains("coursera") ||
+            m.contains("byju") || m.contains("unacademy") || m.contains("stationery") ||
+            m.contains("education") || m.contains("library") -> "EDUCATION"
+
             else -> "MISCELLANEOUS"
         }
     }

@@ -47,4 +47,21 @@ object TransactionRepository {
             Resource.Error("Failed to sync transactions: ${e.localizedMessage}", e)
         }
     }
+
+    /**
+     * Updates the category of a single transaction by its ID.
+     * Used to fix MISCELLANEOUS transactions after AI re-categorization.
+     */
+    suspend fun updateTransactionCategory(transactionId: String, newCategory: String): Resource<Unit> {
+        return try {
+            SupabaseClient.client.postgrest["transactions"]
+                .update({ set("category", newCategory) }) {
+                    filter { eq("id", transactionId) }
+                }
+            Resource.Success(Unit)
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to update category for $transactionId", e)
+            Resource.Error("Failed to update category: ${e.localizedMessage}", e)
+        }
+    }
 }
