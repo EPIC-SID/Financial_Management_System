@@ -29,21 +29,18 @@ object TransactionRepository {
         }
     }
 
-    /**
-     * Inserts list of transaction records into Supabase.
-     * Uses upsert to skip duplicate records matching the unique `sms_id` constraint.
-     * Returns [Resource.Success] with count of inserted transactions, or [Resource.Error] on failure.
-     */
     suspend fun insertTransactions(transactions: List<TransactionData>): Resource<Int> {
         val userId = SupabaseClient.auth.currentUserOrNull()?.id
             ?: return Resource.Error("User not authenticated")
         if (transactions.isEmpty()) return Resource.Success(0)
 
-        val txnsWithUser = transactions.map { it.copy(userId = userId) }
+        // Deduplicate within the current batch to prevent Postgres from throwing multiple target conflicts
+        val uniqueTransactions = transactions.distinctBy { it.smsId }
+        val txnsWithUser = uniqueTransactions.map { it.copy(userId = userId) }
 
         return try {
             SupabaseClient.client.postgrest["transactions"]
-                .upsert(txnsWithUser)
+                .upsert(txnsWithUser, onConflict = "sms_id", ignoreDuplicates = true)
             Resource.Success(txnsWithUser.size)
         } catch (e: Exception) {
             Log.e(TAG, "Failed to insert transactions", e)

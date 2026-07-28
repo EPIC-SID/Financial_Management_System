@@ -43,6 +43,7 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import java.util.TimeZone
+import java.util.Calendar
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -57,6 +58,18 @@ fun TransactionsScreen(
     var isLoading by remember { mutableStateOf(true) }
     var isSyncing by remember { mutableStateOf(false) }
     var selectedCategoryFilter by remember { mutableStateOf("All") }
+    var displayStartTime by remember { 
+        mutableStateOf(
+            Calendar.getInstance().apply {
+                set(Calendar.DAY_OF_MONTH, 1)
+                set(Calendar.HOUR_OF_DAY, 0)
+                set(Calendar.MINUTE, 0)
+                set(Calendar.SECOND, 0)
+                set(Calendar.MILLISECOND, 0)
+            }.timeInMillis
+        ) 
+    }
+    var selectedPeriod by remember { mutableStateOf("Current Month") }
 
     // Dialog state
     var showDurationDialog by remember { mutableStateOf(false) }
@@ -155,13 +168,7 @@ fun TransactionsScreen(
         onResult = { isGranted ->
             hasPermission = isGranted
             if (isGranted) {
-                val lastSync = sharedPrefs.getLong("last_sms_sync_time", 0L)
-                if (lastSync == 0L) {
-                    showDurationDialog = true
-                } else {
-                    // Sync since last sync time
-                    performSmsSync(lastSync)
-                }
+                showDurationDialog = true
             } else {
                 Toast.makeText(context, "Permission denied. Cannot sync transactions.", Toast.LENGTH_LONG).show()
             }
@@ -170,12 +177,7 @@ fun TransactionsScreen(
 
     fun startSyncFlow() {
         if (ContextCompat.checkSelfPermission(context, permission) == PackageManager.PERMISSION_GRANTED) {
-            val lastSync = sharedPrefs.getLong("last_sms_sync_time", 0L)
-            if (lastSync == 0L) {
-                showDurationDialog = true
-            } else {
-                performSmsSync(lastSync)
-            }
+            showDurationDialog = true
         } else {
             permissionLauncher.launch(permission)
         }
@@ -194,17 +196,32 @@ fun TransactionsScreen(
                     Spacer(modifier = Modifier.height(16.dp))
                     
                     val options = listOf(
-                        "Last 7 Days" to 7 * 24 * 60 * 60 * 1000L,
-                        "Last 30 Days" to 30L * 24 * 60 * 60 * 1000L,
-                        "Last 90 Days" to 90L * 24 * 60 * 60 * 1000L,
-                        "All Time" to 0L
+                        "Last 7 Days",
+                        "Last 30 Days",
+                        "Current Month",
+                        "All Time"
                     )
                     
-                    options.forEach { (label, durationMs) ->
+                    options.forEach { label ->
                         Button(
                             onClick = {
                                 showDurationDialog = false
-                                val startTime = if (durationMs == 0L) 0L else System.currentTimeMillis() - durationMs
+                                selectedPeriod = label
+                                val startTime = when (label) {
+                                    "Last 7 Days" -> System.currentTimeMillis() - 7 * 24 * 60 * 60 * 1000L
+                                    "Last 30 Days" -> System.currentTimeMillis() - 30L * 24 * 60 * 60 * 1000L
+                                    "Current Month" -> {
+                                        val cal = Calendar.getInstance()
+                                        cal.set(Calendar.DAY_OF_MONTH, 1)
+                                        cal.set(Calendar.HOUR_OF_DAY, 0)
+                                        cal.set(Calendar.MINUTE, 0)
+                                        cal.set(Calendar.SECOND, 0)
+                                        cal.set(Calendar.MILLISECOND, 0)
+                                        cal.timeInMillis
+                                    }
+                                    else -> 0L // All Time
+                                }
+                                displayStartTime = startTime
                                 performSmsSync(startTime)
                             },
                             modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
@@ -268,18 +285,38 @@ fun TransactionsScreen(
             )
         }
     ) { paddingValues ->
-        val filteredTransactions = remember(transactions, selectedCategoryFilter) {
-            when (selectedCategoryFilter) {
+        val filteredTransactions = remember(transactions, selectedCategoryFilter, displayStartTime) {
+            val byCategory = when (selectedCategoryFilter) {
                 "All" -> transactions
                 "Income" -> transactions.filter { it.amount > 0 }
                 "Expenses" -> transactions.filter { it.amount < 0 }
                 "Food" -> transactions.filter { it.category == "FOOD" }
                 else -> transactions
             }
+            if (displayStartTime > 0L) {
+                val format = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.US)
+                format.timeZone = TimeZone.getTimeZone("UTC")
+                byCategory.filter {
+                    try {
+                        val date = format.parse(it.transactionDate)
+                        date != null && date.time >= displayStartTime
+                    } catch (e: Exception) {
+                        true
+                    }
+                }
+            } else {
+                byCategory
+            }
         }
 
-        val groupedTransactions = remember(filteredTransactions) {
-            filteredTransactions.groupBy { formatTransactionDate(it.transactionDate) }
+        val groupedTransactions = remember(filteredTransactions, selectedPeriod) {
+            filteredTransactions.groupBy { 
+                if (selectedPeriod == "All Time") {
+                    formatTransactionMonth(it.transactionDate)
+                } else {
+                    formatTransactionDate(it.transactionDate)
+                }
+            }
         }
 
         Column(
@@ -373,6 +410,19 @@ fun formatTransactionDate(dateStr: String): String {
         displayFormat.format(date)
     } catch (e: Exception) {
         dateStr.take(10)
+    }
+}
+
+fun formatTransactionMonth(dateStr: String): String {
+    return try {
+        val isoParser = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.US)
+        isoParser.timeZone = TimeZone.getTimeZone("UTC")
+        val date = isoParser.parse(dateStr) ?: return dateStr
+        
+        val displayFormat = SimpleDateFormat("MMMM yyyy", Locale.US)
+        displayFormat.format(date)
+    } catch (e: Exception) {
+        dateStr.take(7)
     }
 }
 
