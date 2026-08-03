@@ -17,12 +17,18 @@ object GeminiCategorizer {
     // In-memory cache: merchant name -> category
     private val memoryCache = HashMap<String, String>()
 
-    // Lazy-initialized GenerativeModel (only created on first AI call)
-    private val model by lazy {
-        GenerativeModel(
-            modelName = "gemini-1.5-flash-latest",
-            apiKey = BuildConfig.GEMINI_API_KEY
-        )
+    private fun getModel(): GenerativeModel? {
+        val apiKey = BuildConfig.GEMINI_API_KEY
+        if (apiKey.isBlank()) return null
+        return try {
+            GenerativeModel(
+                modelName = "gemini-2.0-flash",
+                apiKey = apiKey
+            )
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to initialize GenerativeModel", e)
+            null
+        }
     }
 
     /**
@@ -52,19 +58,21 @@ object GeminiCategorizer {
         // 2. No cache — call Gemini API
         Log.d(TAG, "Cache MISS for '$merchantName', calling Gemini API...")
         val category = try {
+            val model = getModel() ?: return "MISCELLANEOUS"
             val prompt = """
                 You are a financial transaction categorizer for Indian users.
                 Given a merchant name and a brief transaction description, reply with ONLY one word from this exact list:
                 FOOD, TRAVEL, SHOPPING, BILLS, ENTERTAINMENT, INVESTMENTS, HEALTH, EDUCATION, MISCELLANEOUS
 
-                Rules:
-                - Person's name (e.g. "Mr Ramdas", "Atharva Anil") -> MISCELLANEOUS
-                - Food stall, dhaba, sweet shop, bakery, canteen, vending machine -> FOOD
-                - Transport, cab, fuel, parking, metro, train, flight -> TRAVEL
-                - Hospital, clinic, pharmacy, doctor, medicine -> HEALTH
-                - School, college, tuition, online course, library -> EDUCATION
-                - If uncertain -> MISCELLANEOUS
-                - Reply with ONLY the single category word. No punctuation. No explanation.
+                Classification Rules for Indian Merchants:
+                - Grocery, supermarket, super store, provision store, kirana, retail shop, clothing, electronics -> SHOPPING
+                - Restaurant, dhaba, hotel, sweets, bakery, canteen, tea stall, food vendor, snacks, dairy -> FOOD
+                - Travel, auto, cab, petrol, fuel, parking, metro, train, flight -> TRAVEL
+                - Pharmacy, medical, hospital, clinic, doctor -> HEALTH
+                - School, college, tuition, books, stationery -> EDUCATION
+                - Electricity, mobile recharge, wifi, water, DTH, utility -> BILLS
+                - If the merchant appears to be an individual's personal name without business context -> MISCELLANEOUS
+                - Reply with ONLY the single category word in uppercase. No punctuation. No explanation.
 
                 Merchant: "$merchantName"
                 Description: "${smsSnippet.take(100)}"
@@ -98,6 +106,7 @@ object GeminiCategorizer {
         val normalizedKey = merchantName.trim().lowercase()
         Log.d(TAG, "Forced re-categorization for '$merchantName'...")
         val category = try {
+            val model = getModel() ?: return "MISCELLANEOUS"
             val prompt = """
                 You are a financial transaction categorizer for Indian users.
                 Given a merchant name and a brief transaction description, reply with ONLY one word from this exact list:

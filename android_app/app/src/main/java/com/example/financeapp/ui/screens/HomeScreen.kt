@@ -1,6 +1,5 @@
 package com.example.financeapp.ui.screens
 
-import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -15,17 +14,20 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.financeapp.data.Resource
-import com.example.financeapp.data.TransactionData
-import com.example.financeapp.data.TransactionRepository
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.financeapp.data.TransactionEntity
+import com.example.financeapp.data.TransactionViewModel
 import com.example.financeapp.data.UserProfile
 import com.example.financeapp.data.UserRepository
+import com.example.financeapp.data.Resource
+import com.example.financeapp.data.formatTransactionDate
+import com.example.financeapp.data.formatTransactionMonth
+import com.example.financeapp.data.formatTransactionTime
 import com.example.financeapp.ui.components.AppBottomBar
 import com.example.financeapp.ui.components.Tab
 import com.example.financeapp.ui.theme.*
@@ -40,32 +42,28 @@ import java.util.TimeZone
 @Composable
 fun HomeScreen(
     onNavigateToTransactions: () -> Unit,
-    onNavigateToProfile: () -> Unit
+    onNavigateToProfile: () -> Unit,
+    transactionViewModel: TransactionViewModel = viewModel()
 ) {
     val context = LocalContext.current
 
-    var transactions by remember { mutableStateOf<List<TransactionData>>(emptyList()) }
+    // Observe live transactions from Room DB via ViewModel (same instance as TransactionsScreen)
+    val transactions by transactionViewModel.transactions.collectAsState()
     var profile by remember { mutableStateOf<UserProfile?>(null) }
-    var isLoading by remember { mutableStateOf(true) }
+    var isLoadingProfile by remember { mutableStateOf(true) }
 
-    // Fetch transactions & profile on load
+    // Only fetch profile (lightweight Supabase call for user settings)
     LaunchedEffect(Unit) {
-        isLoading = true
+        isLoadingProfile = true
         try {
             val profileResult = UserRepository.getProfile()
             if (profileResult is Resource.Success) {
                 profile = profileResult.data
             }
-            val txnResult = TransactionRepository.getTransactions()
-            if (txnResult is Resource.Success) {
-                transactions = txnResult.data
-            } else if (txnResult is Resource.Error) {
-                Toast.makeText(context, txnResult.message, Toast.LENGTH_SHORT).show()
-            }
         } catch (e: Exception) {
-            Toast.makeText(context, "Failed to load dashboard data", Toast.LENGTH_SHORT).show()
+            // Profile load failed silently — transactions still show
         } finally {
-            isLoading = false
+            isLoadingProfile = false
         }
     }
 
@@ -76,7 +74,7 @@ fun HomeScreen(
 
     // Current month calculations
     val currentMonthTxns = transactions.filter { isCurrentMonth(it.transactionDate) }
-    val monthlyIn = currentMonthTxns.filter { it.amount > 0 }.sumOf { it.amount }
+    val monthlyIn  = currentMonthTxns.filter { it.amount > 0 }.sumOf { it.amount }
     val monthlyOut = currentMonthTxns.filter { it.amount < 0 }.sumOf { kotlin.math.abs(it.amount) }
 
     // Recent activity: top 3 transactions
@@ -122,7 +120,7 @@ fun HomeScreen(
             }
         }
     ) { paddingValues ->
-        if (isLoading) {
+        if (isLoadingProfile && transactions.isEmpty()) {
             Box(modifier = Modifier.fillMaxSize().padding(paddingValues), contentAlignment = Alignment.Center) {
                 CircularProgressIndicator(color = BronzePrimary)
             }
@@ -229,8 +227,8 @@ fun HomeScreen(
                         modifier = Modifier.weight(1f),
                         verticalArrangement = Arrangement.spacedBy(0.dp)
                     ) {
-                        items(recentTxns) { txn ->
-                            TransactionRow(txn)
+                        items(recentTxns, key = { it.smsId }) { txn ->
+                            HomeTransactionRow(txn)
                         }
                     }
                 }
@@ -240,7 +238,7 @@ fun HomeScreen(
 }
 
 @Composable
-fun TransactionRow(txn: TransactionData) {
+fun HomeTransactionRow(txn: TransactionEntity) {
     val isPositive = txn.amount > 0
     Row(
         modifier = Modifier

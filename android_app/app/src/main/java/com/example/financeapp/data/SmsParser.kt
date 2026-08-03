@@ -98,25 +98,60 @@ object SmsParser {
     }
 
     /**
-     * AI-enhanced version of [parse].
-     * Runs the fast regex parser first. If the result is MISCELLANEOUS,
-     * it calls [GeminiCategorizer] to get a smarter category using Gemini.
-     * Results are cached so each unique merchant is only ever sent to the API once.
+     * Full 4-layer categorization pipeline.
+     *
+     * Layer 1 — VpaResolver  (0ms):   detects payment gateway from UPI VPA handle
+     * Layer 2 — Regex        (0ms):   known brand/keyword match (this file)
+     * Layer 3 — Places API   (~200ms): Google Places for local shop lookup
+     * Layer 4 — Gemini 2.0   (~500ms): LLM fallback for anything unresolvable
+     *
+     * Both Layer 3 and Layer 4 are cached in SharedPreferences — same merchant
+     * is NEVER sent to an API more than once, even across app restarts.
      */
     suspend fun parseWithAi(context: Context, smsBody: String, smsId: String, timestamp: Long): TransactionData? {
         val transaction = parse(smsBody, smsId, timestamp) ?: return null
 
-        // Only call AI if the fast regex couldn't figure out the category
-        return if (transaction.category == "MISCELLANEOUS") {
-            val aiCategory = GeminiCategorizer.categorize(
-                context = context,
-                merchantName = transaction.merchant,
-                smsSnippet = smsBody
-            )
-            transaction.copy(category = aiCategory)
-        } else {
-            transaction
+        // If the regex already resolved a non-MISCELLANEOUS category, we're done (Layer 2 hit)
+        if (transaction.category != "MISCELLANEOUS") return transaction
+
+        // Layer 1: Try to resolve from VPA pattern in the SMS body
+        val vpaCategory = VpaResolver.resolveFromSms(smsBody)
+        if (vpaCategory != null) {
+            return transaction.copy(category = vpaCategory)
         }
+
+        // Layer 3: Google Places API — identifies local merchants by name
+        val placesCategory = PlacesCategorizer.categorize(
+            context = context,
+            merchantName = transaction.merchant
+        )
+        if (placesCategory != null) {
+            return transaction.copy(category = placesCategory)
+        }
+
+        // Layer 4: Gemini LLM fallback — last resort
+        val aiCategory = GeminiCategorizer.categorize(
+            context = context,
+            merchantName = transaction.merchant,
+            smsSnippet = smsBody
+        )
+        return transaction.copy(category = aiCategory)
+    }
+
+    /**
+     * Converts a parsed [TransactionData] to a [TransactionEntity] for local Room DB storage.
+     * smsId must be non-null — guaranteed by the parser when called from sync flow.
+     */
+    fun TransactionData.toEntity(): TransactionEntity {
+        return TransactionEntity(
+            smsId = this.smsId ?: error("smsId must not be null when converting to entity"),
+            merchant = this.merchant,
+            amount = this.amount,
+            category = this.category,
+            description = this.description,
+            transactionDate = this.transactionDate,
+            isCategorizedByAi = false  // AI worker will update this later if needed
+        )
     }
 
     /**
@@ -156,6 +191,11 @@ object SmsParser {
     internal fun determineCategory(merchant: String, isCredit: Boolean): String {
         if (isCredit) return "INCOME"
         val m = merchant.lowercase()
+
+        // --- KNOWN PERSONS (instant MISCELLANEOUS, no API call needed) ---
+        val knownPersons = listOf("atharva", "rushikesh", "roshan", "okkhanjojdkar", "shashank", "ramdas")
+        if (knownPersons.any { m.contains(it) }) return "MISCELLANEOUS"
+
         return when {
             m.contains("swiggy") || m.contains("zomato") || m.contains("starbucks") ||
             m.contains("restaurant") || m.contains("cafe") || m.contains("food") ||
@@ -167,7 +207,12 @@ object SmsParser {
             m.contains("zepto") || m.contains("instamart") || m.contains("bigbasket") ||
             m.contains("grofers") || m.contains("chai") || m.contains("tea") ||
             m.contains("juice") || m.contains("vending") || m.contains("canteen") ||
-            m.contains("tiffin") || m.contains("mess") || m.contains("snacks") -> "FOOD"
+            m.contains("tiffin") || m.contains("mess") || m.contains("snacks") ||
+            m.contains("hotel") || m.contains("shankar") || m.contains("dairy") ||
+            m.contains("daba") || m.contains("eatery") || m.contains("thali") ||
+            m.contains("paratha") || m.contains("dosa") || m.contains("biryani") ||
+            // --- LOCAL VENDORS (hardcoded for demo) ---
+            m.contains("vaishnav") || m.contains("trimurti") -> "FOOD"
 
             m.contains("uber") || m.contains("ola") || m.contains("rapido") ||
             m.contains("metro") || m.contains("petrol") || m.contains("fuel") ||
@@ -182,7 +227,14 @@ object SmsParser {
             m.contains("nykaa") || m.contains("shopping") || m.contains("retail") ||
             m.contains("decathlon") || m.contains("store") || m.contains("supermarket") ||
             m.contains("grocery") || m.contains("meesho") || m.contains("ajio") ||
-            m.contains("croma") || m.contains("dmart") || m.contains("ikea") -> "SHOPPING"
+            m.contains("croma") || m.contains("dmart") || m.contains("ikea") ||
+            m.contains("super") || m.contains("mart") || m.contains("bazar") ||
+            m.contains("bazaar") || m.contains("traders") || m.contains("kirana") ||
+            m.contains("provision") || m.contains("provisions") || m.contains("general") ||
+            m.contains("enterprises") || m.contains("footwear") || m.contains("fashion") ||
+            m.contains("textile") || m.contains("textiles") || m.contains("cloth") ||
+            m.contains("garments") || m.contains("jewellers") || m.contains("opticals") ||
+            m.contains("hardware") || m.contains("electronics") || m.contains("mobile") -> "SHOPPING"
 
             m.contains("jio") || m.contains("airtel") || m.contains("vodafone") ||
             m.contains("bsnl") || m.contains("recharge") || m.contains("electricity") ||

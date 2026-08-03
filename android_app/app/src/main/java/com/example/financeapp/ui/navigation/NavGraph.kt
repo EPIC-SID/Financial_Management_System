@@ -42,13 +42,15 @@ fun FinanceAppNavGraph() {
         isCheckingAuth = false
     }
 
-    // Monitor session status — redirect to login on token expiry or sign out
+    // Monitor session status — redirect to login on token expiry or sign out if user was in-app
     val sessionStatus by SupabaseClient.auth.sessionStatus.collectAsState()
     LaunchedEffect(sessionStatus) {
         if (!isCheckingAuth && sessionStatus is SessionStatus.NotAuthenticated) {
-            // Session expired or user was signed out — redirect to login
-            navController.navigate(Screen.Login.route) {
-                popUpTo(0) { inclusive = true }
+            val currentRoute = navController.currentDestination?.route
+            if (currentRoute != null && currentRoute != Screen.Login.route && currentRoute != Screen.SignUp.route) {
+                navController.navigate(Screen.Login.route) {
+                    popUpTo(Screen.Home.route) { inclusive = true }
+                }
             }
         }
     }

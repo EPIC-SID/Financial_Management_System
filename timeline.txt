@@ -1,0 +1,85 @@
+Project Review Timeline & Task Distribution (Aug 2 - Aug 8)
+===========================================================
+Team Members:
+- Siddhant: Lead Developer (Backend logic, performance optimization, API integrations).
+- Uday: Presentation Lead (Slide deck creation, script writing).
+- Roshan: UI/Frontend Developer & Documentation (Jetpack Compose layouts, Technical Report).
+- Snehal: QA Tester & Content Manager (Testing flows, User Manual, gathering sample data, demo recording).
+
+Objectives Checklist (Deliverables):
+[ ] 1. Working prototype of the mobile application
+[ ] 2. Project documentation and technical report
+[ ] 3. Source code with supporting documentation
+[ ] 4. Project presentation and final demonstration
+
+-----------------------------------------------------------
+IMMEDIATE: August 3 - HOD Progress Meeting
+-----------------------------------------------------------
+Goal for HOD Meeting: Since the SMS categorization sync is currently experiencing latency issues, DO NOT rely on a live sync for the demo. Instead, focus on showing:
+1. Complete App Navigation & UI Polish: Walk through Login, Sign Up, Home Screen, and Profile editing.
+2. Architecture & Security: Explain the Supabase integration and data privacy (RLS).
+3. Mocked Data Presentation: Show the Transaction List populated with a few pre-loaded transactions to demonstrate UI capabilities without triggering the heavy SMS sync.
+4. Future Roadmap (This Timeline): Present the mockup for the AI Review Screen and Budgeting, explaining that performance optimization (moving sync to a background thread / bulk upsert) is the current technical priority.
+
+Tasks for August 3 (HOD Meeting Day):
+- Siddhant: Hardcode 5-10 realistic transactions into the database/app state so the Home and Transaction screens look fully populated and beautiful without needing to run the slow SMS sync.
+- Roshan: Prepare a 1-page "Architecture & Progress" summary printout for the HOD.
+- Snehal: Rehearse the app flow with Siddhant to ensure no one clicks the "Sync SMS" button during the live demo.
+
+-----------------------------------------------------------
+DETAILED DAILY TIMELINE (Aug 4 - Aug 8)
+-----------------------------------------------------------
+
+August 4 - Performance & UI Foundation
+- Siddhant: 
+  - Fix the SMS loading latency (move processing to Coroutines/Dispatchers.IO, implement bulk insert for Supabase).
+  - Re-enable the Gemini API integration for the "AI Review Screen" (Finance Advisor) using a background worker.
+- Roshan: 
+  - Implement the UI layout for the Budget Management screen (Create progress bars, category lists in Compose).
+  - Draft Chapter 1 (Introduction) & Chapter 2 (System Architecture) of the Technical Report.
+- Snehal: 
+  - Write Test Cases for the Login/Signup and Profile modules.
+  - Draft the introduction and installation steps for the User Manual.
+- Uday: 
+  - Outline the presentation slides based on the project proposal.
+
+August 5 - Logic Integration & Visual Analytics
+- Siddhant: 
+  - Connect Roshan's Budget Management UI to the backend logic (calculate spent vs. budget limits).
+  - Prepare data aggregation logic for the Expense Charts.
+- Roshan: 
+  - Build the frontend UI for Expense Charts (using a library like MPAndroidChart or Vico).
+  - Draft Chapter 3 (Module Description & AI Integration) of the Technical Report.
+- Snehal: 
+  - Conduct manual QA testing on the optimized SMS Sync and Budget screens. Report any crashes to Siddhant.
+  - Collect 50 diverse sample UPI SMS messages to test categorization accuracy.
+- Uday: 
+  - Draft slide content for the "Problem Statement", "Proposed Solution", and "System Architecture" slides.
+
+August 6 - Additional Features & System Testing
+- Siddhant: 
+  - Implement Savings Goals / Festive Spending tracking logic.
+  - Clean up codebase (remove unused imports, organize packages).
+- Roshan: 
+  - Build the UI for Savings Goals. 
+  - Draft Chapter 4 (Results & Screenshots) of the Technical Report.
+- Snehal: 
+  - Format the Source Code documentation (README, Codebase Overview).
+  - Work with Uday to script the final demo video.
+- Uday: 
+  - Add screenshots to the presentation. Finalize slide designs.
+
+August 7 - Buffer, Bug Fixing, & Final Polish
+- Siddhant: 
+  - Fix any complex bugs found during testing. Add code comments/docstrings to complex functions.
+- Roshan: 
+  - Fix minor UI alignment bugs. 
+  - Compile all chapters, format, and proofread the final Technical Report document.
+- Snehal: 
+  - Record and edit the 3-5 minute Demo Video of the working prototype.
+  - Package the final submission zip (Source Code + Documentation + Report).
+- Uday: 
+  - Do a dry run of the presentation.
+
+August 8 - Project Review Meeting
+- All Members: Deliver the final presentation, show the demo video, and answer HOD questions!
