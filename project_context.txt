@@ -1,0 +1,75 @@
+# RupAI (Financial Management System) — Full Project Context
+
+## 1. Executive Summary
+**RupAI** is an AI-powered automated personal finance tracker designed for Android. It automatically reads bank SMS notifications, extracts transaction details, and uses a multi-layered classification engine (Regex -> Google Places API -> Gemini 2.0 Flash LLM) to categorize spending with high accuracy. 
+
+It is designed with an offline-first architecture using Room DB and WorkManager, backed by Supabase for user authentication and cloud sync.
+
+---
+
+## 2. Technology Stack
+
+- **Android Frontend**: Kotlin, Jetpack Compose (Declarative UI), Material 3, Coroutines & StateFlow.
+- **Local Persistence & Offline First**: Android Room Database (`AppDatabase`, `TransactionDao`).
+- **Background Operations**: Android WorkManager (`AiCategorizationWorker`).
+- **Cloud Backend & Auth**: Supabase Cloud (PostgreSQL Engine & GoTrue Auth).
+- **Merchant Lookup (Layer 3)**: Google Places Text Search API (`PlacesCategorizer`).
+- **LLM AI Engine (Layer 4)**: Google AI Studio SDK — `gemini-2.0-flash` (`GeminiCategorizer`).
+
+---
+
+## 3. Architecture & Data Flow
+
+### 4-Layer Categorization Pipeline
+When SMS messages arrive or when the user taps **SYNC SMS**, transactions flow through 4 specialized layers to ensure speed, privacy, and accuracy:
+
+1. **Layer 1 — VPA Resolver (0ms)**: Identifies payment gateway handles and UPI VPAs from SMS text.
+2. **Layer 2 — Local Regex & Keyword Rules (0ms)**: Fast local pattern matching for known Indian brands, merchants, utilities, and standard keywords (Swiggy, Zomato, Uber, Amazon, Jio, Petrol, etc.).
+3. **Layer 3 — Google Places API (~200ms)**: Looks up un-categorized Indian local merchants (e.g. Kirana stores, sweet shops, medical stores) using Google Places Text Search API. Cached locally in `SharedPreferences`.
+4. **Layer 4 — Gemini 2.0 Flash LLM (~500ms)**: AI fallback for complex or unusual transactions. Uses prompt engineering tailored for Indian financial transactions. Cached locally in `SharedPreferences`.
+
+### Offline-First & Asynchronous Processing
+- **Instant UI Updates**: Layer 1 + Layer 2 run synchronously on sync (~50ms for 100+ SMS). Transactions are immediately saved into Room DB and displayed on the UI via `StateFlow`.
+- **Background WorkManager**: Un-categorized (`MISCELLANEOUS`) transactions trigger `AiCategorizationWorker` in the background off the main thread.
+- **Rate-Limiting & Quota Management**: WorkManager enforces a 4-second delay between Gemini API calls to respect the Gemini Free Tier limit (15 req/min). If quota limits are hit, the worker pauses and automatically retries later without losing state.
+- **Single Source of Truth**: Room DB auto-notifies Compose UI screens whenever `AiCategorizationWorker` updates a transaction's category.
+
+---
+
+## 4. Key Files & Codebase Map
+
+### Core Data & AI Engine (`com.example.financeapp.data`)
+- **`SmsParser.kt`**: Extracts amount, credit/debit type, merchant name, date, and sanitizes sensitive data (masks account numbers & card details).
+- **`SmsReader.kt`**: Reads raw SMS messages from `content://sms/inbox`.
+- **`TransactionEntity.kt`**: Room DB entity schema.
+- **`TransactionDao.kt`**: Room Data Access Object providing Live StateFlow streams and atomic update queries.
+- **`TransactionViewModel.kt`**: ViewModel managing UI states, sync orchestration, and cache resets.
+- **`PlacesCategorizer.kt`**: Handles Google Places API lookups with persistent caching.
+- **`GeminiCategorizer.kt`**: Handles Gemini 2.0 Flash LLM categorization with prompt templates and persistent caching.
+- **`AiCategorizationWorker.kt`**: Asynchronous `CoroutineWorker` handling background AI execution and rate limiting.
+
+### User Interface (`com.example.financeapp.ui`)
+- **`HomeScreen.kt`**: Dashboard presenting monthly totals, budget remaining, and recent transactions.
+- **`TransactionsScreen.kt`**: Complete ledger with search/filter chips and the "Sync SMS" FAB.
+- **`ProfileScreen.kt`**: User profile details, sign out, and the **`RESET DATA & AI CACHE`** developer button.
+- **`EditProfileScreen.kt`**: Form to update user profile information.
+- **`NavGraph.kt`**: Central Jetpack Compose navigation controller with Supabase auth session monitoring.
+
+---
+
+## 5. Security & Privacy Features
+
+- **Sensitive Data Masking**: Account numbers, card numbers, and full UPI IDs are masked (`****`) before storage.
+- **Environment Isolation**: API keys (`GEMINI_API_KEY`, `PLACES_API_KEY`, `SUPABASE_URL`, `SUPABASE_ANON_KEY`) are managed via `local.properties` (not committed to git) and injected into `BuildConfig`.
+  - **Fresh Clone Setup**: Anyone cloning the repo must copy `android_app/local.properties.example` to `android_app/local.properties` and rebuild, otherwise `SUPABASE_URL` compiles as empty `""` causing Sign Up/Sign In HTTP failures.
+- **Row Level Security (RLS)**: Supabase PostgreSQL tables strictly scope transaction records by authenticated user ID.
+
+---
+
+## 6. Testing & Resetting the App
+
+If you want to clear all data and test the AI pipeline from scratch:
+1. Open the app and navigate to the **Profile** screen.
+2. Tap the **`RESET DATA & AI CACHE`** button.
+3. Return to **Transactions** or **Home** and tap **Sync SMS**.
+4. Filter Android Studio Logcat by `tag:GeminiCategorizer` or `tag:AiCategorizationWorker` to watch live API categorization.

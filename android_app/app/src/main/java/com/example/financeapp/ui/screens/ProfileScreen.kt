@@ -192,6 +192,44 @@ fun ProfileScreen(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
+                // ── Reset Data & AI Cache Button ───────
+                var isResetting by remember { mutableStateOf(false) }
+                OutlinedButton(
+                    onClick = {
+                        isResetting = true
+                        coroutineScope.launch(kotlinx.coroutines.Dispatchers.IO) {
+                            try {
+                                val db = com.example.financeapp.data.AppDatabase.getInstance(context)
+                                db.transactionDao().deleteAll()
+                                context.getSharedPreferences("GeminiCategorizerCache", android.content.Context.MODE_PRIVATE).edit().clear().apply()
+                                context.getSharedPreferences("PlacesCategorizerCache", android.content.Context.MODE_PRIVATE).edit().clear().apply()
+                                kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
+                                    Toast.makeText(context, "DB & AI Caches Cleared! Sync SMS to trigger Gemini.", Toast.LENGTH_LONG).show()
+                                }
+                            } catch (e: Exception) {
+                                kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
+                                    Toast.makeText(context, "Reset failed: ${e.message}", Toast.LENGTH_SHORT).show()
+                                }
+                            } finally {
+                                isResetting = false
+                            }
+                        }
+                    },
+                    modifier = Modifier.fillMaxWidth().height(52.dp),
+                    border = BorderStroke(2.dp, Color(0xFFC05621)),
+                    colors = ButtonDefaults.outlinedButtonColors(contentColor = Color(0xFFC05621)),
+                    shape = RectangleShape,
+                    enabled = !isResetting
+                ) {
+                    if (isResetting) {
+                        CircularProgressIndicator(modifier = Modifier.size(24.dp), color = Color(0xFFC05621))
+                    } else {
+                        Text("RESET DATA & AI CACHE", fontSize = 14.sp, fontWeight = FontWeight.Bold)
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
                 // ── Sign Out Button ─────────────────────
                 OutlinedButton(
                     onClick = {

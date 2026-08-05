@@ -17,16 +17,19 @@ object GeminiCategorizer {
     // In-memory cache: merchant name -> category
     private val memoryCache = HashMap<String, String>()
 
-    private fun getModel(): GenerativeModel? {
+    private fun getModel(modelName: String = "gemini-2.0-flash"): GenerativeModel? {
         val apiKey = BuildConfig.GEMINI_API_KEY
-        if (apiKey.isBlank()) return null
+        if (apiKey.isBlank()) {
+            Log.w(TAG, "GEMINI_API_KEY is blank in BuildConfig")
+            return null
+        }
         return try {
             GenerativeModel(
-                modelName = "gemini-2.0-flash",
+                modelName = modelName,
                 apiKey = apiKey
             )
         } catch (e: Exception) {
-            Log.e(TAG, "Failed to initialize GenerativeModel", e)
+            Log.e(TAG, "Failed to initialize GenerativeModel with $modelName", e)
             null
         }
     }
@@ -44,6 +47,14 @@ object GeminiCategorizer {
     }
 
     /**
+     * Returns true if the merchant is already in the in-memory cache.
+     * Used by AiCategorizationWorker to decide whether to apply rate limiting.
+     */
+    fun isInCache(merchantName: String): Boolean {
+        return memoryCache.containsKey(merchantName.trim().lowercase())
+    }
+
+    /**
      * Categorizes a merchant using a cached result or a Gemini API call.
      * Falls back to "MISCELLANEOUS" if the API call fails.
      */
@@ -57,8 +68,11 @@ object GeminiCategorizer {
 
         // 2. No cache — call Gemini API
         Log.d(TAG, "Cache MISS for '$merchantName', calling Gemini API...")
+        var apiSuccess = false
         val category = try {
-            val model = getModel() ?: return "MISCELLANEOUS"
+            val model = getModel("gemini-2.0-flash")
+                ?: return "MISCELLANEOUS"
+
             val prompt = """
                 You are a financial transaction categorizer for Indian users.
                 Given a merchant name and a brief transaction description, reply with ONLY one word from this exact list:
@@ -82,19 +96,24 @@ object GeminiCategorizer {
             val response = model.generateContent(prompt)
             val rawReply = response.text?.trim()?.uppercase() ?: "MISCELLANEOUS"
 
+            apiSuccess = true
             // Validate the response is one of our known categories
             if (rawReply in validCategories) rawReply else "MISCELLANEOUS"
         } catch (e: Exception) {
-            Log.e(TAG, "Gemini API call failed for '$merchantName': ${e.message}")
+            Log.e(TAG, "Gemini API call failed for '$merchantName': ${e.message}", e)
             "MISCELLANEOUS"
         }
 
-        // 3. Save to memory cache and SharedPreferences
-        memoryCache[normalizedKey] = category
-        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-        prefs.edit().putString(normalizedKey, category).apply()
+        // 3. Save to memory cache and SharedPreferences ONLY on successful API call
+        if (apiSuccess) {
+            memoryCache[normalizedKey] = category
+            val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+            prefs.edit().putString(normalizedKey, category).apply()
+            Log.d(TAG, "Gemini categorized '$merchantName' -> $category")
+        } else {
+            Log.w(TAG, "Gemini API failed for '$merchantName'; returning MISCELLANEOUS without caching failure.")
+        }
 
-        Log.d(TAG, "Gemini categorized '$merchantName' -> $category")
         return category
     }
 

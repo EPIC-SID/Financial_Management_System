@@ -98,8 +98,11 @@ object PlacesCategorizer {
     fun loadCache(context: Context) {
         val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
         prefs.all.forEach { (key, value) ->
-            if (value is String) memoryCache[key] = value
-            else if (value == null) memoryCache[key] = null
+            if (value is String) {
+                memoryCache[key] = if (value == "__NULL__") null else value
+            } else if (value == null) {
+                memoryCache[key] = null
+            }
         }
         Log.d(TAG, "Cache loaded: ${memoryCache.size} entries")
     }
