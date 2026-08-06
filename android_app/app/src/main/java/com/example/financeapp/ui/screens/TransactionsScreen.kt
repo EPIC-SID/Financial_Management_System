@@ -131,9 +131,9 @@ fun TransactionsScreen(
                                 showDurationDialog = false
                                 selectedPeriod = label
                                 val startTime = when (label) {
-                                    "Last 7 Days"    -> System.currentTimeMillis() - 7 * 24 * 60 * 60 * 1000L
-                                    "Last 30 Days"   -> System.currentTimeMillis() - 30L * 24 * 60 * 60 * 1000L
-                                    "Current Month"  -> {
+                                    "Last 7 Days"   -> System.currentTimeMillis() - 7 * 24 * 60 * 60 * 1000L
+                                    "Last 30 Days"  -> System.currentTimeMillis() - 30L * 24 * 60 * 60 * 1000L
+                                    "Current Month" -> {
                                         Calendar.getInstance().apply {
                                             set(Calendar.DAY_OF_MONTH, 1)
                                             set(Calendar.HOUR_OF_DAY, 0)
@@ -142,8 +142,9 @@ fun TransactionsScreen(
                                             set(Calendar.MILLISECOND, 0)
                                         }.timeInMillis
                                     }
-                                    else -> 0L
+                                    else -> 0L // All Time
                                 }
+                                // Update both the view filter AND trigger the SMS sync
                                 displayStartTime = startTime
                                 transactionViewModel.syncSms(startTime)
                             },
@@ -167,6 +168,7 @@ fun TransactionsScreen(
             }
         )
     }
+
 
     Scaffold(
         containerColor = BackgroundWhite,
@@ -251,9 +253,29 @@ fun TransactionsScreen(
         ) {
             // Header
             Column(modifier = Modifier.padding(24.dp)) {
-                Text("Recent Transactions", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = TextBlack)
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text("Recent Transactions", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = TextBlack)
+                    // Clickable period badge — shows current time window, tap to change
+                    Box(
+                        modifier = Modifier
+                            .border(1.dp, BronzePrimary)
+                            .clickable { startSyncFlow() }
+                            .padding(horizontal = 10.dp, vertical = 4.dp)
+                    ) {
+                        Text(
+                            text = selectedPeriod,
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = BronzePrimary
+                        )
+                    }
+                }
                 Spacer(modifier = Modifier.height(4.dp))
-                Text("Review your latest spending and income.", fontSize = 14.sp, color = TextGray)
+                Text("Showing: $selectedPeriod", fontSize = 14.sp, color = TextGray)
                 Spacer(modifier = Modifier.height(24.dp))
 
                 // Category filter chips
@@ -271,6 +293,7 @@ fun TransactionsScreen(
                     }
                 }
             }
+
 
             if (transactions.isEmpty() && !isSyncing) {
                 // Empty state
