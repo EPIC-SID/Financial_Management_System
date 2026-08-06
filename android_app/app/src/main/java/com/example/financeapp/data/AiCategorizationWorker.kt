@@ -62,80 +62,37 @@ class AiCategorizationWorker(
 
                 if (miscTransactions.isEmpty()) return@withContext Result.success()
 
-                var geminiCallCount = 0
-                var quotaHit = false
-
-                for (txn in miscTransactions) {
-                    if (quotaHit) {
-                        // Stop processing for this run — will retry on next enqueue
-                        Log.w(TAG, "Quota hit — stopping early. Remaining txns will be retried.")
-                        break
-                    }
-
-                    try {
-                        // Check in-memory caches first; only count real API calls toward rate limit
-                        val needsGemini = !GeminiCategorizer.isInCache(txn.merchant)
-
-                        val category = resolveCategory(txn)
-
-                        // Apply rate limit only when a real Gemini API call was made
-                        if (needsGemini && category != "MISCELLANEOUS") {
-                            geminiCallCount++
-                            if (geminiCallCount > 1) {
-                                Log.d(TAG, "Rate limiting: waiting ${GEMINI_RATE_LIMIT_MS}ms before next Gemini call")
-                                delay(GEMINI_RATE_LIMIT_MS)
-                            }
-                        }
-
-                        // Always mark as AI-processed, even if still MISCELLANEOUS
-                        dao.updateCategoryAndMarkAiProcessed(txn.smsId, category)
-                        Log.d(TAG, "Updated '${txn.merchant}' -> $category")
-
-                    } catch (e: Exception) {
-                        val msg = e.message ?: ""
-                        if (msg.contains("Quota", ignoreCase = true) || msg.contains("RESOURCE_EXHAUSTED", ignoreCase = true)) {
-                            // Don't mark as processed so it retries on next worker run
-                            Log.w(TAG, "Quota exceeded for '${txn.merchant}' — will retry later")
-                            quotaHit = true
-                        } else {
-                            Log.e(TAG, "Failed to process txn ${txn.smsId}: $msg")
-                            // Non-quota errors: mark as processed to avoid infinite loop
-                            dao.updateCategoryAndMarkAiProcessed(txn.smsId, "MISCELLANEOUS")
-                        }
-                    }
+                // Prepare batch request items: List of (merchant, snippet)
+                val batchItems = miscTransactions.map { txn ->
+                    Pair(txn.merchant, txn.description ?: txn.merchant)
                 }
 
-                Log.d(TAG, "AI categorization run complete. Gemini calls made: $geminiCallCount")
-                if (quotaHit) Result.retry() else Result.success()
+                // Call backend batch endpoint (handles local cache + backend shared DB cache + Gemini)
+                val categoryMap = BackendCategorizerClient.categorizeBatch(
+                    context = applicationContext,
+                    items = batchItems
+                )
+
+                if (categoryMap.isEmpty() && batchItems.isNotEmpty()) {
+                    Log.w(TAG, "Backend returned empty category map (network or server error) — will retry later.")
+                    return@withContext Result.retry()
+                }
+
+                // Update Room database with resolved categories
+                var processedCount = 0
+                for (txn in miscTransactions) {
+                    val resolvedCategory = categoryMap[txn.merchant] ?: "MISCELLANEOUS"
+                    dao.updateCategoryAndMarkAiProcessed(txn.smsId, resolvedCategory)
+                    Log.d(TAG, "Updated '${txn.merchant}' -> $resolvedCategory")
+                    processedCount++
+                }
+
+                Log.d(TAG, "AI categorization worker run complete. Processed $processedCount transactions.")
+                Result.success()
             } catch (e: Exception) {
                 Log.e(TAG, "Worker failed", e)
                 Result.retry()  // WorkManager will retry with backoff
             }
         }
-    }
-
-    /**
-     * Runs Layer 3 (Places API) first, then Layer 4 (Gemini) only if needed.
-     * Both respect their SharedPrefs caches — same merchant is never re-queried.
-     */
-    private suspend fun resolveCategory(txn: TransactionEntity): String {
-        // Layer 3: Google Places API
-        val placesCategory = PlacesCategorizer.categorize(
-            context = applicationContext,
-            merchantName = txn.merchant
-        )
-        if (placesCategory != null) {
-            Log.d(TAG, "Layer 3 resolved '${txn.merchant}' -> $placesCategory")
-            return placesCategory
-        }
-
-        // Layer 4: Gemini LLM fallback
-        val geminiCategory = GeminiCategorizer.categorize(
-            context = applicationContext,
-            merchantName = txn.merchant,
-            smsSnippet = txn.description ?: txn.merchant
-        )
-        Log.d(TAG, "Layer 4 resolved '${txn.merchant}' -> $geminiCategory")
-        return geminiCategory
     }
 }

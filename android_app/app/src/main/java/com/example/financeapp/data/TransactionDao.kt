@@ -45,6 +45,10 @@ interface TransactionDao {
     @Query("SELECT COUNT(*) FROM transactions")
     suspend fun getCount(): Int
 
+    /** Reset isCategorizedByAi flag for all MISCELLANEOUS transactions so AI can re-process them. */
+    @Query("UPDATE transactions SET isCategorizedByAi = 0 WHERE category = 'MISCELLANEOUS'")
+    suspend fun resetAiCategorizationFlags()
+
     /** Delete all local transactions (reset DB). */
     @Query("DELETE FROM transactions")
     suspend fun deleteAll()

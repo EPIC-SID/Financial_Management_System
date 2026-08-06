@@ -8,6 +8,7 @@
         android:allowBackup="false"
         android:label="RupAI"
         android:supportsRtl="true"
+        android:usesCleartextTraffic="true"
         android:theme="@android:style/Theme.Material.Light.NoActionBar">
         <activity
             android:name=".MainActivity"

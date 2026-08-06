@@ -201,10 +201,11 @@ fun ProfileScreen(
                             try {
                                 val db = com.example.financeapp.data.AppDatabase.getInstance(context)
                                 db.transactionDao().deleteAll()
+                                context.getSharedPreferences("BackendCategorizerCache", android.content.Context.MODE_PRIVATE).edit().clear().apply()
                                 context.getSharedPreferences("GeminiCategorizerCache", android.content.Context.MODE_PRIVATE).edit().clear().apply()
                                 context.getSharedPreferences("PlacesCategorizerCache", android.content.Context.MODE_PRIVATE).edit().clear().apply()
                                 kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
-                                    Toast.makeText(context, "DB & AI Caches Cleared! Sync SMS to trigger Gemini.", Toast.LENGTH_LONG).show()
+                                    Toast.makeText(context, "DB & AI Backend Caches Cleared! Syncing SMS will trigger AI backend.", Toast.LENGTH_LONG).show()
                                 }
                             } catch (e: Exception) {
                                 kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {

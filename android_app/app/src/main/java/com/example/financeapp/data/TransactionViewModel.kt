@@ -45,12 +45,10 @@ class TransactionViewModel(application: Application) : AndroidViewModel(applicat
             )
 
     /**
-     * Preloads all categorizer caches from SharedPreferences.
-     * Call once when the app starts to ensure AI caches are warm.
+     * Preloads categorizer caches if needed.
      */
     fun loadCaches(context: android.content.Context) {
-        GeminiCategorizer.loadCache(context)
-        PlacesCategorizer.loadCache(context)
+        // BackendCategorizerClient handles local SharedPreferences caching automatically
     }
 
     /**
