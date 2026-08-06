@@ -20,6 +20,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.financeapp.data.SupabaseClient
 import com.example.financeapp.data.TransactionEntity
 import com.example.financeapp.data.TransactionViewModel
 import com.example.financeapp.data.UserProfile
@@ -31,6 +32,7 @@ import com.example.financeapp.data.formatTransactionTime
 import com.example.financeapp.ui.components.AppBottomBar
 import com.example.financeapp.ui.components.Tab
 import com.example.financeapp.ui.theme.*
+import io.github.jan.supabase.gotrue.SessionStatus
 import java.text.NumberFormat
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -52,18 +54,23 @@ fun HomeScreen(
     var profile by remember { mutableStateOf<UserProfile?>(null) }
     var isLoadingProfile by remember { mutableStateOf(true) }
 
-    // Only fetch profile (lightweight Supabase call for user settings)
-    LaunchedEffect(Unit) {
-        isLoadingProfile = true
-        try {
-            val profileResult = UserRepository.getProfile()
-            if (profileResult is Resource.Success) {
-                profile = profileResult.data
+    // Wait for Supabase session to be fully authenticated before fetching profile.
+    // Avoids a race condition where getProfile() fires while session is still
+    // being restored from SharedPreferences (LoadingFromStorage state).
+    val sessionStatus by SupabaseClient.auth.sessionStatus.collectAsState()
+    LaunchedEffect(sessionStatus) {
+        if (sessionStatus is SessionStatus.Authenticated) {
+            isLoadingProfile = true
+            try {
+                val profileResult = UserRepository.getProfile()
+                if (profileResult is Resource.Success) {
+                    profile = profileResult.data
+                }
+            } catch (e: Exception) {
+                // Profile load failed silently — transactions still show
+            } finally {
+                isLoadingProfile = false
             }
-        } catch (e: Exception) {
-            // Profile load failed silently — transactions still show
-        } finally {
-            isLoadingProfile = false
         }
     }
 

@@ -25,6 +25,7 @@ import com.example.financeapp.data.UserRepository
 import com.example.financeapp.ui.components.AppBottomBar
 import com.example.financeapp.ui.components.Tab
 import com.example.financeapp.ui.theme.*
+import io.github.jan.supabase.gotrue.SessionStatus
 import kotlinx.coroutines.launch
 import java.text.NumberFormat
 import java.util.Locale
@@ -43,19 +44,24 @@ fun ProfileScreen(
     var profile by remember { mutableStateOf<UserProfile?>(null) }
     var isLoadingProfile by remember { mutableStateOf(true) }
 
-    // Fetch profile from Supabase on load
-    LaunchedEffect(Unit) {
-        try {
-            val result = UserRepository.getProfile()
-            if (result is Resource.Success) {
-                profile = result.data
-            } else if (result is Resource.Error) {
-                Toast.makeText(context, result.message, Toast.LENGTH_SHORT).show()
+    // Wait for Supabase session to be fully authenticated before fetching profile.
+    // Avoids a race condition where getProfile() fires while session is still
+    // being restored from SharedPreferences (LoadingFromStorage state).
+    val sessionStatus by SupabaseClient.auth.sessionStatus.collectAsState()
+    LaunchedEffect(sessionStatus) {
+        if (sessionStatus is SessionStatus.Authenticated) {
+            try {
+                val result = UserRepository.getProfile()
+                if (result is Resource.Success) {
+                    profile = result.data
+                } else if (result is Resource.Error) {
+                    Toast.makeText(context, result.message, Toast.LENGTH_SHORT).show()
+                }
+            } catch (e: Exception) {
+                // Fallback to auth metadata if profile fetch fails
+            } finally {
+                isLoadingProfile = false
             }
-        } catch (e: Exception) {
-            // Fallback to auth metadata if profile fetch fails
-        } finally {
-            isLoadingProfile = false
         }
     }
 
