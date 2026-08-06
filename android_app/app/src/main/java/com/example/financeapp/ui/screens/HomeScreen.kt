@@ -159,45 +159,64 @@ fun HomeScreen(
                         fontWeight = FontWeight.Bold
                     )
                     Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = "₹${NumberFormat.getNumberInstance(Locale("en", "IN")).format(totalBalance)}",
-                        fontSize = 40.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = if (isOverBudget) Color(0xFFB91C1C) else TextBlack
-                    )
 
-                    Spacer(modifier = Modifier.height(6.dp))
+                    if (isLoadingProfile) {
+                        // Show placeholder while income is still being fetched from Supabase.
+                        // Without this, balance = 0 - monthlyOut = negative red flash for a split second.
+                        Text(
+                            text = "—",
+                            fontSize = 40.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = TextGray
+                        )
+                        Spacer(modifier = Modifier.height(6.dp))
+                        Text(
+                            text = "Loading...",
+                            color = TextGray,
+                            fontSize = 11.sp
+                        )
+                    } else {
+                        Text(
+                            text = "₹${NumberFormat.getNumberInstance(Locale("en", "IN")).format(totalBalance)}",
+                            fontSize = 40.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = if (isOverBudget) Color(0xFFB91C1C) else TextBlack
+                        )
 
-                    // Savings indicator / over-budget warning
-                    when {
-                        !isIncomeSet -> {
-                            Text(
-                                text = "Monthly income not set. Tap here to set it.",
-                                color = BronzePrimary,
-                                fontSize = 11.sp,
-                                fontWeight = FontWeight.SemiBold,
-                                modifier = Modifier.clickable { onNavigateToProfile() }
-                            )
-                        }
-                        isOverBudget -> {
-                            val overBy = kotlin.math.abs(totalBalance)
-                            Text(
-                                text = "⚠ Over budget by ₹${NumberFormat.getNumberInstance(Locale("en", "IN")).format(overBy)} this month",
-                                color = Color(0xFFB91C1C),
-                                fontSize = 11.sp,
-                                fontWeight = FontWeight.SemiBold
-                            )
-                        }
-                        else -> {
-                            Text(
-                                text = "✓ Saved $savingsPct% of income this month",
-                                color = TealPositive,
-                                fontSize = 11.sp,
-                                fontWeight = FontWeight.SemiBold
-                            )
+                        Spacer(modifier = Modifier.height(6.dp))
+
+                        // Savings indicator / over-budget warning
+                        when {
+                            !isIncomeSet -> {
+                                Text(
+                                    text = "Monthly income not set. Tap here to set it.",
+                                    color = BronzePrimary,
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.SemiBold,
+                                    modifier = Modifier.clickable { onNavigateToProfile() }
+                                )
+                            }
+                            isOverBudget -> {
+                                val overBy = kotlin.math.abs(totalBalance)
+                                Text(
+                                    text = "⚠ Over budget by ₹${NumberFormat.getNumberInstance(Locale("en", "IN")).format(overBy)} this month",
+                                    color = Color(0xFFB91C1C),
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.SemiBold
+                                )
+                            }
+                            else -> {
+                                Text(
+                                    text = "✓ Saved $savingsPct% of income this month",
+                                    color = TealPositive,
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.SemiBold
+                                )
+                            }
                         }
                     }
                 }
+
 
                 Spacer(modifier = Modifier.height(32.dp))
 
