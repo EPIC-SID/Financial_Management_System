@@ -30,27 +30,44 @@ import io.github.jan.supabase.gotrue.SessionStatus
 fun FinanceAppNavGraph() {
     val navController = rememberNavController()
 
-    // Check if the user is already signed in
+    // Track auth state — wait for Supabase to finish restoring session from SharedPreferences
     var startDestination by remember { mutableStateOf(Screen.Login.route) }
     var isCheckingAuth by remember { mutableStateOf(true) }
 
-    LaunchedEffect(Unit) {
-        val sessionStatus = SupabaseClient.auth.sessionStatus.value
-        if (sessionStatus is SessionStatus.Authenticated) {
-            startDestination = Screen.Home.route
-        }
-        isCheckingAuth = false
-    }
-
-    // Monitor session status — redirect to login on token expiry or sign out if user was in-app
+    // Collect the session status flow to properly wait for LoadingFromStorage to resolve.
+    // On cold start: status goes LoadingFromStorage → Authenticated (if saved) or NotAuthenticated (if no token).
+    // We must NOT check .value immediately — it may still be LoadingFromStorage at that point.
     val sessionStatus by SupabaseClient.auth.sessionStatus.collectAsState()
+
     LaunchedEffect(sessionStatus) {
-        if (!isCheckingAuth && sessionStatus is SessionStatus.NotAuthenticated) {
-            val currentRoute = navController.currentDestination?.route
-            if (currentRoute != null && currentRoute != Screen.Login.route && currentRoute != Screen.SignUp.route) {
-                navController.navigate(Screen.Login.route) {
-                    popUpTo(Screen.Home.route) { inclusive = true }
+        when (sessionStatus) {
+            is SessionStatus.Authenticated -> {
+                if (isCheckingAuth) {
+                    // First resolution on launch — user has a valid saved session, go straight to Home
+                    startDestination = Screen.Home.route
+                    isCheckingAuth = false
                 }
+                // If already past auth check, do nothing (user is already on Home)
+            }
+            is SessionStatus.NotAuthenticated -> {
+                if (isCheckingAuth) {
+                    // No saved session found — show Login
+                    isCheckingAuth = false
+                } else {
+                    // Session expired or user signed out mid-session — redirect to Login
+                    val currentRoute = navController.currentDestination?.route
+                    if (currentRoute != null && currentRoute != Screen.Login.route && currentRoute != Screen.SignUp.route) {
+                        navController.navigate(Screen.Login.route) {
+                            popUpTo(Screen.Home.route) { inclusive = true }
+                        }
+                    }
+                }
+            }
+            is SessionStatus.LoadingFromStorage -> {
+                // Still restoring session from SharedPreferences — keep spinner visible
+            }
+            else -> {
+                // NetworkError or other transient states — keep spinner, will resolve shortly
             }
         }
     }
