@@ -103,17 +103,20 @@ class TransactionViewModel(application: Application) : AndroidViewModel(applicat
                     Log.d("TransactionViewModel", "Inserted ${newEntities.size} new transactions")
                 }
 
-                // Check if any MISCELLANEOUS rows in DB need AI processing (new OR previously inserted)
-                val pendingAiCount = dao.getMiscellaneousNotAiProcessed().size
-                _syncMessage.value = if (newEntities.isEmpty()) {
-                    if (pendingAiCount > 0) "Categorizing $pendingAiCount transaction(s) in background…" else "Already up to date."
-                } else {
-                    "Synced ${newEntities.size} transaction(s)." +
-                    if (pendingAiCount > 0) " Categorizing $pendingAiCount in background…" else ""
+                // Only check AI backlog if we actually inserted new transactions this sync.
+                // Checking all-time pendingAiCount on every sync caused the "Categorizing 283..."
+                // toast to fire on every period-change button press, even with 0 new rows.
+                val newMiscCount = newEntities.count { it.category == "MISCELLANEOUS" && !it.isCategorizedByAi }
+
+                _syncMessage.value = when {
+                    newEntities.isEmpty()   -> "Already up to date."
+                    newMiscCount > 0        -> "Synced ${newEntities.size} transaction(s). Categorizing $newMiscCount in background…"
+                    else                    -> "Synced ${newEntities.size} transaction(s)."
                 }
 
-                // Enqueue background AI worker if any unprocessed MISCELLANEOUS rows exist in DB
-                if (pendingAiCount > 0) {
+                // Enqueue AI worker only when there are newly inserted rows that need categorization.
+                // The worker itself uses ExistingWorkPolicy.KEEP so it won't run if already active.
+                if (newMiscCount > 0) {
                     AiCategorizationWorker.enqueue(context)
                 }
 
