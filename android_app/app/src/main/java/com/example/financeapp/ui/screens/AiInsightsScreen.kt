@@ -65,6 +65,12 @@ fun AiInsightsScreen(
     val savings = monthlyIncome - monthlyOut
     val savingsRate = if (monthlyIncome > 0) (savings / monthlyIncome) * 100 else 0.0
 
+    val sortedSummary = remember(expenseSummary) {
+        expenseSummary.entries
+            .sortedByDescending { it.value }
+            .associate { it.key to it.value }
+    }
+
     LaunchedEffect(Unit) {
         val profile = UserRepository.getProfile()
         if (profile is Resource.Success) {
@@ -116,7 +122,7 @@ fun AiInsightsScreen(
                 )
                 Spacer(modifier = Modifier.height(12.dp))
                 
-                if (expenseSummary.isEmpty()) {
+                if (sortedSummary.isEmpty()) {
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -142,7 +148,7 @@ fun AiInsightsScreen(
                         ) {
                             Box(contentAlignment = Alignment.Center) {
                                 PieChart(
-                                    data = expenseSummary,
+                                    data = sortedSummary,
                                     modifier = Modifier.size(140.dp)
                                 )
                                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -160,7 +166,7 @@ fun AiInsightsScreen(
                                 }
                             }
                             Spacer(modifier = Modifier.width(16.dp))
-                            ChartLegend(data = expenseSummary, total = monthlyOut)
+                            ChartLegend(data = sortedSummary, total = monthlyOut)
                         }
                     }
                 }
@@ -242,7 +248,7 @@ fun ChartLegend(data: Map<String, Double>, total: Double) {
         verticalArrangement = Arrangement.spacedBy(6.dp),
         modifier = Modifier.widthIn(max = 160.dp)
     ) {
-        data.entries.sortedByDescending { it.value }.take(5).forEachIndexed { index, entry ->
+        data.entries.take(5).forEachIndexed { index, entry ->
             val percentage = if (total > 0) (entry.value / total) * 100 else 0.0
             Row(
                 verticalAlignment = Alignment.CenterVertically,
