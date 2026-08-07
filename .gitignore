@@ -86,6 +86,8 @@ android_app/*.py
 *.pdf
 *.docx
 *.doc
+*.pptx
+
 Supabase_details.txt
 Financial Management System.txt
 UPI Transactions messages (DebitCre.txt
