@@ -49,6 +49,13 @@ interface TransactionDao {
     @Query("UPDATE transactions SET isCategorizedByAi = 0 WHERE category = 'MISCELLANEOUS'")
     suspend fun resetAiCategorizationFlags()
 
+    /**
+     * Updates the category for all transactions matching a given merchant (case-insensitive).
+     * Called when a user manually re-categorizes a merchant.
+     */
+    @Query("UPDATE transactions SET category = :category, isCategorizedByAi = 1 WHERE LOWER(merchant) = LOWER(:merchant)")
+    suspend fun updateCategoryForMerchant(merchant: String, category: String)
+
     /** Delete all local transactions (reset DB). */
     @Query("DELETE FROM transactions")
     suspend fun deleteAll()

@@ -135,6 +135,23 @@ class TransactionViewModel(application: Application) : AndroidViewModel(applicat
     }
 
     /**
+     * Manually updates the category for a merchant.
+     * Saves the preference to local cache so all future SMS from this merchant are automatically categorized,
+     * and updates all existing transactions in Room DB matching this merchant.
+     */
+    fun updateCategoryForMerchant(merchant: String, newCategory: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val context = getApplication<Application>()
+            // 1. Save to local cache so future SMS syncs inherit this category
+            BackendCategorizerClient.saveToCache(context, merchant, newCategory)
+
+            // 2. Update all existing transactions for this merchant in local Room DB
+            dao.updateCategoryForMerchant(merchant, newCategory)
+            Log.d("TransactionViewModel", "Updated merchant '$merchant' -> '$newCategory' in cache and Room DB")
+        }
+    }
+
+    /**
      * Resets the local Room database and clears all SharedPreferences caches.
      */
     fun clearAllData() {

@@ -369,6 +369,42 @@ fun TransactionsScreen(
                                 DetailRow("Category", txn.category)
                                 DetailRow("Date", formatTransactionDate(txn.transactionDate))
                                 DetailRow("Time", formatTransactionTime(txn.transactionDate))
+
+                                Divider(color = SurfaceGray)
+                                Column {
+                                    Text("Change Category for '${txn.merchant}'", fontSize = 11.sp, color = TextGray, fontWeight = FontWeight.Bold)
+                                    Spacer(modifier = Modifier.height(8.dp))
+                                    val categoryOptions = listOf("FOOD", "TRAVEL", "SHOPPING", "BILLS", "ENTERTAINMENT", "HEALTH", "EDUCATION", "INVESTMENTS", "INCOME", "MISCELLANEOUS")
+                                    Row(
+                                        modifier = Modifier.horizontalScroll(rememberScrollState()),
+                                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                    ) {
+                                        categoryOptions.forEach { cat ->
+                                            val isSelected = txn.category.equals(cat, ignoreCase = true)
+                                            Box(
+                                                modifier = Modifier
+                                                    .border(1.dp, if (isSelected) BronzePrimary else BorderBlack, RoundedCornerShape(4.dp))
+                                                    .background(if (isSelected) BronzePrimary else Color.Transparent)
+                                                    .clickable {
+                                                        if (!isSelected) {
+                                                            transactionViewModel.updateCategoryForMerchant(txn.merchant, cat)
+                                                            selectedTransaction = txn.copy(category = cat)
+                                                            Toast.makeText(context, "Saved category '$cat' for ${txn.merchant}", Toast.LENGTH_SHORT).show()
+                                                        }
+                                                    }
+                                                    .padding(horizontal = 10.dp, vertical = 6.dp)
+                                            ) {
+                                                Text(
+                                                    text = cat,
+                                                    fontSize = 11.sp,
+                                                    fontWeight = FontWeight.Bold,
+                                                    color = if (isSelected) Color.White else TextBlack
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+
                                 if (!txn.description.isNullOrBlank()) {
                                     Divider(color = SurfaceGray)
                                     Text("SMS Snippet", fontSize = 11.sp, color = TextGray, fontWeight = FontWeight.Bold)
