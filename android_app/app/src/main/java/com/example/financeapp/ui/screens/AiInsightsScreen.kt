@@ -604,12 +604,21 @@ fun generateStaticSuggestions(
         ))
     }
 
-    // Dynamic Alert 3: Emergency Reserve Advice
-    list.add(StaticSuggestion(
-        "Emergency Reserve Allocation",
-        "Maintain an emergency reserve of at least ₹50,000 (3-6 months essential expenses).",
-        Icons.Default.Savings
-    ))
+    // Dynamic Alert 3: Emergency Reserve Allocation (3x Monthly Income)
+    if (income > 0) {
+        val targetReserve = income * 3
+        list.add(StaticSuggestion(
+            "Emergency Reserve Allocation",
+            "Maintain a 3-month emergency safety fund of ₹${format.format(targetReserve.toInt())} based on your ₹${format.format(income.toInt())} monthly income.",
+            Icons.Default.Savings
+        ))
+    } else {
+        list.add(StaticSuggestion(
+            "Configure Emergency Reserve Target",
+            "Set your monthly income in Profile to calculate your personalized 3-month emergency safety fund.",
+            Icons.Default.Savings
+        ))
+    }
 
     return list
 }
