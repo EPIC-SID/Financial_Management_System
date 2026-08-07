@@ -99,7 +99,7 @@ fun TransactionsScreen(
         onResult = { isGranted ->
             hasPermission = isGranted
             if (isGranted) showDurationDialog = true
-            else Toast.makeText(context, "We need SMS permission to find your transactions. Please allow it!", Toast.LENGTH_LONG).show()
+            else Toast.makeText(context, "Permission required to scan bank transaction SMS.", Toast.LENGTH_LONG).show()
         }
     )
 
@@ -117,19 +117,19 @@ fun TransactionsScreen(
             onDismissRequest = { showDurationDialog = false },
             shape = RectangleShape,
             containerColor = BackgroundWhite,
-            title = { Text("How far back should we look? 🔍", fontWeight = FontWeight.Bold) },
+            title = { Text("Sync Transaction History", fontWeight = FontWeight.Bold) },
             text = {
                 Column {
                     Text(
-                        "We'll scan your SMS messages to find bank transactions.",
+                        "Select timeframe to scan SMS messages:",
                         color = TextGray, fontSize = 14.sp
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                     listOf(
-                        "Last 7 Days" to "Just the past week",
-                        "Last 30 Days" to "Past month",
-                        "Current Month" to "Since 1st of this month",
-                        "All Time" to "Everything ever"
+                        "Last 7 Days" to "Past 7 days",
+                        "Last 30 Days" to "Past 30 days",
+                        "Current Month" to "Current calendar month",
+                        "All Time" to "All historical messages"
                     ).forEach { (label, subtitle) ->
                         Button(
                             onClick = {
@@ -172,10 +172,11 @@ fun TransactionsScreen(
                     border = BorderStroke(1.dp, BorderBlack),
                     shape = RectangleShape,
                     colors = ButtonDefaults.outlinedButtonColors(contentColor = TextBlack)
-                ) { Text("Not now") }
+                ) { Text("Cancel") }
             }
         )
     }
+
 
 
     Scaffold(
@@ -300,20 +301,17 @@ fun TransactionsScreen(
                         )
                     }
                 }
-            }
-
-
-            if (transactions.isEmpty() && !isSyncing) {
+                            if (transactions.isEmpty() && !isSyncing) {
                 // Empty state
                 Box(
                     modifier = Modifier.weight(1f).fillMaxWidth().padding(24.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text("Nothing here yet! 🤔", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = TextBlack)
+                        Text("No Transactions Found", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = TextBlack)
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
-                            "Tap the refresh icon at the top right to scan your bank SMS messages.",
+                            "Tap the refresh icon in the top right to sync transaction SMS messages from your device.",
                             color = TextGray, fontSize = 14.sp, textAlign = TextAlign.Center
                         )
                     }
@@ -343,7 +341,7 @@ fun TransactionsScreen(
                                 horizontalArrangement = Arrangement.SpaceBetween,
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Text("Transaction Info", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = TextBlack)
+                                Text("Transaction Details", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = TextBlack)
                                 IconButton(onClick = { selectedTransaction = null }) {
                                     Icon(Icons.Default.Close, contentDescription = "Close", tint = TextGray)
                                 }
@@ -371,7 +369,7 @@ fun TransactionsScreen(
                                 DetailRow("Time", formatTransactionTime(txn.transactionDate))
                                 if (!txn.description.isNullOrBlank()) {
                                     Divider(color = SurfaceGray)
-                                    Text("Original SMS", fontSize = 11.sp, color = TextGray, fontWeight = FontWeight.Bold)
+                                    Text("SMS Snippet", fontSize = 11.sp, color = TextGray, fontWeight = FontWeight.Bold)
                                     Text(txn.description, fontSize = 12.sp, color = TextGray, lineHeight = 18.sp)
                                 }
                             }
@@ -386,7 +384,7 @@ fun TransactionsScreen(
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            "No transactions found for \"$selectedCategoryFilter\" 🔎",
+                            "No transactions found for \"$selectedCategoryFilter\".",
                             color = TextGray, fontSize = 14.sp, textAlign = TextAlign.Center
                         )
                     }
@@ -432,12 +430,7 @@ fun TransactionEntityListItem(txn: TransactionEntity, onClick: () -> Unit) {
         "INCOME"        -> TealPositive.copy(alpha = 0.15f)
         else            -> SurfaceGray
     }
-    val iconEmoji = when (txn.category) {
-        "FOOD"          -> "🍽"; "TRAVEL"        -> "🚗"; "SHOPPING" -> "🛍"
-        "BILLS"         -> "⚡"; "ENTERTAINMENT" -> "🎬"; "INVESTMENTS" -> "📈"
-        "HEALTH"        -> "💊"; "EDUCATION"     -> "📚"; "INCOME" -> "💰"
-        else            -> txn.merchant.take(1).uppercase()
-    }
+    val iconInitial = txn.merchant.take(1).uppercase().ifEmpty { "T" }
     val pillBg = when (txn.category) {
         "FOOD"          -> Color(0xFFE8F5E9); "TRAVEL"    -> Color(0xFFE3F2FD)
         "SHOPPING"      -> Color(0xFFF3E5F5); "BILLS"     -> Color(0xFFFFF8E1)
@@ -467,7 +460,7 @@ fun TransactionEntityListItem(txn: TransactionEntity, onClick: () -> Unit) {
                     .size(46.dp)
                     .background(iconBg, RoundedCornerShape(10.dp)),
                 contentAlignment = Alignment.Center
-            ) { Text(iconEmoji, fontSize = 20.sp) }
+            ) { Text(iconInitial, fontSize = 16.sp, fontWeight = FontWeight.Bold, color = TextBlack) }
             Spacer(modifier = Modifier.width(14.dp))
             Column {
                 Text(txn.merchant, fontWeight = FontWeight.Bold, fontSize = 15.sp, color = TextBlack, maxLines = 1)

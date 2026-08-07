@@ -95,21 +95,21 @@ fun HomeScreen(
     if (showDurationDialog) {
         AlertDialog(
             onDismissRequest = { showDurationDialog = false },
-            shape = androidx.compose.ui.graphics.RectangleShape,
-            containerColor = com.example.financeapp.ui.theme.BackgroundWhite,
-            title = { Text("How far back should we look? 🔍", fontWeight = FontWeight.Bold) },
+            shape = RectangleShape,
+            containerColor = BackgroundWhite,
+            title = { Text("Select Sync Period", fontWeight = FontWeight.Bold) },
             text = {
                 Column {
                     Text(
-                        "We'll scan your SMS messages to find bank transactions.",
-                        color = com.example.financeapp.ui.theme.TextGray, fontSize = 14.sp
+                        "Scan SMS messages within the selected timeframe to extract bank transactions.",
+                        color = TextGray, fontSize = 14.sp
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                     listOf(
-                        "Last 7 Days" to "Just the past week",
-                        "Last 30 Days" to "Past month",
-                        "Current Month" to "Since 1st of this month",
-                        "All Time" to "Everything ever"
+                        "Last 7 Days" to "Past 7 days",
+                        "Last 30 Days" to "Past 30 days",
+                        "Current Month" to "Current calendar month",
+                        "All Time" to "All historical messages"
                     ).forEach { (label, subtitle) ->
                         Button(
                             onClick = {
@@ -131,12 +131,12 @@ fun HomeScreen(
                                 transactionViewModel.syncSms(startTime)
                             },
                             modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
-                            colors = ButtonDefaults.buttonColors(containerColor = com.example.financeapp.ui.theme.BronzePrimary),
-                            shape = androidx.compose.ui.graphics.RectangleShape
+                            colors = ButtonDefaults.buttonColors(containerColor = BronzePrimary),
+                            shape = RectangleShape
                         ) {
                             Column(modifier = Modifier.fillMaxWidth()) {
                                 Text(label, fontWeight = FontWeight.Bold)
-                                Text(subtitle, fontSize = 11.sp, color = androidx.compose.ui.graphics.Color.White.copy(alpha = 0.8f))
+                                Text(subtitle, fontSize = 11.sp, color = Color.White.copy(alpha = 0.8f))
                             }
                         }
                     }
@@ -146,17 +146,15 @@ fun HomeScreen(
             dismissButton = {
                 OutlinedButton(
                     onClick = { showDurationDialog = false },
-                    border = BorderStroke(1.dp, com.example.financeapp.ui.theme.BorderBlack),
-                    shape = androidx.compose.ui.graphics.RectangleShape,
-                    colors = ButtonDefaults.outlinedButtonColors(contentColor = com.example.financeapp.ui.theme.TextBlack)
-                ) { Text("Not now") }
+                    border = BorderStroke(1.dp, BorderBlack),
+                    shape = RectangleShape,
+                    colors = ButtonDefaults.outlinedButtonColors(contentColor = TextBlack)
+                ) { Text("Cancel") }
             }
         )
     }
 
     // Wait for Supabase session to be fully authenticated before fetching profile.
-    // Avoids a race condition where getProfile() fires while session is still
-    // being restored from SharedPreferences (LoadingFromStorage state).
     val sessionStatus by SupabaseClient.auth.sessionStatus.collectAsState()
     LaunchedEffect(sessionStatus) {
         if (sessionStatus is SessionStatus.Authenticated) {
@@ -182,9 +180,6 @@ fun HomeScreen(
     val monthlyIn  = currentMonthTxns.filter { it.amount > 0 }.sumOf { it.amount }
     val monthlyOut = currentMonthTxns.filter { it.amount < 0 }.sumOf { kotlin.math.abs(it.amount) }
 
-    // Total Balance = Income this month - Spent this month
-    // (Previously used all-time transaction sum which caused wildly negative balances
-    //  when syncing months of SMS history against just one month of income.)
     val totalBalance = monthlyIncomeValue - monthlyOut
 
     // Savings insight
@@ -193,7 +188,6 @@ fun HomeScreen(
     val savingsPct = if (isIncomeSet && !isOverBudget) ((totalBalance / monthlyIncomeValue) * 100).toInt() else 0
 
     // Recent activity: 3 newest transactions from the current month
-    // (Falls back to newest 3 overall if no current-month transactions exist yet)
     val recentTxns = currentMonthTxns.take(3).ifEmpty { transactions.take(3) }
 
     Scaffold(
@@ -263,7 +257,7 @@ fun HomeScreen(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        "💰 MONEY LEFT THIS MONTH",
+                        "NET BALANCE THIS MONTH",
                         color = TextGray,
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Bold
@@ -271,8 +265,6 @@ fun HomeScreen(
                     Spacer(modifier = Modifier.height(4.dp))
 
                     if (isLoadingProfile) {
-                        // Show placeholder while income is still being fetched from Supabase.
-                        // Without this, balance = 0 - monthlyOut = negative red flash for a split second.
                         Text(
                             text = "—",
                             fontSize = 40.sp,
@@ -299,7 +291,7 @@ fun HomeScreen(
                         when {
                             !isIncomeSet -> {
                                 Text(
-                                    text = "👆 Tap here to set your monthly income!",
+                                    text = "Monthly income not configured. Tap to update profile.",
                                     color = BronzePrimary,
                                     fontSize = 11.sp,
                                     fontWeight = FontWeight.SemiBold,
@@ -309,7 +301,7 @@ fun HomeScreen(
                             isOverBudget -> {
                                 val overBy = kotlin.math.abs(totalBalance)
                                 Text(
-                                    text = "😬 You've spent ₹${NumberFormat.getNumberInstance(Locale("en", "IN")).format(overBy)} more than you earned!",
+                                    text = "Exceeded income by ₹${NumberFormat.getNumberInstance(Locale("en", "IN")).format(overBy)} this month",
                                     color = Color(0xFFB91C1C),
                                     fontSize = 11.sp,
                                     fontWeight = FontWeight.SemiBold
@@ -317,7 +309,7 @@ fun HomeScreen(
                             }
                             else -> {
                                 Text(
-                                    text = "🎉 Great job! You've saved $savingsPct% of your income this month",
+                                    text = "Saved $savingsPct% of income this month",
                                     color = TealPositive,
                                     fontSize = 11.sp,
                                     fontWeight = FontWeight.SemiBold
@@ -342,8 +334,8 @@ fun HomeScreen(
                         Icon(Icons.Default.AutoAwesome, contentDescription = null, tint = BronzePrimary)
                         Spacer(modifier = Modifier.width(12.dp))
                         Column {
-                            Text("✨ See My Money Insights", fontWeight = FontWeight.Bold, fontSize = 14.sp, color = TextBlack)
-                            Text("Find out where your money is going!", fontSize = 12.sp, color = TextGray)
+                            Text("AI Spending Insights", fontWeight = FontWeight.Bold, fontSize = 14.sp, color = TextBlack)
+                            Text("Analyze monthly budget & spending trends", fontSize = 12.sp, color = TextGray)
                         }
                     }
                 }
@@ -352,12 +344,12 @@ fun HomeScreen(
 
                 // ── Monthly In / Out Cards ───────────────────────
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                    // Money In
+                    // Income Received
                     Box(modifier = Modifier.weight(1f).border(1.dp, BorderBlack).padding(16.dp)) {
                         Column {
                             Text("↗", color = TealPositive)
                             Spacer(modifier = Modifier.height(8.dp))
-                            Text("💵 MONEY IN", fontSize = 9.sp, color = TextGray, fontWeight = FontWeight.Bold)
+                            Text("INCOME RECEIVED", fontSize = 9.sp, color = TextGray, fontWeight = FontWeight.Bold)
                             Text(
                                 text = "₹${NumberFormat.getNumberInstance(Locale("en", "IN")).format(monthlyIn)}",
                                 fontSize = 18.sp,
@@ -366,12 +358,12 @@ fun HomeScreen(
                             )
                         }
                     }
-                    // Money Out
+                    // Spent This Month
                     Box(modifier = Modifier.weight(1f).border(1.dp, BorderBlack).padding(16.dp)) {
                         Column {
                             Text("↘", color = Color(0xFFB91C1C))
                             Spacer(modifier = Modifier.height(8.dp))
-                            Text("🛒 MONEY OUT", fontSize = 9.sp, color = TextGray, fontWeight = FontWeight.Bold)
+                            Text("TOTAL EXPENSES", fontSize = 9.sp, color = TextGray, fontWeight = FontWeight.Bold)
                             Text(
                                 text = "₹${NumberFormat.getNumberInstance(Locale("en", "IN")).format(monthlyOut)}",
                                 fontSize = 18.sp,
@@ -390,9 +382,9 @@ fun HomeScreen(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.Bottom
                 ) {
-                    Text("🕐 RECENT ACTIVITY", fontWeight = FontWeight.Bold, fontSize = 14.sp, color = TextBlack)
+                    Text("RECENT ACTIVITY", fontWeight = FontWeight.Bold, fontSize = 14.sp, color = TextBlack)
                     Text(
-                        text = "SEE ALL →",
+                        text = "VIEW ALL",
                         color = BronzePrimary,
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Bold,
@@ -407,7 +399,7 @@ fun HomeScreen(
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = "Nothing here yet! 👇\nTap the orange button below to import your bank messages.",
+                            text = "No recent transactions.\nTap sync button to import SMS messages.",
                             color = TextGray,
                             fontSize = 14.sp,
                             textAlign = TextAlign.Center
@@ -426,6 +418,7 @@ fun HomeScreen(
             }
         }
     }
+
 }
 
 @Composable
