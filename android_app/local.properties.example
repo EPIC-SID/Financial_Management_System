@@ -1,13 +1,31 @@
-## Example local.properties file for FinanceApp
-# Copy this file to `android_app/local.properties` and fill in your SDK path and API keys.
+# Android local.properties — Template
+# ─────────────────────────────────────────────────────────
+# HOW TO USE:
+#   1. Copy this file:  copy local.properties.example local.properties
+#   2. Fill in your real values in local.properties
+#   3. NEVER commit local.properties — it is gitignored
+# ─────────────────────────────────────────────────────────
 
-# Location of your local Android SDK (update path for your OS)
+# Android SDK path (set automatically by Android Studio)
 sdk.dir=C\:\\Users\\YourUsername\\AppData\\Local\\Android\\Sdk
 
-# Supabase Credentials
-SUPABASE_URL=https://lsudxyorjmmoagkyzxzn.supabase.co
-SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxzdWR4eW9yam1tb2Fna3l6eHpuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM1MjE2NjgsImV4cCI6MjA5OTA5NzY2OH0.x4PLWP6lI4M5eCYloo5Hr1Z106KuoHH27EWBX9o2amw
+# ─── Supabase ───────────────────────────────────────────
+# From: Supabase Dashboard → Project Settings → API
+SUPABASE_URL=https://your-project-ref.supabase.co
+SUPABASE_ANON_KEY=your-supabase-anon-key-here
 
-# AI API Keys
-GEMINI_API_KEY=AQ.Ab8RN6KYXAX0X9pMvIE2l046BhqHccIbbXiJytVGb34cgCY0zw
-PLACES_API_KEY=
+# ─── Backend URL ─────────────────────────────────────────
+# For emulator:          http://10.0.2.2:8000
+# For physical device:   http://127.0.0.1:8000  (with: adb reverse tcp:8000 tcp:8000)
+# For production:        https://your-app.up.railway.app
+BACKEND_URL=http://127.0.0.1:8000
+
+# ─── Google AI (Gemini) ──────────────────────────────────
+# Required for on-device AI Insights (GeminiAdvisor.kt)
+# From: https://aistudio.google.com/app/apikey
+GEMINI_API_KEY=your-gemini-api-key-here
+
+# ─── Google Places API ──────────────────────────────────
+# Required for merchant categorization (backend uses this)
+# From: Google Cloud Console → APIs & Services → Credentials
+PLACES_API_KEY=your-google-places-api-key-here
