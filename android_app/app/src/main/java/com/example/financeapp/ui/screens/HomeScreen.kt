@@ -21,21 +21,21 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.financeapp.data.SupabaseClient
 import com.example.financeapp.data.TransactionEntity
 import com.example.financeapp.data.TransactionViewModel
 import com.example.financeapp.data.UserProfile
 import com.example.financeapp.data.UserRepository
 import com.example.financeapp.data.Resource
 import com.example.financeapp.data.formatTransactionDate
-import com.example.financeapp.data.formatTransactionMonth
 import com.example.financeapp.data.formatTransactionTime
 import com.example.financeapp.ui.components.AppBottomBar
 import com.example.financeapp.ui.components.Tab
 import com.example.financeapp.ui.theme.*
+import io.github.jan.supabase.gotrue.SessionStatus
 import java.text.NumberFormat
 import java.text.SimpleDateFormat
 import java.util.Calendar
-import java.util.Date
 import java.util.Locale
 import java.util.TimeZone
 
@@ -54,33 +54,47 @@ fun HomeScreen(
     var profile by remember { mutableStateOf<UserProfile?>(null) }
     var isLoadingProfile by remember { mutableStateOf(true) }
 
-    // Only fetch profile (lightweight Supabase call for user settings)
-    LaunchedEffect(Unit) {
-        isLoadingProfile = true
-        try {
-            val profileResult = UserRepository.getProfile()
-            if (profileResult is Resource.Success) {
-                profile = profileResult.data
+    // Wait for Supabase session to be fully authenticated before fetching profile.
+    // Avoids a race condition where getProfile() fires while session is still
+    // being restored from SharedPreferences (LoadingFromStorage state).
+    val sessionStatus by SupabaseClient.auth.sessionStatus.collectAsState()
+    LaunchedEffect(sessionStatus) {
+        if (sessionStatus is SessionStatus.Authenticated) {
+            isLoadingProfile = true
+            try {
+                val profileResult = UserRepository.getProfile()
+                if (profileResult is Resource.Success) {
+                    profile = profileResult.data
+                }
+            } catch (e: Exception) {
+                // Profile load failed silently — transactions still show
+            } finally {
+                isLoadingProfile = false
             }
-        } catch (e: Exception) {
-            // Profile load failed silently — transactions still show
-        } finally {
-            isLoadingProfile = false
         }
     }
 
-    // Calculations based on real data
+    // ── Calculations ────────────────────────────────────────
     val monthlyIncomeValue = profile?.monthlyIncome ?: 0.0
-    val totalNetTxnFlow = transactions.sumOf { it.amount }
-    val totalBalance = monthlyIncomeValue + totalNetTxnFlow
 
-    // Current month calculations
+    // Current month transactions only
     val currentMonthTxns = transactions.filter { isCurrentMonth(it.transactionDate) }
     val monthlyIn  = currentMonthTxns.filter { it.amount > 0 }.sumOf { it.amount }
     val monthlyOut = currentMonthTxns.filter { it.amount < 0 }.sumOf { kotlin.math.abs(it.amount) }
 
-    // Recent activity: top 3 transactions
-    val recentTxns = transactions.take(3)
+    // Total Balance = Income this month - Spent this month
+    // (Previously used all-time transaction sum which caused wildly negative balances
+    //  when syncing months of SMS history against just one month of income.)
+    val totalBalance = monthlyIncomeValue - monthlyOut
+
+    // Savings insight
+    val isIncomeSet = monthlyIncomeValue > 0.0
+    val isOverBudget = totalBalance < 0.0
+    val savingsPct = if (isIncomeSet && !isOverBudget) ((totalBalance / monthlyIncomeValue) * 100).toInt() else 0
+
+    // Recent activity: 3 newest transactions from the current month
+    // (Falls back to newest 3 overall if no current-month transactions exist yet)
+    val recentTxns = currentMonthTxns.take(3).ifEmpty { transactions.take(3) }
 
     Scaffold(
         containerColor = BackgroundWhite,
@@ -113,7 +127,7 @@ fun HomeScreen(
         },
         floatingActionButton = {
             FloatingActionButton(
-                onClick = onNavigateToTransactions, // Navigate to transaction sync
+                onClick = onNavigateToTransactions,
                 containerColor = BronzePrimary,
                 contentColor = Color.White,
                 shape = CircleShape
@@ -134,33 +148,78 @@ fun HomeScreen(
                     .padding(horizontal = 24.dp)
             ) {
                 Spacer(modifier = Modifier.height(16.dp))
-                
+
+                // ── This Month's Net Balance ─────────────────────
                 Column(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Text("TOTAL BALANCE", color = TextGray, fontSize = 12.sp, fontWeight = FontWeight.Bold)
-                    Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        text = "₹${NumberFormat.getNumberInstance(Locale("en", "IN")).format(totalBalance)}",
-                        fontSize = 40.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = TextBlack
+                        "THIS MONTH'S NET",
+                        color = TextGray,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Bold
                     )
-                    
-                    // Show a warning/link if monthly income is not set
-                    if (profile?.monthlyIncome == null || profile?.monthlyIncome == 0.0) {
+                    Spacer(modifier = Modifier.height(4.dp))
+
+                    if (isLoadingProfile) {
+                        // Show placeholder while income is still being fetched from Supabase.
+                        // Without this, balance = 0 - monthlyOut = negative red flash for a split second.
+                        Text(
+                            text = "—",
+                            fontSize = 40.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = TextGray
+                        )
                         Spacer(modifier = Modifier.height(6.dp))
                         Text(
-                            text = "Monthly income not set. Tap here to set it.",
-                            color = BronzePrimary,
-                            fontSize = 11.sp,
-                            fontWeight = FontWeight.SemiBold,
-                            modifier = Modifier.clickable { onNavigateToProfile() }
+                            text = "Loading...",
+                            color = TextGray,
+                            fontSize = 11.sp
                         )
+                    } else {
+                        Text(
+                            text = "₹${NumberFormat.getNumberInstance(Locale("en", "IN")).format(totalBalance)}",
+                            fontSize = 40.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = if (isOverBudget) Color(0xFFB91C1C) else TextBlack
+                        )
+
+                        Spacer(modifier = Modifier.height(6.dp))
+
+                        // Savings indicator / over-budget warning
+                        when {
+                            !isIncomeSet -> {
+                                Text(
+                                    text = "Monthly income not set. Tap here to set it.",
+                                    color = BronzePrimary,
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.SemiBold,
+                                    modifier = Modifier.clickable { onNavigateToProfile() }
+                                )
+                            }
+                            isOverBudget -> {
+                                val overBy = kotlin.math.abs(totalBalance)
+                                Text(
+                                    text = "⚠ Over budget by ₹${NumberFormat.getNumberInstance(Locale("en", "IN")).format(overBy)} this month",
+                                    color = Color(0xFFB91C1C),
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.SemiBold
+                                )
+                            }
+                            else -> {
+                                Text(
+                                    text = "✓ Saved $savingsPct% of income this month",
+                                    color = TealPositive,
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.SemiBold
+                                )
+                            }
+                        }
                     }
                 }
-                
+
+
                 Spacer(modifier = Modifier.height(32.dp))
 
                 // AI Insights Card
@@ -182,14 +241,15 @@ fun HomeScreen(
                 }
 
                 Spacer(modifier = Modifier.height(24.dp))
-                
+
+                // ── Monthly In / Out Cards ───────────────────────
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                    // Monthly In
+                    // Income Received
                     Box(modifier = Modifier.weight(1f).border(1.dp, BorderBlack).padding(16.dp)) {
                         Column {
-                            Text("↗", color = TextGray)
+                            Text("↗", color = TealPositive)
                             Spacer(modifier = Modifier.height(8.dp))
-                            Text("MONTHLY IN", fontSize = 10.sp, color = TextGray, fontWeight = FontWeight.Bold)
+                            Text("INCOME RECEIVED", fontSize = 9.sp, color = TextGray, fontWeight = FontWeight.Bold)
                             Text(
                                 text = "₹${NumberFormat.getNumberInstance(Locale("en", "IN")).format(monthlyIn)}",
                                 fontSize = 18.sp,
@@ -198,12 +258,12 @@ fun HomeScreen(
                             )
                         }
                     }
-                    // Monthly Out
+                    // Spent This Month
                     Box(modifier = Modifier.weight(1f).border(1.dp, BorderBlack).padding(16.dp)) {
                         Column {
-                            Text("↘", color = TextGray)
+                            Text("↘", color = Color(0xFFB91C1C))
                             Spacer(modifier = Modifier.height(8.dp))
-                            Text("MONTHLY OUT", fontSize = 10.sp, color = TextGray, fontWeight = FontWeight.Bold)
+                            Text("SPENT THIS MONTH", fontSize = 9.sp, color = TextGray, fontWeight = FontWeight.Bold)
                             Text(
                                 text = "₹${NumberFormat.getNumberInstance(Locale("en", "IN")).format(monthlyOut)}",
                                 fontSize = 18.sp,
@@ -213,9 +273,10 @@ fun HomeScreen(
                         }
                     }
                 }
-                
+
                 Spacer(modifier = Modifier.height(32.dp))
-                
+
+                // ── Recent Activity ──────────────────────────────
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -231,7 +292,7 @@ fun HomeScreen(
                     )
                 }
                 Divider(color = BorderBlack, thickness = 2.dp, modifier = Modifier.padding(top = 8.dp, bottom = 16.dp))
-                
+
                 if (recentTxns.isEmpty()) {
                     Box(
                         modifier = Modifier.fillMaxWidth().weight(1f),
