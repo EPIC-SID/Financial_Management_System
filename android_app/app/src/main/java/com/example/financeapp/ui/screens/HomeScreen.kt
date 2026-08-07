@@ -424,6 +424,18 @@ fun HomeScreen(
 @Composable
 fun HomeTransactionRow(txn: TransactionEntity) {
     val isPositive = txn.amount > 0
+    val iconEmoji = when (txn.category) {
+        "FOOD"          -> "🍽"
+        "TRAVEL"        -> "🚗"
+        "SHOPPING"      -> "🛍"
+        "BILLS"         -> "⚡"
+        "ENTERTAINMENT" -> "🎬"
+        "INVESTMENTS"   -> "📈"
+        "HEALTH"        -> "💊"
+        "EDUCATION"     -> "📚"
+        "INCOME"        -> "💰"
+        else            -> txn.merchant.take(1).uppercase().ifEmpty { "💸" }
+    }
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -438,7 +450,7 @@ fun HomeTransactionRow(txn: TransactionEntity) {
                     .background(SurfaceGray, CircleShape),
                 contentAlignment = Alignment.Center
             ) {
-                Text(txn.category.take(1), fontWeight = FontWeight.Bold, color = TextGray)
+                Text(iconEmoji, fontSize = 18.sp)
             }
             Spacer(modifier = Modifier.width(16.dp))
             Column {

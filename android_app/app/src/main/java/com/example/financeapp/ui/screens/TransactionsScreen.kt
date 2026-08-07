@@ -468,7 +468,18 @@ fun TransactionEntityListItem(txn: TransactionEntity, onClick: () -> Unit) {
         "INCOME"        -> TealPositive.copy(alpha = 0.15f)
         else            -> SurfaceGray
     }
-    val iconInitial = txn.merchant.take(1).uppercase().ifEmpty { "T" }
+    val iconEmoji = when (txn.category) {
+        "FOOD"          -> "🍽"
+        "TRAVEL"        -> "🚗"
+        "SHOPPING"      -> "🛍"
+        "BILLS"         -> "⚡"
+        "ENTERTAINMENT" -> "🎬"
+        "INVESTMENTS"   -> "📈"
+        "HEALTH"        -> "💊"
+        "EDUCATION"     -> "📚"
+        "INCOME"        -> "💰"
+        else            -> txn.merchant.take(1).uppercase().ifEmpty { "💸" }
+    }
     val pillBg = when (txn.category) {
         "FOOD"          -> Color(0xFFE8F5E9); "TRAVEL"    -> Color(0xFFE3F2FD)
         "SHOPPING"      -> Color(0xFFF3E5F5); "BILLS"     -> Color(0xFFFFF8E1)
@@ -498,7 +509,7 @@ fun TransactionEntityListItem(txn: TransactionEntity, onClick: () -> Unit) {
                     .size(46.dp)
                     .background(iconBg, RoundedCornerShape(10.dp)),
                 contentAlignment = Alignment.Center
-            ) { Text(iconInitial, fontSize = 16.sp, fontWeight = FontWeight.Bold, color = TextBlack) }
+            ) { Text(iconEmoji, fontSize = 20.sp) }
             Spacer(modifier = Modifier.width(14.dp))
             Column {
                 Text(txn.merchant, fontWeight = FontWeight.Bold, fontSize = 15.sp, color = TextBlack, maxLines = 1)
