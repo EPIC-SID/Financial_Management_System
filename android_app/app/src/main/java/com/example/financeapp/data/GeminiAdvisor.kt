@@ -21,10 +21,11 @@ object GeminiAdvisor {
     }
 
     /**
-     * Generates 3 financial suggestions based on income and transaction history.
+     * Generates 3 financial suggestions based on income, target budget limit, and transaction history.
      */
     suspend fun getSuggestions(
         income: Double,
+        targetBudget: Double,
         expenses: List<TransactionEntity>
     ): List<AiSuggestion> = withContext(Dispatchers.IO) {
         if (BuildConfig.GEMINI_API_KEY.isBlank() || expenses.isEmpty()) {
@@ -36,15 +37,20 @@ object GeminiAdvisor {
             .groupBy { it.category }
             .mapValues { entry -> entry.value.sumOf { kotlin.math.abs(it.amount) } }
 
+        val totalSpent = expenseSummary.values.sum()
+
         val prompt = """
-            You are a helpful financial advisor. Based on the following monthly data:
-            Income: ₹${income}
+            You are a personal financial advisor. Analyze this user's monthly budget & spending data:
+            Monthly Income: ₹${income}
+            Monthly Spending Limit/Target Budget: ₹${targetBudget}
+            Total Spent So Far: ₹${totalSpent}
             Spending by Category: ${expenseSummary.map { "${it.key}: ₹${it.value}" }.joinToString(", ")}
-            
-            Provide exactly 3 actionable financial suggestions. 
+
+            Provide exactly 3 actionable, specific financial recommendations.
+            If total spent is close to or over the spending limit (₹${targetBudget}), include a warning recommendation.
             Format your response as a JSON array of objects with keys: "title", "description", and "type".
             "type" can be "SAVINGS", "WARNING", or "ADVICE".
-            Keep descriptions short (max 15 words).
+            Keep descriptions concise (max 15 words).
             Respond ONLY with the JSON array.
         """.trimIndent()
 
