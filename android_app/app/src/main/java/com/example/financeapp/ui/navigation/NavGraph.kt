@@ -23,6 +23,7 @@ import com.example.financeapp.ui.screens.EditProfileScreen
 import com.example.financeapp.ui.screens.SignUpScreen
 import com.example.financeapp.ui.screens.TransactionsScreen
 import com.example.financeapp.ui.screens.AiReviewScreen
+import com.example.financeapp.ui.screens.AiInsightsScreen
 import com.example.financeapp.ui.theme.BronzePrimary
 import io.github.jan.supabase.gotrue.SessionStatus
 
@@ -95,6 +96,9 @@ fun FinanceAppNavGraph() {
                 },
                 onNavigateToProfile = {
                     navController.navigate(Screen.Profile.route)
+                },
+                onNavigateToAiInsights = {
+                    navController.navigate(Screen.AiInsights.route)
                 }
             )
         }
@@ -138,6 +142,13 @@ fun FinanceAppNavGraph() {
         composable(Screen.AiReview.route) {
             AiReviewScreen(
                 onDismiss = {
+                    navController.popBackStack()
+                }
+            )
+        }
+        composable(Screen.AiInsights.route) {
+            AiInsightsScreen(
+                onNavigateBack = {
                     navController.popBackStack()
                 }
             )

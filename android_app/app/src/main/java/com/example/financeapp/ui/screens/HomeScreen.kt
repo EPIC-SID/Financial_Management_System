@@ -8,6 +8,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.List
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -43,6 +44,7 @@ import java.util.TimeZone
 fun HomeScreen(
     onNavigateToTransactions: () -> Unit,
     onNavigateToProfile: () -> Unit,
+    onNavigateToAiInsights: () -> Unit,
     transactionViewModel: TransactionViewModel = viewModel()
 ) {
     val context = LocalContext.current
@@ -160,6 +162,26 @@ fun HomeScreen(
                 }
                 
                 Spacer(modifier = Modifier.height(32.dp))
+
+                // AI Insights Card
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .border(1.dp, BronzePrimary)
+                        .clickable { onNavigateToAiInsights() }
+                        .padding(16.dp)
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(Icons.Default.AutoAwesome, contentDescription = null, tint = BronzePrimary)
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Column {
+                            Text("AI Insights", fontWeight = FontWeight.Bold, fontSize = 14.sp, color = TextBlack)
+                            Text("Check your savings & spending patterns", fontSize = 12.sp, color = TextGray)
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(24.dp))
                 
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                     // Monthly In
