@@ -109,7 +109,7 @@ fun AiInsightsScreen(
             item {
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    "SPENDING DISTRIBUTION",
+                    "🍧 WHERE IS MY MONEY GOING?",
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Bold,
                     color = TextGray
@@ -121,7 +121,7 @@ fun AiInsightsScreen(
                         modifier = Modifier.fillMaxWidth().height(200.dp).border(1.dp, SurfaceGray),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text("No data for current month", color = TextGray)
+                        Text("No spending this month yet 😊", color = TextGray)
                     }
                 } else {
                     Row(
@@ -145,7 +145,7 @@ fun AiInsightsScreen(
             item {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
-                        "AI PERSONALIZED SUGGESTIONS",
+                        "🤖 TIPS JUST FOR YOU",
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Bold,
                         color = TextGray,
@@ -244,16 +244,16 @@ fun InsightSummaryCard(savingsRate: Double, savings: Double) {
                     tint = if (isPositive) TealPositive else BronzePrimary
                 )
                 Spacer(modifier = Modifier.width(8.dp))
-                Text(
-                    text = if (isPositive) "Healthy Savings" else "Low Savings Rate",
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 18.sp,
-                    color = TextBlack
-                )
+            Text(
+                text = if (isPositive) "You're saving well! 😄" else "Let's save more this month 💪",
+                fontWeight = FontWeight.Bold,
+                fontSize = 18.sp,
+                color = TextBlack
+            )
             }
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = "Your current savings rate is ${String.format("%.1f", savingsRate)}%. You've saved ₹${format.format(savings)} this month.",
+                text = "You've saved ${String.format("%.1f", savingsRate)}% of your income this month — that's ₹${format.format(savings)}!",
                 fontSize = 14.sp,
                 color = TextBlack
             )
@@ -338,8 +338,8 @@ fun generateStaticSuggestions(income: Double, expense: Double, txns: List<Transa
     
     if (income <= 0) {
         list.add(StaticSuggestion(
-            "Set Monthly Income",
-            "Update your income in Profile to get accurate savings goals.",
+            "💰 Set your monthly income",
+            "Go to Profile and add your salary so we can track how much you're saving!",
             Icons.Default.AutoAwesome
         ))
     }
@@ -347,15 +347,15 @@ fun generateStaticSuggestions(income: Double, expense: Double, txns: List<Transa
     val foodSpent = txns.filter { it.category.contains("Food", true) }.sumOf { kotlin.math.abs(it.amount) }
     if (foodSpent > income * 0.2 && income > 0) {
         list.add(StaticSuggestion(
-            "Reduce Dining Out",
-            "You spent ${String.format("%.0f", (foodSpent/income)*100)}% of your income on food. Try cooking more!",
+            "🍕 You're spending a lot on food!",
+            "Food is ${String.format("%.0f", (foodSpent/income)*100)}% of your income this month. Try cooking at home more!",
             Icons.Default.TrendingDown
         ))
     }
 
     list.add(StaticSuggestion(
-        "Emergency Fund",
-        "Based on your spend, we recommend a ₹50,000 emergency buffer.",
+        "🛡️ Build a Safety Net",
+        "Try to save at least ₹50,000 as an emergency fund — it's like a financial seatbelt!",
         Icons.Default.AutoAwesome
     ))
 

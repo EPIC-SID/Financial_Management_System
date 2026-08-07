@@ -99,7 +99,7 @@ fun TransactionsScreen(
         onResult = { isGranted ->
             hasPermission = isGranted
             if (isGranted) showDurationDialog = true
-            else Toast.makeText(context, "Permission denied. Cannot sync transactions.", Toast.LENGTH_LONG).show()
+            else Toast.makeText(context, "We need SMS permission to find your transactions. Please allow it!", Toast.LENGTH_LONG).show()
         }
     )
 
@@ -117,15 +117,20 @@ fun TransactionsScreen(
             onDismissRequest = { showDurationDialog = false },
             shape = RectangleShape,
             containerColor = BackgroundWhite,
-            title = { Text("Sync Transaction History", fontWeight = FontWeight.Bold) },
+            title = { Text("How far back should we look? 🔍", fontWeight = FontWeight.Bold) },
             text = {
                 Column {
                     Text(
-                        "Select how far back we should scan your SMS inbox:",
+                        "We'll scan your SMS messages to find bank transactions.",
                         color = TextGray, fontSize = 14.sp
                     )
                     Spacer(modifier = Modifier.height(16.dp))
-                    listOf("Last 7 Days", "Last 30 Days", "Current Month", "All Time").forEach { label ->
+                    listOf(
+                        "Last 7 Days" to "Just the past week",
+                        "Last 30 Days" to "Past month",
+                        "Current Month" to "Since 1st of this month",
+                        "All Time" to "Everything ever"
+                    ).forEach { (label, subtitle) ->
                         Button(
                             onClick = {
                                 showDurationDialog = false
@@ -152,7 +157,10 @@ fun TransactionsScreen(
                             colors = ButtonDefaults.buttonColors(containerColor = BronzePrimary),
                             shape = RectangleShape
                         ) {
-                            Text(label, fontWeight = FontWeight.Bold)
+                            Column(modifier = Modifier.fillMaxWidth()) {
+                                Text(label, fontWeight = FontWeight.Bold)
+                                Text(subtitle, fontSize = 11.sp, color = Color.White.copy(alpha = 0.8f))
+                            }
                         }
                     }
                 }
@@ -164,7 +172,7 @@ fun TransactionsScreen(
                     border = BorderStroke(1.dp, BorderBlack),
                     shape = RectangleShape,
                     colors = ButtonDefaults.outlinedButtonColors(contentColor = TextBlack)
-                ) { Text("CANCEL") }
+                ) { Text("Not now") }
             }
         )
     }
@@ -258,7 +266,7 @@ fun TransactionsScreen(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text("Recent Transactions", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = TextBlack)
+                    Text("My Transactions", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = TextBlack)
                     // Clickable period badge — shows current time window, tap to change
                     Box(
                         modifier = Modifier
@@ -302,10 +310,10 @@ fun TransactionsScreen(
                     contentAlignment = Alignment.Center
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text("No Transactions Found", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = TextBlack)
+                        Text("Nothing here yet! 🤔", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = TextBlack)
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
-                            "Tap the refresh icon in the top right to sync transaction SMS messages from your device.",
+                            "Tap the refresh icon at the top right to scan your bank SMS messages.",
                             color = TextGray, fontSize = 14.sp, textAlign = TextAlign.Center
                         )
                     }
@@ -335,7 +343,7 @@ fun TransactionsScreen(
                                 horizontalArrangement = Arrangement.SpaceBetween,
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Text("Transaction Details", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = TextBlack)
+                                Text("Transaction Info", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = TextBlack)
                                 IconButton(onClick = { selectedTransaction = null }) {
                                     Icon(Icons.Default.Close, contentDescription = "Close", tint = TextGray)
                                 }
@@ -363,7 +371,7 @@ fun TransactionsScreen(
                                 DetailRow("Time", formatTransactionTime(txn.transactionDate))
                                 if (!txn.description.isNullOrBlank()) {
                                     Divider(color = SurfaceGray)
-                                    Text("SMS Snippet", fontSize = 11.sp, color = TextGray, fontWeight = FontWeight.Bold)
+                                    Text("Original SMS", fontSize = 11.sp, color = TextGray, fontWeight = FontWeight.Bold)
                                     Text(txn.description, fontSize = 12.sp, color = TextGray, lineHeight = 18.sp)
                                 }
                             }
@@ -378,7 +386,7 @@ fun TransactionsScreen(
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            "No transactions found for \"$selectedCategoryFilter\".",
+                            "No transactions found for \"$selectedCategoryFilter\" 🔎",
                             color = TextGray, fontSize = 14.sp, textAlign = TextAlign.Center
                         )
                     }
