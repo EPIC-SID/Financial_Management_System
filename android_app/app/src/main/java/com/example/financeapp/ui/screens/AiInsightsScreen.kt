@@ -349,7 +349,7 @@ fun BudgetTrackerCard(
             Spacer(modifier = Modifier.height(12.dp))
 
             LinearProgressIndicator(
-                progress = { usageRatio },
+                progress = usageRatio,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(8.dp),
