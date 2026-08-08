@@ -180,12 +180,13 @@ fun HomeScreen(
     val monthlyIn  = currentMonthTxns.filter { it.amount > 0 }.sumOf { it.amount }
     val monthlyOut = currentMonthTxns.filter { it.amount < 0 }.sumOf { kotlin.math.abs(it.amount) }
 
-    val totalBalance = monthlyIncomeValue - monthlyOut
+    val totalIncome  = monthlyIncomeValue + monthlyIn
+    val totalBalance = totalIncome - monthlyOut
 
     // Savings insight
-    val isIncomeSet = monthlyIncomeValue > 0.0
+    val isIncomeSet  = totalIncome > 0.0
     val isOverBudget = totalBalance < 0.0
-    val savingsPct = if (isIncomeSet && !isOverBudget) ((totalBalance / monthlyIncomeValue) * 100).toInt() else 0
+    val savingsPct   = if (isIncomeSet && !isOverBudget) ((totalBalance / totalIncome) * 100).toInt() else 0
 
     // Recent activity: 3 newest transactions from the current month
     val recentTxns = currentMonthTxns.take(3).ifEmpty { transactions.take(3) }
@@ -251,13 +252,13 @@ fun HomeScreen(
             ) {
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // ── This Month's Net Balance ─────────────────────
+                // ── Remaining Balance This Month ─────────────────────
                 Column(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        "NET BALANCE THIS MONTH",
+                        "REMAINING BALANCE THIS MONTH",
                         color = TextGray,
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Bold

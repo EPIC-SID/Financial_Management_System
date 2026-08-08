@@ -1,0 +1,88 @@
+================================================================================
+RupAI — Executive Project Context & System Architecture (PPT Guide)
+================================================================================
+
+1. PROJECT OVERVIEW & ELEVATOR PITCH
+--------------------------------------------------------------------------------
+Project Name: RupAI (Smart Financial Management System)
+Tagline: Automated, Privacy-First Personal Expense Tracking & AI-Powered Financial Advisory.
+
+Problem Statement:
+- Manual Entry Friction: Users forget or find it tedious to manually log cash/UPI transactions.
+- Unorganized Local Merchant Data: Standard SMS alerts from UPI/banks contain cryptic merchant names (e.g., JAY GANESH, UDAY SETHI) that end up as uncategorized "Miscellaneous" spend.
+- Static, Unrealistic Budgets: Traditional apps use rigid budgets that fail to alert users in real time when approaching spending limits.
+
+RupAI Solution:
+An offline-first Android application paired with a Python FastAPI AI Backend that automatically parses bank transaction SMS messages, categorizes expenses using a 4-Tier Hybrid AI Pipeline, remembers user merchant preferences, and delivers dynamic financial recommendations.
+
+
+2. HIGH-LEVEL TECHNOLOGY STACK
+--------------------------------------------------------------------------------
+- Android Client: Kotlin, Jetpack Compose, Material3, Kotlin Coroutines, StateFlow
+- Local Database (Offline-First): Android Room DB (AppDatabase, TransactionDao, TransactionEntity)
+- Remote Database & Auth: Supabase (PostgreSQL, Supabase Auth, Row Level Security)
+- Backend API: Python (FastAPI, Uvicorn)
+- AI & Spatial Engine: Google Gemini 1.5 Flash API, Google Places API (New)
+- Background Processing: Android WorkManager (AiCategorizationWorker)
+
+
+3. SYSTEM ARCHITECTURE & DATA FLOW
+--------------------------------------------------------------------------------
+[ Bank SMS Inbox ]
+       |
+       v (Automated Reader & Parser)
+[ Layer 1 & 2: VPA + Regex Engine ] --(Fast Local Categorization ~50ms)--> [ Room Database ]
+       |                                                                       |
+       v (Background WorkManager)                                              v
+[ Layer 3 & 4: Places API + Gemini 1.5 Flash ]                             [ Jetpack Compose UI ]
+       |                                                                 (StateFlow Auto-Update)
+       v
+[ Local Memory Cache (SharedPreferences) ] <--(User Manual Override)
+
+
+4. 4-TIER HYBRID CATEGORIZATION ENGINE
+--------------------------------------------------------------------------------
+RupAI processes transaction SMS messages through four progressive layers to maximize speed, offline usability, and AI precision:
+
+Layer 1 — VPA Resolver: Matches Virtual Payment Addresses (e.g. @swiggy, @zomato, @paytm) to instant categories.
+Layer 2 — Regex Keyword Matcher: Scans SMS body text for clear keywords (salary, fuel, hospital, electricity).
+Layer 3 — Google Places API (Backend): Resolves physical commercial merchants and stores categories server-side.
+Layer 4 — Gemini 1.5 Flash AI Engine: Handles complex, ambiguous merchant names and context using generative AI.
+
+
+5. CORE KEY FEATURES
+--------------------------------------------------------------------------------
+Feature 1: Automated SMS Transaction Ingestion
+- Reads SMS messages with permission flow and configurable time filters (Last 7 Days, Last 30 Days, Current Month, All Time).
+- Deduplicates transactions automatically via unique smsId hash in Room DB.
+
+Feature 2: User Merchant Memory & Custom Overrides
+- Issue Solved: Personal QR transfers (e.g., local vendors or friends like JAY GANESH) are hard to auto-categorize.
+- Feature: Tapping any transaction allows users to manually re-categorize a merchant.
+- Persistent Memory: Saves merchant preferences locally so ALL past and future transactions for that merchant inherit the new category automatically without calling APIs again.
+
+Feature 3: Dynamic Monthly Budget Target & Proximity Alerts
+- Real-time spending progress bar showing "Spent / Target Budget".
+- Proximity Alerts:
+  * On Track (<80% spent): "On Track — Rs X remaining for the month."
+  * Approaching (80%-100% spent): "Approaching Spending Limit — 85% of budget utilized."
+  * Exceeded (>100% spent): "Monthly Limit Exceeded — Rs Y over target limit."
+
+Feature 4: Executive AI Insights & Visual Analytics
+- Custom native Jetpack Compose Canvas Donut Chart displaying category expenditure breakdown with live total spend centered.
+- Synchronized, percentage-sorted category legends.
+- Personalized 3-Month Emergency Safety Reserve Calculation based on the user's actual income.
+
+
+6. SECURITY, PRIVACY & SECRET MANAGEMENT ARCHITECTURE
+--------------------------------------------------------------------------------
+- Zero Leaked Keys: API keys (GEMINI_API_KEY, PLACES_API_KEY, SUPABASE_SERVICE_KEY) are decoupled from source code and injected via gitignored local.properties and .env templates.
+- On-Device Data Processing: SMS messages are parsed locally on the user's device before any aggregated data is sent.
+
+
+7. FUTURE ROADMAP
+--------------------------------------------------------------------------------
+1. Biometric Security: Adding Android BiometricPrompt (Fingerprint/Face Unlock) for app entry.
+2. Peer-to-Peer / Family Transfer Bucket: Dedicated category for splitwise/friend debt payments.
+3. Advanced AI Forecasting: Predictive expense modeling based on recurring monthly bills.
+================================================================================

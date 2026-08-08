@@ -1,0 +1,72 @@
+================================================================================
+RupAI — Project Presentation & Viva Q&A Guide
+================================================================================
+
+1. QUESTION: How do you handle user privacy when reading SMS messages?
+--------------------------------------------------------------------------------
+ANSWER:
+SMS parsing happens 100% locally on the Android device (SmsReader.kt and SmsParser.kt). No raw SMS text messages are ever uploaded to an external server. The app extracts only the essential transaction fields (merchant name, amount, date) locally into an offline Room Database. Only aggregated merchant names are processed for AI categorization.
+
+
+2. QUESTION: How does the system handle local vendor UPI payments (like JAY GANESH or UDAY SETHI) that banks don't categorize?
+--------------------------------------------------------------------------------
+ANSWER:
+We use a two-part hybrid solution:
+1. Gemini 1.5 Flash AI analyzes ambiguous merchant names for smart classification.
+2. If unassigned, users can tap a transaction to manually set its category once. RupAI saves this merchant preference to local disk memory (SharedPreferences + Room DB). All past and future transactions for that merchant automatically inherit the category without requiring API calls again.
+
+
+3. QUESTION: Why did you build a custom Python FastAPI backend instead of calling Gemini API directly from the Android app?
+--------------------------------------------------------------------------------
+ANSWER:
+Security and architectural decoupling. Putting API keys inside an Android APK makes them vulnerable to reverse engineering. Routing AI and Google Places requests through our FastAPI backend keeps all sensitive credentials server-side, enables centralized response caching, and allows us to swap AI models in the future without updating the Android app.
+
+
+4. QUESTION: How does the app perform if the phone is offline or internet connection drops?
+--------------------------------------------------------------------------------
+ANSWER:
+RupAI is built offline-first using Android Room Database. Layers 1 & 2 of our categorization pipeline (VPA resolver + Regex matcher), budget analytics, and UI chart rendering work 100% offline. Background AI categorization jobs are managed via Android WorkManager (AiCategorizationWorker), which automatically queues requests and syncs whenever network connectivity is restored.
+
+
+5. QUESTION: How do you prevent duplicate transactions when scanning SMS history multiple times?
+--------------------------------------------------------------------------------
+ANSWER:
+Every parsed SMS generates a unique smsId hash based on the SMS timestamp and Android message ID. In Room Database, we enforce @Insert(onConflict = OnConflictStrategy.IGNORE). When a user re-syncs, duplicate SMS messages are skipped silently at the database level in under 50ms.
+
+
+6. QUESTION: Why did you build a custom Jetpack Compose Canvas chart instead of using a 3rd-party library like MPAndroidChart?
+--------------------------------------------------------------------------------
+ANSWER:
+Using native Jetpack Compose Canvas (Canvas and drawArc) eliminates external library bloat, provides faster frame rates, integrates natively with Compose StateFlow, and allows complete custom control over center total metrics, color palettes, and synchronized percentage legends.
+
+
+7. QUESTION: How does your AI advisory and budget tracking system work? Is it dynamic?
+--------------------------------------------------------------------------------
+ANSWER:
+It is 100% dynamic. Users can configure a custom monthly spending limit. RupAI tracks real-time spend ratio against this limit and emits dynamic alerts:
+- On Track (<80% spent): Displays remaining budget balance.
+- Approaching (80%-100% spent): Warning alert when nearing spending cap.
+- Exceeded (>100% spent): Critical over-budget alert.
+Additionally, emergency safety reserves are calculated dynamically as 3x the user's actual monthly income.
+
+
+8. QUESTION: How do you ensure API keys and secrets don't leak on GitHub?
+--------------------------------------------------------------------------------
+ANSWER:
+We implemented strict environment secret management. All API keys (Gemini, Google Places, Supabase) are excluded from Git via .gitignore and loaded dynamically from local.properties (Android) and .env (Backend). We provide sanitized template files (local.properties.example and env.example) for team onboarding.
+
+
+9. QUESTION: What is the difference between Room DB and Supabase in your project?
+--------------------------------------------------------------------------------
+ANSWER:
+- Room DB is our local on-device SQLite database. It provides zero-latency offline storage and powers real-time UI updates via Kotlin StateFlow.
+- Supabase is our cloud backend. It handles user authentication (Supabase Auth) and cloud profile backup.
+
+
+10. QUESTION: What is the future scope / Phase 2 roadmap of RupAI?
+--------------------------------------------------------------------------------
+ANSWER:
+1. Android Biometric Security (Fingerprint & Face Unlock) for secure app access.
+2. Dedicated Peer-to-Peer (P2P) & Family Transfer bucket for personal debt/splitwise tracking.
+3. Predictive recurring bill forecasting using historical monthly transaction cycles.
+================================================================================

@@ -75,14 +75,16 @@ fun AiInsightsScreen(
         .groupBy { it.category }
         .mapValues { entry -> entry.value.sumOf { kotlin.math.abs(it.amount) } }
     
+    val monthlyIn  = currentMonthTxns.filter { it.amount > 0 }.sumOf { it.amount }
     val monthlyOut = expenseSummary.values.sum()
-    val savings = monthlyIncome - monthlyOut
-    val savingsRate = if (monthlyIncome > 0) (savings / monthlyIncome) * 100 else 0.0
+    val totalIncome = monthlyIncome + monthlyIn
+    val savings    = totalIncome - monthlyOut
+    val savingsRate = if (totalIncome > 0) (savings / totalIncome) * 100 else 0.0
 
-    // Calculate effective target budget: user custom target OR 80% of income OR default 15k
+    // Calculate effective target budget: user custom target OR 80% of total income OR default 15k
     val effectiveTargetBudget = when {
         storedTargetBudget > 0.0 -> storedTargetBudget
-        monthlyIncome > 0.0      -> monthlyIncome * 0.8
+        totalIncome > 0.0        -> totalIncome * 0.8
         else                     -> 15000.0
     }
 
@@ -99,11 +101,11 @@ fun AiInsightsScreen(
         }
     }
 
-    LaunchedEffect(monthlyIncome, effectiveTargetBudget, currentMonthTxns) {
+    LaunchedEffect(totalIncome, effectiveTargetBudget, currentMonthTxns) {
         if (currentMonthTxns.isNotEmpty()) {
             isLoadingSuggestions = true
             try {
-                aiSuggestions = GeminiAdvisor.getSuggestions(monthlyIncome, effectiveTargetBudget, currentMonthTxns)
+                aiSuggestions = GeminiAdvisor.getSuggestions(totalIncome, effectiveTargetBudget, currentMonthTxns)
             } catch (e: Exception) {
                 // Fallback or silent error
             } finally {
@@ -283,7 +285,7 @@ fun AiInsightsScreen(
             }
 
             if (aiSuggestions.isEmpty() && !isLoadingSuggestions) {
-                val fallback = generateStaticSuggestions(monthlyIncome, effectiveTargetBudget, monthlyOut, currentMonthTxns)
+                val fallback = generateStaticSuggestions(totalIncome, effectiveTargetBudget, monthlyOut, currentMonthTxns)
                 items(fallback) { suggestion ->
                     StaticSuggestionCard(suggestion)
                 }
