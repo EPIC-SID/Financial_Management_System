@@ -22,8 +22,8 @@ Only Siddhant updates this central checklist. Record commit, verification and bl
 - [x] 1B: Android merchant extraction, category policy, bounded client and incremental worker; SmsParserTest and CategorizationPolicyTest (commit `b704045`).
 - [x] 2B: Backend uncertain-cache/provider failure handling and pending-row recovery; test_categorizer and CategorizationRetryTest (commit `39fa28a`).
 - [x] 3B: Pure-Kotlin unusual-expense detector using prior-only observations; ExpenseAnomalyDetectorTest (commit `ca537e7`).
-- [ ] 4B: Regional read-aloud service and fake-engine lifecycle checks; SpeechTextFormatterTest and RegionalSpeechPlayerTest.
-- [ ] 5B: Category/anomaly acceptance results, actual or pending device checks and integration boundary review.
+- [x] 4B: Regional read-aloud service and fake-engine lifecycle checks; SpeechTextFormatterTest and RegionalSpeechPlayerTest (commit `8920861`).
+- [x] 5B: Category/anomaly acceptance results, actual or pending device checks and integration boundary review; RoshanAcceptanceBenchmarkTest passed (commit `49715c4`).
 
 ## Snehal - Localization & Quality Assurance
 
