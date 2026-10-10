@@ -14,11 +14,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.datasource.CollectionPreviewParameterProvider
 import com.example.financeapp.ui.theme.FinanceAppTheme
+import com.example.financeapp.ui.theme.GuidanceYellow
 import com.example.financeapp.ui.theme.Ink
 import com.example.financeapp.ui.theme.Radius
 import com.example.financeapp.ui.theme.Spacing
@@ -36,7 +36,11 @@ fun TypeTag(type: StatementType, modifier: Modifier = Modifier) {
     Surface(
         modifier = modifier.semantics(mergeDescendants = true) {},
         shape = RoundedCornerShape(Radius.tag),
-        color = if (type == StatementType.FACT) SummaryGreen else SurfaceNeutral,
+        color = when (type) {
+            StatementType.FACT -> SummaryGreen
+            StatementType.PREDICTION -> SurfaceNeutral
+            StatementType.RECOMMENDATION -> GuidanceYellow
+        },
         contentColor = Ink
     ) {
         Row(
@@ -44,7 +48,7 @@ fun TypeTag(type: StatementType, modifier: Modifier = Modifier) {
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(Spacing.xxs)
         ) {
-            Text(type.glyph, modifier = Modifier.clearAndSetSemantics {}, style = MaterialTheme.typography.labelMedium, fontSize = 16.sp)
+            Text(type.glyph, modifier = Modifier.clearAndSetSemantics {}, style = MaterialTheme.typography.labelMedium)
             Text(type.label, style = MaterialTheme.typography.labelSmall)
         }
     }

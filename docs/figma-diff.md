@@ -146,7 +146,7 @@ Illustration source directory: `C:\Users\udays\Documents\rupai\Financial_Managem
 ## Work remaining
 
 1. Screen margin, precise state-border geometry, icon silhouettes and leading remain unverified in the current JSON. Do not invent exact source values.
-2. Screen implementation, final illustration assignments, inputs/choices, navigation, charts and landing page work are deferred by the user's phase boundary.
+2. Screens after Phase 3A, final illustration assignments outside Cockpit, inputs/choices and the install landing page remain deferred by the phase boundary.
 3. Legacy Android screen colour/shape overrides and current native preview/device validation remain outstanding; W1 does not migrate them.
 
 ## Delivery verification on uday
@@ -183,3 +183,27 @@ Open these files in Android Studio's Design/Split view under `android_app/app/sr
 ### Screen finish gate for later phases
 
 After each future screen is built, open it at 360dp and 412dp widths at 100% and 200% font scale. Record every clipped, truncated or overlapping element here before reporting that screen complete. Phase 1 contains no product screens, so there is no screen-level clipping result yet.
+
+## Phase 3A — Cockpit
+
+The native Cockpit follows the v4 Home content hierarchy and uses the approved Phase 1 primitives, while M1/M10/M8a/M8b add the greeting, health score, account detail, confidence and explanation content absent from the source frame. The implementation adds fixture-only scenario switching through the overflow menu; production data wiring and navigation remain later-phase work.
+
+Known differences from the Figma frame:
+
+- The 700×1200 source frame is adapted to 360dp and 412dp native widths. A 16dp screen margin is used because `figma-source.json` does not retain a screen-margin token.
+- The source Home headline and compact cards are expanded into the Phase 3A order required by M1. The quiet four-item bottom capsule replaces the source frame's wider presentation.
+- The 240-degree health arc, percentile band, today marker and Material outlined icons are programmatic approximations because the extraction does not retain their vector geometry.
+- The source frame does not define skeleton, no-data, low-completeness or alert layouts. These use the current tokens and the supplied `home_overview` illustration only for no-data and low-completeness.
+- Metric cards reflow from 2×2 to one column at 200% font scale to preserve text instead of clipping.
+- Native visual rendering could not be completed in this environment: the installed Pixel 6 AVD remained `offline` after normal and cold starts. The six preview configurations compile, but clipping remains unverified until opened in Android Studio.
+
+Exact previews: `CockpitPreview` in `CockpitScreen.kt` → “Cockpit · 360 · 100%”, “Cockpit · 412 · 100%”, “Cockpit · 360 · 130%”, “Cockpit · 412 · 130%”, “Cockpit · 360 · 200%”, and “Cockpit · 412 · 200%”. The preview parameter provider renders skeleton, no data, low completeness, alert active and full data in each configuration.
+
+### Phase 3A closeout — 11 October 2026
+
+- The required 360dp preview matrix is present: normal (`full`), no-data, low-completeness and alert-active fixtures render at both 100% and 200% font scale through `CockpitPreviewProvider`. Skeleton remains as an additional state.
+- Decorative icons beside visible labels intentionally use `contentDescription = null` so TalkBack does not announce duplicate information. Meaningful image, gauge and overflow affordances have descriptions.
+- The statement-tag glyph no longer overrides typography with a hardcoded `16.sp`; it inherits the scalable `labelMedium` role.
+- `:app:testDebugUnitTest`, `:app:assembleDebug` and `:app:lintDebug` pass. The test report contains 22 tests with zero failures, errors or skips.
+- Lint retains 27 non-accessibility warnings by design: 14 `UnusedResources`, 10 `GradleDependency`, and one each of `DataExtractionRules`, `MissingApplicationIcon` and `OldTargetApi`. No missing-content-description warning remains.
+- Native screenshot review is still blocked because the installed Pixel 6 AVD stays `offline` in ADB after a clean cold boot; compiled previews are confirmed, rendered clipping is not.
