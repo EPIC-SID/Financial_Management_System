@@ -36,40 +36,49 @@ data class ResultBundle(
     val confidenceLabel: ConfidenceLabel
 )
 
-data class NumberRange(
+data class PredictionRange(
     val p10: Double,
     val p50: Double,
     val p90: Double
 )
+typealias NumberRange = PredictionRange
 
-data class RecommendationImpact(
+data class ActionImpact(
     val runwayDeltaMonths: Double = 0.0,
     val riskDelta: Double = 0.0,
     val interestSaved: Double = 0.0
 )
+typealias RecommendationImpact = ActionImpact
 
-data class ObservedFact(
+data class ObservedItem(
     val text: String,
     val refs: List<String>
 )
+typealias ObservedFact = ObservedItem
 
-data class PredictedFact(
+data class PredictedItem(
     val text: String,
-    val range: NumberRange,
+    val range: PredictionRange,
     val confidenceLabel: ConfidenceLabel,
     val horizon: String
 )
+typealias PredictedFact = PredictedItem
 
-data class RecommendedAction(
+data class RecommendedItem(
     val text: String,
-    val impact: RecommendationImpact,
+    val impact: ActionImpact,
     val tradeOff: String
 )
+typealias RecommendedAction = RecommendedItem
 
+/**
+ * Standard Copilot StructuredResponse schema (06-backend.md §13.3).
+ * Compatible with 3-arg call (Snehal LocalizedAdvisor) and 5-arg call (Track 4 Orchestrator).
+ */
 data class StructuredResponse(
-    val observed: List<ObservedFact>,
-    val predicted: List<PredictedFact>,
-    val recommended: List<RecommendedAction>,
-    val intent: CopilotIntent,
-    val source: ResponseSource
+    val observed: List<ObservedItem>,
+    val predicted: List<PredictedItem>,
+    val recommended: List<RecommendedItem>,
+    val intent: CopilotIntent = CopilotIntent.GENERAL_INQUIRY,
+    val source: ResponseSource = ResponseSource.LOCAL
 )

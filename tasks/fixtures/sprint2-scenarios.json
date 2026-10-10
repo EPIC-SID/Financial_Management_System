@@ -1,0 +1,59 @@
+{
+  "note": "Evaluation fixtures. Amounts are seeder inputs copied from SyntheticPersonas.kt and SyntheticDataSeeder.kt, not measured benchmark results.",
+  "source_files": [
+    "android_app/app/src/main/java/com/example/financeapp/data/ingest/SyntheticPersonas.kt",
+    "android_app/app/src/main/java/com/example/financeapp/data/ingest/SyntheticDataSeeder.kt"
+  ],
+  "scenarios": [
+    {
+      "id": "freelancer_income",
+      "persona": "A",
+      "employer": "Freelance Clients",
+      "income_kind": "AR1",
+      "base": 30000,
+      "pay_day": 7,
+      "log_sigma": 0.2,
+      "phi": 0.3,
+      "source": "SyntheticPersonas.A.income",
+      "use": "Track 4 freelancer forecast / irregular income"
+    },
+    {
+      "id": "delayed_receipts",
+      "persona": "A",
+      "employer": "Freelance Clients",
+      "slip_chance": 0.2,
+      "source": "SyntheticPersonas.A.income.slipChance",
+      "use": "A month's payment can land in the next month"
+    },
+    {
+      "id": "shock_8k",
+      "amount": 8000,
+      "rate_per_month": 0.15,
+      "source": "SyntheticDataSeeder.SHOCK_MEDIAN / SHOCK_RATE_PER_MONTH",
+      "merchants": [
+        { "name": "City Hospital", "category": "HEALTH" },
+        { "name": "Car Service Centre", "category": "MAINTENANCE" },
+        { "name": "Home Repairs", "category": "MAINTENANCE" }
+      ],
+      "related_emergency": {
+        "amount": 25000,
+        "merchant": "Apollo Hospital",
+        "category": "HEALTH",
+        "source": "SyntheticDataSeeder.EMERGENCY_AMOUNT on Scenario.UNEXPECTED_EXPENSE month 27"
+      },
+      "use": "Shock absorb / LocalizedAdvisor SHOCK intent"
+    },
+    {
+      "id": "rent_15k",
+      "kind": "RENT",
+      "amount": 15000,
+      "specified_in": "HACKATHON_MASTER_PLAN_ROUND2.md Phase 3C",
+      "seeder_ground_truth": [
+        { "persona": "A", "merchant": "PG Rent", "amount": 8000, "source": "SyntheticPersonas.A.bills" },
+        { "persona": "B", "merchant": "Landlord Rent", "amount": 22000, "source": "SyntheticPersonas.B.bills" }
+      ],
+      "note": "Fixture-only overlay for review. Do not change seeder rent amounts to 15000.",
+      "use": "RecurringDetector RENT / demo what-if"
+    }
+  ]
+}

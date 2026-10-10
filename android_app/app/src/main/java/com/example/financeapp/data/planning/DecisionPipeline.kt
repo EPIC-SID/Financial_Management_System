@@ -5,6 +5,7 @@ import com.example.financeapp.data.TransactionEntity
 import com.example.financeapp.data.remote.BackendClient
 import com.example.financeapp.domain.ai.LocalAdvisor
 import com.example.financeapp.domain.engine.*
+import com.example.financeapp.domain.engine.GoalConflict
 import com.example.financeapp.domain.freelancer.*
 import com.example.financeapp.domain.model.*
 import kotlinx.coroutines.*
