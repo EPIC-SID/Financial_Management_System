@@ -1,0 +1,363 @@
+{
+  "phase": "W1",
+  "fontSource": "https://raw.githubusercontent.com/google/fonts/main/ofl/librebaskerville/",
+  "fonts": [
+    {
+      "file": "libre-baskerville-regular.woff2",
+      "sourceSha256": "05a95421961341c5b2556285e8415df9db27dab4f4abe22b446b3c6a8b916c5d",
+      "sha256": "f36120601a3cc93a21a87bb73ca9554a6e1b62b64e52c9741408a02899a7282d",
+      "bytes": 22852,
+      "rupee": false,
+      "tabular": false
+    },
+    {
+      "file": "inter-regular.woff2",
+      "sourceSha256": "1b08e7fc267a5c7e1d614100f604b83e7e8a0be241f0f288faa2b3ac93a683ba",
+      "sha256": "26c1215a4c5bd55c71e949ff3ba738f4b0419ac86c9a14fe4b9c86fe94186c6f",
+      "bytes": 20608,
+      "rupee": true,
+      "tabular": true
+    },
+    {
+      "file": "inter-medium.woff2",
+      "sourceSha256": "8c883f63b2c4157d997319f2c8bc6995ed4357ef371940d31ca159004a4aae63",
+      "sha256": "375f8621d3df3381a743307055fd5ed69e54d01f857e018e79907b6dde3e6d7a",
+      "bytes": 21184,
+      "rupee": true,
+      "tabular": true
+    },
+    {
+      "file": "inter-semibold.woff2",
+      "sourceSha256": "e7a1aaf7eda9f2fad4131725fa556265ec75ca7b2d756260173a040363e8d4f7",
+      "sha256": "7d378001c244eac50ebeaed8146bfb7ba77a394973d5b8467969c8cffe979f38",
+      "bytes": 21172,
+      "rupee": true,
+      "tabular": true
+    }
+  ],
+  "artRule": "2x is native source resolution; 1x is half-size rounded up. No added illustration detail.",
+  "art": [
+    {
+      "name": "home-cushion",
+      "source": "rupai_illustrations/Asha\u2019s Relaxed Green-Accent Moment.png",
+      "sourceSha256": "7103f40ea46c493ab7a5fed1447a511ee524f67a5209488c52a383ddcaa77035",
+      "variants": [
+        {
+          "density": 1,
+          "file": "home-cushion@1x.webp",
+          "width": 724,
+          "height": 543,
+          "sha256": "8b6a131b052dcf836e4e68f3ca275c9b80d96a4981482f9dd69ad1ec46650eb3",
+          "bytes": 127744
+        },
+        {
+          "density": 2,
+          "file": "home-cushion@2x.webp",
+          "width": 1448,
+          "height": 1086,
+          "sha256": "f941a99eae6eed9ded1ea4b6281fb9ebbddc9dbaebdb0543e99d77c17ab29cc2",
+          "bytes": 364818
+        }
+      ]
+    },
+    {
+      "name": "onboarding-choices",
+      "source": "rupai_illustrations/Choosing Among Three Doors.png",
+      "sourceSha256": "59ff4922f002b227d2cfa1432bebcf25b816191dc1b357739b8b99b0b35b7d2c",
+      "variants": [
+        {
+          "density": 1,
+          "file": "onboarding-choices@1x.webp",
+          "width": 724,
+          "height": 543,
+          "sha256": "fc179051d3e4caa91ec93b8580064b3c63231add2d457fbf1f554299134c8a33",
+          "bytes": 176036
+        },
+        {
+          "density": 2,
+          "file": "onboarding-choices@2x.webp",
+          "width": 1448,
+          "height": 1086,
+          "sha256": "e03fdcf079ec513f3bee07028d97b33805f235024749222e7a8fd8fd3f87ed6f",
+          "bytes": 507088
+        }
+      ]
+    },
+    {
+      "name": "home-overview",
+      "source": "rupai_illustrations/Cozy Daydream with Coffee and Calendar.png",
+      "sourceSha256": "702607ce69d65bee88d2e96fe4d496bc26b54f4a152adff33038695e2cd296dc",
+      "variants": [
+        {
+          "density": 1,
+          "file": "home-overview@1x.webp",
+          "width": 724,
+          "height": 543,
+          "sha256": "f1a1382b188f1f05672cff2fd102ad6596e5e52393547eba70c6f6a09632bbb8",
+          "bytes": 134708
+        },
+        {
+          "density": 2,
+          "file": "home-overview@2x.webp",
+          "width": 1448,
+          "height": 1086,
+          "sha256": "eea08c300d9a69cc9d75937a71663533bcf0b14d0ccc68f08a15302ab0ec17be",
+          "bytes": 384004
+        }
+      ]
+    },
+    {
+      "name": "welcome",
+      "source": "rupai_illustrations/Cozy Sofa Moments with Floating Papers.png",
+      "sourceSha256": "3cef421a6bb52364ceb3bd50e5f218a1ca99c17e98bb361ae683b091a07fa955",
+      "variants": [
+        {
+          "density": 1,
+          "file": "welcome@1x.webp",
+          "width": 561,
+          "height": 701,
+          "sha256": "cfcecffd475e86801ecf1da8a3dc80435b37130a7552b2c2b5c32a66c9aa0cca",
+          "bytes": 129948
+        },
+        {
+          "density": 2,
+          "file": "welcome@2x.webp",
+          "width": 1122,
+          "height": 1402,
+          "sha256": "fde8ec03c5744af4402fce39ad767b711d7a88a9f7bcf2fd78762571fff92539",
+          "bytes": 367008
+        }
+      ]
+    },
+    {
+      "name": "plan-board",
+      "source": "rupai_illustrations/Meera Organizes a Planning Board.png",
+      "sourceSha256": "8b3ad9fd0ecf1bdec20590e68d5716754d147e257295dbbb94743d720a734406",
+      "variants": [
+        {
+          "density": 1,
+          "file": "plan-board@1x.webp",
+          "width": 724,
+          "height": 543,
+          "sha256": "48e237689aad873df73ffffa79ca1a1859bea80bea44896b5e7f04343f2bc010",
+          "bytes": 146404
+        },
+        {
+          "density": 2,
+          "file": "plan-board@2x.webp",
+          "width": 1448,
+          "height": 1086,
+          "sha256": "399dc3ebead8ed7313e1472d3ca3ca00ee4e331f0130d37222d74c7711297e9e",
+          "bytes": 409938
+        }
+      ]
+    },
+    {
+      "name": "ledger-organizer",
+      "source": "rupai_illustrations/Relaxed Home Document Organizer.png",
+      "sourceSha256": "45e3f4f20b8d0f7b1203f714f16f3e65cd6be7dc444728151698662d3130b291",
+      "variants": [
+        {
+          "density": 1,
+          "file": "ledger-organizer@1x.webp",
+          "width": 656,
+          "height": 600,
+          "sha256": "4edfcdcfb6462c8eaf08cda07322d48ac9233dde4d68d872f589ad278d0d3265",
+          "bytes": 188416
+        },
+        {
+          "density": 2,
+          "file": "ledger-organizer@2x.webp",
+          "width": 1312,
+          "height": 1199,
+          "sha256": "5c0148a3208f0b46acda20bf0228f0945daf7e87dd0289537ed25eb418103244",
+          "bytes": 532744
+        }
+      ]
+    },
+    {
+      "name": "advisor-guidance",
+      "source": "rupai_illustrations/Relaxing with Notes and a Flag.png",
+      "sourceSha256": "1adbe218d8b5206798d27fc15a27651163618464543bb0b7918c777e09316c1a",
+      "variants": [
+        {
+          "density": 1,
+          "file": "advisor-guidance@1x.webp",
+          "width": 724,
+          "height": 543,
+          "sha256": "6fdf56e0247a6e210e4d27736e63c4d2e6181a8cd0280dadc42b2ac3af3f9fb2",
+          "bytes": 167000
+        },
+        {
+          "density": 2,
+          "file": "advisor-guidance@2x.webp",
+          "width": 1448,
+          "height": 1086,
+          "sha256": "df01af714bb44c8e3190afc37493d89e50b656e8917f36857405bc83aa1c824c",
+          "bytes": 474060
+        }
+      ]
+    },
+    {
+      "name": "ledger-empty",
+      "source": "rupai_illustrations/Rohan Placing Items in Tray.png",
+      "sourceSha256": "7fa32ace695b15618b000004381058c7d5d7f70cfba895a56a2aae855d5810a0",
+      "variants": [
+        {
+          "density": 1,
+          "file": "ledger-empty@1x.webp",
+          "width": 627,
+          "height": 627,
+          "sha256": "205774df8dbbecb87cdffc30ed04dea52d41235a97d3c1c1534e13f514526674",
+          "bytes": 104714
+        },
+        {
+          "density": 2,
+          "file": "ledger-empty@2x.webp",
+          "width": 1254,
+          "height": 1254,
+          "sha256": "2a145938a6ad9b4ec592d5904d50d58960f76fd74bd42273a180444b2b6ebe2b",
+          "bytes": 295966
+        }
+      ]
+    },
+    {
+      "name": "onboarding-first-step",
+      "source": "rupai_illustrations/Rohan\u2019s First Step Forward.png",
+      "sourceSha256": "971c99d19c38933e3c341e84ebd4aac83a36f3f2f7b41e3f1b8f9aae919c00c0",
+      "variants": [
+        {
+          "density": 1,
+          "file": "onboarding-first-step@1x.webp",
+          "width": 627,
+          "height": 627,
+          "sha256": "3fc8fa90420c3903fb958c4bf22d1091517e2aab8ff00095ddf4a03b3bac03cb",
+          "bytes": 108448
+        },
+        {
+          "density": 2,
+          "file": "onboarding-first-step@2x.webp",
+          "width": 1254,
+          "height": 1254,
+          "sha256": "2add83ad430e6f2f5c11feacf079cbafbda97e284c7c7eaf876b54bd36c57422",
+          "bytes": 324138
+        }
+      ]
+    },
+    {
+      "name": "plan-comparison",
+      "source": "rupai_illustrations/Thoughtful Choice_ Comfort or Contract.png",
+      "sourceSha256": "bfceff8eb48adcadb68a3806229216652221142d8c1935009338a4d4b3674baa",
+      "variants": [
+        {
+          "density": 1,
+          "file": "plan-comparison@1x.webp",
+          "width": 627,
+          "height": 627,
+          "sha256": "9e6673da6a72dcef80b5b96c39e1ec5ff7bf4fca5d456374d49ca3d9928d0029",
+          "bytes": 139102
+        },
+        {
+          "density": 2,
+          "file": "plan-comparison@2x.webp",
+          "width": 1254,
+          "height": 1254,
+          "sha256": "69ed53bcc077e6e40079660eb5cd1de74f229623f9e9a5139dbebc8cef9f6dbc",
+          "bytes": 397304
+        }
+      ]
+    },
+    {
+      "name": "plan-commitments",
+      "source": "rupai_illustrations/Thoughtful Dreamer with Calendar, Key, and Coin.png",
+      "sourceSha256": "a620051bca35f0a9b23a46c7a2c3d6b4921cf9cdea8fb2cb318e0454dbff2be5",
+      "variants": [
+        {
+          "density": 1,
+          "file": "plan-commitments@1x.webp",
+          "width": 724,
+          "height": 543,
+          "sha256": "53d88b3dab6e1f08f8bd1846b830588b5587b8954ac5c51a04ecdd4ac4e9db13",
+          "bytes": 106790
+        },
+        {
+          "density": 2,
+          "file": "plan-commitments@2x.webp",
+          "width": 1448,
+          "height": 1086,
+          "sha256": "618d52b2fc25c80b3bd3406e7394584563271df0fecee1f93132153c94f2af51",
+          "bytes": 326834
+        }
+      ]
+    },
+    {
+      "name": "error-recovery",
+      "source": "rupai_illustrations/Upside-Down Map Adventure.png",
+      "sourceSha256": "a99b9e8e99a1dd6fd3533f7902584ce40865d5afcbc06e83f4049c7e683721c6",
+      "variants": [
+        {
+          "density": 1,
+          "file": "error-recovery@1x.webp",
+          "width": 627,
+          "height": 627,
+          "sha256": "624f0036268dd3b62d6892a08ee9f2c488be1a5a51a170a94f701a9416954b51",
+          "bytes": 91420
+        },
+        {
+          "density": 2,
+          "file": "error-recovery@2x.webp",
+          "width": 1254,
+          "height": 1254,
+          "sha256": "493f1d9b37d26a72610b90212c4133b1e3f40f5f344b4d6e7bf8725aba1948d7",
+          "bytes": 256956
+        }
+      ]
+    },
+    {
+      "name": "advisor-next-step",
+      "source": "rupai_illustrations/Woman Contemplates a Winding Path.png",
+      "sourceSha256": "c14b177998c8a02defe3c838806a1e4d378676943b47839577d3975ce72909d1",
+      "variants": [
+        {
+          "density": 1,
+          "file": "advisor-next-step@1x.webp",
+          "width": 627,
+          "height": 627,
+          "sha256": "d4a38518e5ea3818305a0badbf24accf85fa46979a9a13678f9812ccacd91d3a",
+          "bytes": 101610
+        },
+        {
+          "density": 2,
+          "file": "advisor-next-step@2x.webp",
+          "width": 1254,
+          "height": 1254,
+          "sha256": "8035999e08638c1f9974ab323b1d678331f4836a6184933a722d3a46d6effbdb",
+          "bytes": 291230
+        }
+      ]
+    },
+    {
+      "name": "privacy-control",
+      "source": "rupai_illustrations/Woman Managing Messages in a Privacy Safe.png",
+      "sourceSha256": "32554c43eac73f9bd10a12685a5db0f0b791dc586d86e739fec54774b077fb78",
+      "variants": [
+        {
+          "density": 1,
+          "file": "privacy-control@1x.webp",
+          "width": 724,
+          "height": 543,
+          "sha256": "208574f619dd58b6b84cf0bfae1ea3d10088cfcd164fc62e0747ba54762780e4",
+          "bytes": 177564
+        },
+        {
+          "density": 2,
+          "file": "privacy-control@2x.webp",
+          "width": 1448,
+          "height": 1086,
+          "sha256": "8e97e4f9102cb52a15c853df97bdbfeeb96573e46d1c8ccb7c4f6238c018fac2",
+          "bytes": 495080
+        }
+      ]
+    }
+  ]
+}
