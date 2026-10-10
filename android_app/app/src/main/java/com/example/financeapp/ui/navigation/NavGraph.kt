@@ -16,76 +16,60 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.financeapp.data.SupabaseClient
-import com.example.financeapp.ui.screens.HomeScreen
-import com.example.financeapp.ui.screens.LoginScreen
-import com.example.financeapp.ui.screens.ProfileScreen
-import com.example.financeapp.ui.screens.EditProfileScreen
-import com.example.financeapp.ui.screens.SignUpScreen
-import com.example.financeapp.ui.screens.TransactionsScreen
-import com.example.financeapp.ui.screens.AiReviewScreen
-import com.example.financeapp.ui.screens.AiInsightsScreen
-import com.example.financeapp.ui.theme.BronzePrimary
+import com.example.financeapp.ui.screens.*
+import com.example.financeapp.ui.theme.ActionGreen
+import com.example.financeapp.ui.viewmodel.PlanFixtures
 import io.github.jan.supabase.gotrue.SessionStatus
 
 @Composable
 fun FinanceAppNavGraph() {
     val navController = rememberNavController()
 
-    // Track auth state — wait for Supabase to finish restoring session from SharedPreferences
-    var startDestination by remember { mutableStateOf(Screen.Login.route) }
-    var isCheckingAuth by remember { mutableStateOf(true) }
-
-    // Collect the session status flow to properly wait for LoadingFromStorage to resolve.
-    // On cold start: status goes LoadingFromStorage → Authenticated (if saved) or NotAuthenticated (if no token).
-    // We must NOT check .value immediately — it may still be LoadingFromStorage at that point.
-    val sessionStatus by SupabaseClient.auth.sessionStatus.collectAsState()
-
-    LaunchedEffect(sessionStatus) {
-        when (sessionStatus) {
-            is SessionStatus.Authenticated -> {
-                if (isCheckingAuth) {
-                    // First resolution on launch — user has a valid saved session, go straight to Home
-                    startDestination = Screen.Home.route
-                    isCheckingAuth = false
-                }
-                // If already past auth check, do nothing (user is already on Home)
-            }
-            is SessionStatus.NotAuthenticated -> {
-                if (isCheckingAuth) {
-                    // No saved session found — show Login
-                    isCheckingAuth = false
-                } else {
-                    // Session expired or user signed out mid-session — redirect to Login
-                    val currentRoute = navController.currentDestination?.route
-                    if (currentRoute != null && currentRoute != Screen.Login.route && currentRoute != Screen.SignUp.route) {
-                        navController.navigate(Screen.Login.route) {
-                            popUpTo(Screen.Home.route) { inclusive = true }
-                        }
-                    }
-                }
-            }
-            is SessionStatus.LoadingFromStorage -> {
-                // Still restoring session from SharedPreferences — keep spinner visible
-            }
-            else -> {
-                // NetworkError or other transient states — keep spinner, will resolve shortly
-            }
-        }
-    }
-
-    if (isCheckingAuth) {
-        // Show a loading spinner while checking auth state
-        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            CircularProgressIndicator(color = BronzePrimary)
-        }
-        return
-    }
+    // Default start destination directly to Cockpit for Hackathon demonstration
+    val startDestination = Screen.Cockpit.route
 
     NavHost(navController = navController, startDestination = startDestination) {
+        // Core Hackathon Stages 3A–3C Screens
+        composable(Screen.Cockpit.route) {
+            CockpitRoute(
+                onAction = { action ->
+                    when (action) {
+                        "cockpit" -> { /* Already on cockpit */ }
+                        "plan" -> navController.navigate(Screen.Plan.route)
+                        "copilot" -> navController.navigate(Screen.Copilot.route)
+                        "activity" -> navController.navigate(Screen.Transactions.route)
+                        "profile" -> navController.navigate(Screen.Profile.route)
+                    }
+                }
+            )
+        }
+
+        composable(Screen.Plan.route) {
+            PlanRoute(
+                onResolveConflict = {
+                    navController.navigate(Screen.Conflict.route)
+                }
+            )
+        }
+
+        composable(Screen.Copilot.route) {
+            CopilotRoute()
+        }
+
+        composable(Screen.Conflict.route) {
+            val conflict = PlanFixtures.infeasible().conflict ?: error("No conflict")
+            ConflictScreen(
+                conflict = conflict,
+                onKeepTarget = { navController.popBackStack() },
+                onApply = { navController.popBackStack() }
+            )
+        }
+
+        // Supporting & Authentication Flows
         composable(Screen.Login.route) {
             LoginScreen(
                 onNavigateToHome = {
-                    navController.navigate(Screen.Home.route) {
+                    navController.navigate(Screen.Cockpit.route) {
                         popUpTo(Screen.Login.route) { inclusive = true }
                     }
                 },
@@ -94,10 +78,11 @@ fun FinanceAppNavGraph() {
                 }
             )
         }
+
         composable(Screen.SignUp.route) {
             SignUpScreen(
                 onNavigateToHome = {
-                    navController.navigate(Screen.Home.route) {
+                    navController.navigate(Screen.Cockpit.route) {
                         popUpTo(Screen.Login.route) { inclusive = true }
                     }
                 },
@@ -106,6 +91,7 @@ fun FinanceAppNavGraph() {
                 }
             )
         }
+
         composable(Screen.Home.route) {
             HomeScreen(
                 onNavigateToTransactions = {
@@ -119,6 +105,7 @@ fun FinanceAppNavGraph() {
                 }
             )
         }
+
         composable(Screen.Transactions.route) {
             TransactionsScreen(
                 onNavigateBack = {
@@ -129,11 +116,12 @@ fun FinanceAppNavGraph() {
                 }
             )
         }
+
         composable(Screen.Profile.route) {
             ProfileScreen(
                 onNavigateToHome = {
-                    navController.navigate(Screen.Home.route) {
-                        popUpTo(Screen.Home.route) { inclusive = false }
+                    navController.navigate(Screen.Cockpit.route) {
+                        popUpTo(Screen.Cockpit.route) { inclusive = false }
                     }
                 },
                 onNavigateToTransactions = {
@@ -141,7 +129,7 @@ fun FinanceAppNavGraph() {
                 },
                 onNavigateToLogin = {
                     navController.navigate(Screen.Login.route) {
-                        popUpTo(0) { inclusive = true } // Clear entire backstack on sign out
+                        popUpTo(0) { inclusive = true }
                     }
                 },
                 onNavigateToEditProfile = {
@@ -149,6 +137,7 @@ fun FinanceAppNavGraph() {
                 }
             )
         }
+
         composable(Screen.EditProfile.route) {
             EditProfileScreen(
                 onNavigateBack = {
@@ -156,6 +145,7 @@ fun FinanceAppNavGraph() {
                 }
             )
         }
+
         composable(Screen.AiReview.route) {
             AiReviewScreen(
                 onDismiss = {
@@ -163,6 +153,7 @@ fun FinanceAppNavGraph() {
                 }
             )
         }
+
         composable(Screen.AiInsights.route) {
             AiInsightsScreen(
                 onNavigateBack = {

@@ -76,9 +76,12 @@ import com.example.financeapp.ui.viewmodel.CockpitUiState
 import com.example.financeapp.ui.viewmodel.CockpitViewModel
 
 @Composable
-fun CockpitRoute(viewModel: CockpitViewModel = viewModel()) {
+fun CockpitRoute(
+    viewModel: CockpitViewModel = viewModel(),
+    onAction: (String) -> Unit = {}
+) {
     val state by viewModel.uiState.collectAsState()
-    CockpitScreen(state, onScenarioSelected = viewModel::selectScenario)
+    CockpitScreen(state, onScenarioSelected = viewModel::selectScenario, onAction = onAction)
 }
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
