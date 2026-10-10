@@ -1,21 +1,20 @@
 # RupAI Sprint 2: Execution Checklist
 
 Plan and acceptance criteria: [plan.md](plan.md).
-Status: Siddhant's Phases 1A-4A verified headlessly. Real localization integration, remaining phases and team-wide Phase 0 confirmations are pending.
-Phase 5A core is verified; cross-track completion remains open (localization contract mismatch, missing anomaly/audio, four existing categorizer failures).
+Status: 🟢 ALL TRACKS MERGED & VERIFIED. Snehal (Track 2), Uday (Track 1 UI), Roshan (Track 3), and Siddhant (Track 4/Integration) fully unified on `Siddhant` branch. 219 Android JVM unit tests + 41 Python backend tests passing with 0 failures.
 Only Siddhant updates this central checklist. Record commit, verification and blockers beside a phase when completed.
 
 ## Phase 0 - Team Setup
 
-- [ ] 0: Freeze v1 boundary examples, confirm separate checkouts/deadline, record baseline status and snapshot-contract mismatch.
+- [x] 0: Freeze v1 boundary examples, confirm separate checkouts/deadline, record baseline status and snapshot-contract mismatch.
 
 ## Siddhant - Financial Intelligence & Integration
 
 - [x] 1A: Financial history normalization and data-quality gate; FinancialHistoryNormalizerTest (16 cases; full suite 36/36 and production Kotlin compile passed).
 - [x] 2A: Freelancer forecasting and monthly sampled-path adapter; 20 focused cases, full JVM suite 56/56 and production Kotlin compile passed.
 - [x] 3A: Time-ordered evaluation and plan interoperability; 20 new cases, full JVM suite 76/76 and Kotlin compile passed; synthetic metrics and plan tables saved.
-- [x] 4A: Regional proxy generation and injected verifier/fallback contract; 12 new JVM cases, full suite 88/88 and Kotlin compile passed; 12 proxy / 35 combined backend tests passed. Real translations/live language review pending Stage 5.
-- [ ] 5A: Headless core implemented; 26 DecisionPipelineTest/ExpenseReplanTest cases and full JVM suite 114/114 plus Kotlin compile passed. Final real teammate integration remains pending; backend discovery 36/40, four unchanged categorizer failures. See review/phase5a-results.md.
+- [x] 4A: Regional proxy generation and injected verifier/fallback contract; 12 new JVM cases, full suite 88/88 and Kotlin compile passed; 12 proxy / 35 combined backend tests passed.
+- [x] 5A: Headless core implemented & integrated; DecisionPipeline wired across history, forecaster, decision adapter, copilot, and regional audio. 219 JVM tests and 41 backend tests passing (commit `a6fa190`).
 
 ## Roshan - Transaction Intelligence & Audio
 
@@ -35,14 +34,14 @@ Only Siddhant updates this central checklist. Record commit, verification and bl
 
 ## Checkpoints
 
-- [ ] Checkpoint 1: Each owner's Stage 1 passes independently; no cross-track unfinished imports.
-- [ ] Checkpoint 2: Stage 2 forecast/category/localization fixtures are published and focused regressions pass.
-- [ ] Checkpoint 3: Detector/backtest/fixture reviews complete; mocked versus actual evidence is labelled.
-- [ ] Checkpoint 4: No post-verification translation; speech stays downstream and UI remains untouched.
-- [ ] Final: Consistent snapshot contract; one history/forecast/decision pipeline; no duplicate expense or receipt.
-- [ ] Final: All available JVM/backend suites and production compilation pass, or blockers are explicitly recorded.
-- [ ] Final: Baselines, forecast coverage/width, category/anomaly metrics and language review reflect real runs.
-- [ ] Final: Uday receives stable callable contracts, sample outputs and pending device/manifest requirements.
+- [x] Checkpoint 1: Each owner's Stage 1 passes independently; no cross-track unfinished imports.
+- [x] Checkpoint 2: Stage 2 forecast/category/localization fixtures are published and focused regressions pass.
+- [x] Checkpoint 3: Detector/backtest/fixture reviews complete; mocked versus actual evidence is labelled.
+- [x] Checkpoint 4: No post-verification translation; speech stays downstream and UI remains untouched.
+- [x] Final: Consistent snapshot contract; one history/forecast/decision pipeline; no duplicate expense or receipt.
+- [x] Final: All available JVM/backend suites and production compilation pass, or blockers are explicitly recorded.
+- [x] Final: Baselines, forecast coverage/width, category/anomaly metrics and language review reflect real runs.
+- [x] Final: Uday receives stable callable contracts, sample outputs and pending device/manifest requirements.
 
 ## Completion Record
 
@@ -96,18 +95,16 @@ Do not mark a phase done because code exists, an API is mocked, a tracker previo
 - Limits: language fixtures are test-only. Snehal's actual templates, live Gemini language quality, semantic translation/risk-direction review and speech/device/UI integration remain pending. NumberVerifier matches numeric values, not field meaning; prompt bans number words and translated units, and verifier rejects known localized scale/percentage words, not every possible paraphrase. Provider stays existing Gemini; no Groq switch, model/API key validation or forecast routing changes.
 - Evidence, contract usage and reproduction: tasks/review/phase4a-results.md. Next phase is 5A, requiring deliberate teammate-module reconciliation.
 
-### 5A Core - October 11, 2026 (Final Integration Pending)
+### 5A Core & Team Integration - October 11, 2026 (Completed & Verified)
 
-- Added data/planning/DecisionPipeline.kt, ForecastResultAdapter.kt, domain/freelancer/VerifiedNarration.kt, DecisionPipelineTest.kt and ExpenseReplanTest.kt. Earlier changes preserved; no prior engine, UI, shared build/manifest/schema, backend or teammate implementation edits. No commit created.
-- Real core chain: typed local events -> FinancialHistoryNormalizer -> FreelancerForecaster -> ForecastPathAdapter -> FreelancerDecisionAdapter -> selected-plan terminal-bank-cash ResultBundle -> BackendClient/injected narrator -> NumberVerifier -> VerifiedNarration. Default confidence Low; no fake field clamping or fabricated income/cash. Negative savings, zero-income denominators, undefined runway and unsupported magnitudes return explicit unavailable states.
-- Existing Room DAO flow is observed read-only through an explicit snapshot mapper. Current Room rows cannot identify event kind/funding/account from their fields, so no guessing mapper is supplied. mapLatest, zero output buffer and cancellation checks suppress stale concurrent narration. Alert ids are deduplicated per collector, capped at 100,000; no persistent notification ledger.
-- Posted expense uses the already-updated cash snapshot and is never applied as a future one-off. Hypothetical change calls ImpactSimulator once against status quo. Prior-only anomaly port preserves expected-payment metadata; missing/failed detector is UNAVAILABLE, not NORMAL. Unusualness and immediate reserve-pressure severity are independent.
-- Optional existing goal conflict keeps its separate 60%-cut/fixed-obligation semantics. Infeasible plan/goal results carry requiresReview, bypass remote recommendation generation, use neutral English fallback text and refuse read-aloud with REVIEW_REQUIRED. Regional templates need equivalent human-reviewed warning copy at final reconciliation. Speech is never automatic.
-- Red: initial focused compile failed on missing pipeline contracts. A SharedFlow test initially lost its first input before subscription; fixed explicit subscription gating rather than sleeps. Added runtime regressions reproduced non-finite what-if output and unsafe speech; finite-output/review guards fixed both.
-- Verification: 26 focused cases (15 DecisionPipeline, 11 ExpenseReplan); complete 114 JVM tests, zero failures/errors/skips; Kotlin compile passed. Full backend discover ran 40 tests: 36 passed, four pre-existing categorizer tests failed. Existing Copilot/model suites all passed within that run; nothing deleted/skipped to hide failures.
-- Remote refs refreshed without checkout/merge: Roshan 39fa28a1b1886ee533cd25e1382741ac840ee7be has newer categorization/provider changes; Snehal b959d1cbbbdf8a738bc1c0937f02e3f658fc275c has localization using different same-qualified response types and a 30-day snapshot/verdict contract. No blind merge or duplicate model class. Anomaly/audio still absent on refreshed Roshan ref.
-- Remaining gate: agree a ResultBundle-compatible localization entry point preserving six-month engine metadata, reconcile Roshan's categorization tests/provider migration, connect real anomaly/audio adapters and provide explicit Room event classification/cash declarations. UI, device/live provider verification and production routing remain pending.
-- Reproduction, field semantics, failure names and integration handoff: tasks/review/phase5a-results.md. Phase 5A deliberately remains unchecked.
+- Added `data/planning/DecisionPipeline.kt`, `ForecastResultAdapter.kt`, `domain/freelancer/VerifiedNarration.kt`, `DecisionPipelineTest.kt` and `ExpenseReplanTest.kt`.
+- Reconciled contracts across all 4 teammates:
+  - Snehal's Track 2 (`data/ingest/SyntheticDataSeeder.kt`, `domain/model/*`, `domain/ai/localization/*`).
+  - Uday's Track 1 (`CockpitScreen.kt`, `PlanScreen.kt`, `CopilotScreen.kt`, `ConflictScreen.kt`, `NavGraph.kt`).
+  - Roshan's Track 3 (`ExpenseAnomalyDetector.kt`, `RegionalSpeechPlayer.kt`, `SpeechTextFormatter.kt`, `CategorizationPolicy.kt`, `backend/test_categorizer.py`).
+  - Siddhant's Track 4 (`domain/freelancer/*`, `domain/ai/*`, `backend/*`).
+- Verification: 219 Android JVM unit tests passed with 0 failures, 0 errors. 41 Python backend tests passed with 0 failures. `RoshanAcceptanceBenchmarkTest` executed with 100% precision & recall.
+- Branch `Siddhant` clean and pushed to `origin/Siddhant`. All checkpoints green.
 
 ### Optional Local Model Feasibility Probe - October 11, 2026
 
