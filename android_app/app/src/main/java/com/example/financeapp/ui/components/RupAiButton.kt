@@ -1,0 +1,121 @@
+package com.example.financeapp.ui.components
+
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsFocusedAsState
+import androidx.compose.foundation.interaction.collectIsPressedAsState
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
+import androidx.compose.ui.tooling.preview.datasource.CollectionPreviewParameterProvider
+import androidx.compose.ui.unit.dp
+import com.example.financeapp.ui.theme.ActionGreen
+import com.example.financeapp.ui.theme.CanvasWhite
+import com.example.financeapp.ui.theme.FinanceAppTheme
+import com.example.financeapp.ui.theme.Ink
+import com.example.financeapp.ui.theme.MutedInk
+import com.example.financeapp.ui.theme.Radius
+import com.example.financeapp.ui.theme.Spacing
+import com.example.financeapp.ui.theme.SurfaceNeutral
+
+enum class RupAiButtonVariant { PRIMARY, OUTLINE }
+enum class RupAiButtonState { DEFAULT, PRESSED, FOCUSED, DISABLED, LOADING }
+
+@Composable
+fun RupAiButton(
+    label: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    variant: RupAiButtonVariant = RupAiButtonVariant.PRIMARY,
+    state: RupAiButtonState = RupAiButtonState.DEFAULT,
+    disabledReason: String? = null,
+    loadingLabel: String = "Saving…"
+) {
+    val disabled = state == RupAiButtonState.DISABLED
+    val loading = state == RupAiButtonState.LOADING
+    require(!disabled || !disabledReason.isNullOrBlank()) { "Disabled buttons need a visible reason" }
+    val interactions = remember { MutableInteractionSource() }
+    val pressed by interactions.collectIsPressedAsState()
+    val focused by interactions.collectIsFocusedAsState()
+    val emphasized = !disabled && !loading &&
+        (pressed || focused || state == RupAiButtonState.PRESSED || state == RupAiButtonState.FOCUSED)
+    val fill = if (variant == RupAiButtonVariant.PRIMARY) ActionGreen else CanvasWhite
+    val border = when {
+        emphasized -> BorderStroke(2.dp, Ink)
+        variant == RupAiButtonVariant.OUTLINE -> BorderStroke(1.dp, if (disabled) MutedInk else Ink)
+        else -> null
+    }
+    Column(modifier, verticalArrangement = Arrangement.spacedBy(Spacing.xs)) {
+        Button(
+            onClick = onClick,
+            modifier = Modifier.fillMaxWidth().heightIn(min = Spacing.defaultCtaHeight).semantics {
+                if (loading) {
+                    stateDescription = loadingLabel
+                    liveRegion = LiveRegionMode.Polite
+                }
+            },
+            enabled = !disabled && !loading,
+            interactionSource = interactions,
+            shape = RoundedCornerShape(Radius.button),
+            border = border,
+            elevation = null,
+            contentPadding = PaddingValues(horizontal = Spacing.lg, vertical = Spacing.md),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = fill,
+                contentColor = Ink,
+                disabledContainerColor = if (loading) fill else SurfaceNeutral,
+                disabledContentColor = if (loading) Ink else MutedInk
+            )
+        ) {
+            if (loading) {
+                CircularProgressIndicator(
+                    Modifier.size(20.dp).clearAndSetSemantics { },
+                    color = Ink,
+                    strokeWidth = 2.dp
+                )
+                Spacer(Modifier.width(Spacing.xs))
+            }
+            Text(if (loading) loadingLabel else label, style = MaterialTheme.typography.labelLarge)
+        }
+        if (disabled) Text(disabledReason!!, style = MaterialTheme.typography.bodyMedium, color = MutedInk)
+    }
+}
+
+class RupAiButtonStatePreviewProvider : CollectionPreviewParameterProvider<RupAiButtonState>(RupAiButtonState.values().toList())
+
+@Preview(name = "CTA · every state", widthDp = 320, showBackground = true)
+@Preview(name = "CTA · every state · 130%", widthDp = 320, fontScale = 1.3f, showBackground = true)
+@Preview(name = "CTA · every state · 200%", widthDp = 320, fontScale = 2f, showBackground = true)
+@Composable
+private fun RupAiButtonPreview(@PreviewParameter(RupAiButtonStatePreviewProvider::class) state: RupAiButtonState) {
+    FinanceAppTheme {
+        Column(Modifier.padding(Spacing.md), verticalArrangement = Arrangement.spacedBy(Spacing.md)) {
+            RupAiButton("See plan", {}, state = state, disabledReason = "Add an account to enable this action.")
+            RupAiButton("Explore demo", {}, variant = RupAiButtonVariant.OUTLINE, state = state,
+                disabledReason = "Add an account to enable this action.")
+        }
+    }
+}
