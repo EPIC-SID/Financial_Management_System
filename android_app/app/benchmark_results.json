@@ -1,0 +1,38 @@
+{
+  "benchmark": "HACKMATRIX 5.0 FIN-02 EVALUATION",
+  "generatedAt": "2026-10-10T17:30:23.232190900Z",
+  "protocol": {
+    "trainWindow": "Month -6 to Month -2",
+    "validationWindow": "Month -1",
+    "testHorizon": "Month +1 to Month +6",
+    "totalEvaluatedRuns": 12,
+    "scenarios": ["STABLE_INCOME", "INCOME_REDUCTION", "UNEXPECTED_EXPENSE", "HIGH_UNCERTAINTY"],
+    "seeds": [42, 101, 2024]
+  },
+  "models": {
+    "probabilisticBootstrapOurs": {
+      "name": "Probabilistic Bootstrap with Conformal Calibration",
+      "horizon": "6 Months",
+      "mae": 5810.83,
+      "rmse": 6719.40,
+      "coverage80Percent": 80.56,
+      "meanIntervalWidth": 30898.90
+    },
+    "historicalAverageBaseline": {
+      "name": "Trailing Historical Monthly Average (Normal Approximation ±1.28σ)",
+      "horizon": "6 Months",
+      "mae": 31504.07,
+      "rmse": 37262.28,
+      "coverage80Percent": 29.17,
+      "meanIntervalWidth": 14331.87
+    },
+    "recurringOnlyFixedBaseline": {
+      "name": "Scheduled Recurring Obligations (Zero Variance Point Forecast)",
+      "horizon": "6 Months",
+      "mae": 7868.42,
+      "rmse": 9001.26,
+      "coverage80Percent": null,
+      "meanIntervalWidth": null
+    }
+  }
+}
