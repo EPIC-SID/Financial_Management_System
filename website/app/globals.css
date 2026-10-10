@@ -1,0 +1,126 @@
+@import "tailwindcss";
+
+/* Source: docs/figma-source.json Foundations/CTA v2 plus explicit user overrides. */
+:root {
+  color-scheme: light;
+  --background: #ffffff;
+  --foreground: #101010;
+  --card: #ffffff;
+  --card-foreground: #101010;
+  --popover: #ffffff;
+  --popover-foreground: #101010;
+  --primary: #52a145;
+  --primary-foreground: #101010;
+  --secondary: #f6f7f5;
+  --secondary-foreground: #101010;
+  --muted: #f6f7f5;
+  --muted-foreground: #60665d;
+  --accent: #e9f3e6;
+  --accent-foreground: #101010;
+  --destructive: #a52a48;
+  --destructive-foreground: #ffffff;
+  --error-container: #fbe1e7;
+  --error-foreground: #a52a48;
+  --guidance: #ffc200;
+  --guidance-foreground: #101010;
+  --watch: #ffe4cc;
+  --watch-foreground: #9a4200;
+  --border: #101010;
+  --input: #101010;
+  --ring: #101010;
+  --radius: 20px;
+  --radius-tag: 8px;
+  --radius-field: 12px;
+  --radius-button: 16px;
+  --radius-card: 20px;
+  --radius-sheet: 24px;
+  --space-xxs: 4px;
+  --space-xs: 8px;
+  --space-sm: 12px;
+  --space-md: 16px;
+  --space-lg: 20px;
+  --space-xl: 24px;
+  --space-xxl: 32px;
+  --space-xxxl: 48px;
+  --size-touch: 48px;
+  --size-button-compact: 40px;
+  --size-button-default: 48px;
+  --size-button-large: 56px;
+  --elevation-base: 0;
+  --elevation-raised: 0;
+  --elevation-sheet: 0;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --font-sans: var(--font-inter);
+  --font-serif: var(--font-libre);
+  --radius-sm: var(--radius-field);
+  --radius-md: var(--radius-button);
+  --radius-lg: var(--radius-card);
+  --radius-xl: var(--radius-sheet);
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--background); color: var(--foreground); font-family: var(--font-inter), sans-serif; font-size: 1rem; line-height: 1.5; font-feature-settings: "tnum" 1, "lnum" 1; }
+h1, h2, p { margin: 0; }
+h1 { font-family: var(--font-libre), var(--font-inter), serif; font-size: 2.5rem; font-weight: 400; line-height: 1.3; }
+h2 { font-size: 1.5rem; font-weight: 500; line-height: 1.35; }
+code { font-family: inherit; font-size: .75rem; overflow-wrap: anywhere; }
+
+/* Specimen layout only: JSON has no verified screen margin or board inner geometry. */
+.specimen { max-width: 1320px; margin-inline: auto; padding: var(--space-xxl); overflow-wrap: anywhere; }
+.specimen-header { display: grid; gap: var(--space-sm); padding-block: var(--space-lg) var(--space-xxxl); }
+.eyebrow { font-size: .75rem; font-weight: 600; letter-spacing: .06em; }
+.supporting-copy { color: var(--muted-foreground); font-size: 1rem; }
+.specimen-section { min-width: 0; padding-block: var(--space-xl); border-top: 1px solid var(--border); }
+.button-states { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: var(--space-lg); margin-top: var(--space-xl); }
+.state-specimen { display: grid; align-content: start; gap: var(--space-md); min-width: 0; }
+.state-label { color: var(--muted-foreground); font-size: .875rem; }
+.rupai-cta { border: 0; cursor: pointer; }
+.rupai-cta[data-size="compact"] { position: relative; }
+.rupai-cta[data-size="compact"]::after { content: ""; position: absolute; inset: -4px 0; }
+.rupai-cta[data-variant="outline"] { outline: 1px solid var(--border); outline-offset: -1px; }
+.rupai-cta:is(:focus-visible, :active, [data-state="pressed"], [data-state="focused"]):not(:disabled) { outline: 2px solid var(--ring); outline-offset: -2px; }
+.rupai-cta[data-state="disabled"] { background: var(--muted); color: var(--muted-foreground); }
+.rupai-cta[data-variant="outline"][data-state="disabled"] { outline-color: var(--muted-foreground); }
+.rupai-cta[data-state="loading"] { cursor: wait; }
+.disabled-reason { margin-top: var(--space-xs); font-size: .875rem; color: var(--muted-foreground); overflow-wrap: anywhere; }
+.scale-note { margin-top: var(--space-xl); }
+.button-sizes { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-lg); margin-top: var(--space-xl); }
+.foundations-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-xxl); margin-top: var(--space-xl); }
+.palette { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-lg); margin-block: var(--space-xl) 0; }
+.palette dt { margin-top: var(--space-xs); font-size: .875rem; }
+.palette dd { margin: 0; color: var(--muted-foreground); }
+.swatch { display: block; height: 56px; border: 1px solid var(--border); border-radius: var(--radius-tag); }
+.type-specimen { display: grid; align-content: start; gap: var(--space-lg); }
+.serif-specimen { font-family: var(--font-libre), var(--font-inter), serif; font-size: 2rem; line-height: 1.4; }
+.money { font-family: var(--font-inter), sans-serif; font-feature-settings: "tnum" 1, "lnum" 1; }
+.amount-specimen { font-size: 2rem; font-weight: 500; line-height: 1.25; }
+.caption { font-size: .75rem; }
+.token-note { font-size: .875rem; color: var(--muted-foreground); }
+.art-specimen { margin-top: var(--space-xl); max-width: 360px; border-radius: var(--radius-card); background: var(--accent); padding: var(--space-md); }
+.art-image { display: block; width: 100%; height: auto; }
+
+@media (max-width: 1050px) { .button-states { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 700px) { .button-states { grid-template-columns: repeat(2, minmax(0, 1fr)); } .button-sizes, .foundations-grid { grid-template-columns: 1fr; } }
+@media (max-width: 480px) { .specimen { padding: var(--space-md); } h1 { font-size: 2rem; } .button-states { grid-template-columns: 1fr; } .palette { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (prefers-reduced-motion: reduce) { .loading-indicator { transform: none !important; } }

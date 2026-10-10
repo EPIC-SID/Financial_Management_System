@@ -1,0 +1,147 @@
+{
+  "phase": "1C",
+  "mapping": "Descriptive screen-role names; exact screen placement is deferred.",
+  "encoding": "Lossless WebP, original dimensions, alpha and hidden RGB preserved.",
+  "assets": [
+    {
+      "source": "rupai_illustrations/Asha’s Relaxed Green-Accent Moment.png",
+      "android": "android_app/app/src/main/res/drawable-nodpi/home_cushion.webp",
+      "width": 1448,
+      "height": 1086,
+      "sourceSha256": "7103f40ea46c493ab7a5fed1447a511ee524f67a5209488c52a383ddcaa77035",
+      "webpSha256": "f941a99eae6eed9ded1ea4b6281fb9ebbddc9dbaebdb0543e99d77c17ab29cc2",
+      "alphaPreserved": true,
+      "rgbaPixelsIdentical": true
+    },
+    {
+      "source": "rupai_illustrations/Choosing Among Three Doors.png",
+      "android": "android_app/app/src/main/res/drawable-nodpi/onboarding_choices.webp",
+      "width": 1448,
+      "height": 1086,
+      "sourceSha256": "59ff4922f002b227d2cfa1432bebcf25b816191dc1b357739b8b99b0b35b7d2c",
+      "webpSha256": "e03fdcf079ec513f3bee07028d97b33805f235024749222e7a8fd8fd3f87ed6f",
+      "alphaPreserved": true,
+      "rgbaPixelsIdentical": true
+    },
+    {
+      "source": "rupai_illustrations/Cozy Daydream with Coffee and Calendar.png",
+      "android": "android_app/app/src/main/res/drawable-nodpi/home_overview.webp",
+      "width": 1448,
+      "height": 1086,
+      "sourceSha256": "702607ce69d65bee88d2e96fe4d496bc26b54f4a152adff33038695e2cd296dc",
+      "webpSha256": "eea08c300d9a69cc9d75937a71663533bcf0b14d0ccc68f08a15302ab0ec17be",
+      "alphaPreserved": true,
+      "rgbaPixelsIdentical": true
+    },
+    {
+      "source": "rupai_illustrations/Cozy Sofa Moments with Floating Papers.png",
+      "android": "android_app/app/src/main/res/drawable-nodpi/welcome.webp",
+      "width": 1122,
+      "height": 1402,
+      "sourceSha256": "3cef421a6bb52364ceb3bd50e5f218a1ca99c17e98bb361ae683b091a07fa955",
+      "webpSha256": "fde8ec03c5744af4402fce39ad767b711d7a88a9f7bcf2fd78762571fff92539",
+      "alphaPreserved": true,
+      "rgbaPixelsIdentical": true
+    },
+    {
+      "source": "rupai_illustrations/Meera Organizes a Planning Board.png",
+      "android": "android_app/app/src/main/res/drawable-nodpi/plan_board.webp",
+      "width": 1448,
+      "height": 1086,
+      "sourceSha256": "8b3ad9fd0ecf1bdec20590e68d5716754d147e257295dbbb94743d720a734406",
+      "webpSha256": "399dc3ebead8ed7313e1472d3ca3ca00ee4e331f0130d37222d74c7711297e9e",
+      "alphaPreserved": true,
+      "rgbaPixelsIdentical": true
+    },
+    {
+      "source": "rupai_illustrations/Relaxed Home Document Organizer.png",
+      "android": "android_app/app/src/main/res/drawable-nodpi/ledger_organizer.webp",
+      "width": 1312,
+      "height": 1199,
+      "sourceSha256": "45e3f4f20b8d0f7b1203f714f16f3e65cd6be7dc444728151698662d3130b291",
+      "webpSha256": "5c0148a3208f0b46acda20bf0228f0945daf7e87dd0289537ed25eb418103244",
+      "alphaPreserved": true,
+      "rgbaPixelsIdentical": true
+    },
+    {
+      "source": "rupai_illustrations/Relaxing with Notes and a Flag.png",
+      "android": "android_app/app/src/main/res/drawable-nodpi/advisor_guidance.webp",
+      "width": 1448,
+      "height": 1086,
+      "sourceSha256": "1adbe218d8b5206798d27fc15a27651163618464543bb0b7918c777e09316c1a",
+      "webpSha256": "df01af714bb44c8e3190afc37493d89e50b656e8917f36857405bc83aa1c824c",
+      "alphaPreserved": true,
+      "rgbaPixelsIdentical": true
+    },
+    {
+      "source": "rupai_illustrations/Rohan Placing Items in Tray.png",
+      "android": "android_app/app/src/main/res/drawable-nodpi/ledger_empty.webp",
+      "width": 1254,
+      "height": 1254,
+      "sourceSha256": "7fa32ace695b15618b000004381058c7d5d7f70cfba895a56a2aae855d5810a0",
+      "webpSha256": "2a145938a6ad9b4ec592d5904d50d58960f76fd74bd42273a180444b2b6ebe2b",
+      "alphaPreserved": true,
+      "rgbaPixelsIdentical": true
+    },
+    {
+      "source": "rupai_illustrations/Rohan’s First Step Forward.png",
+      "android": "android_app/app/src/main/res/drawable-nodpi/onboarding_first_step.webp",
+      "width": 1254,
+      "height": 1254,
+      "sourceSha256": "971c99d19c38933e3c341e84ebd4aac83a36f3f2f7b41e3f1b8f9aae919c00c0",
+      "webpSha256": "2add83ad430e6f2f5c11feacf079cbafbda97e284c7c7eaf876b54bd36c57422",
+      "alphaPreserved": true,
+      "rgbaPixelsIdentical": true
+    },
+    {
+      "source": "rupai_illustrations/Thoughtful Choice_ Comfort or Contract.png",
+      "android": "android_app/app/src/main/res/drawable-nodpi/plan_comparison.webp",
+      "width": 1254,
+      "height": 1254,
+      "sourceSha256": "bfceff8eb48adcadb68a3806229216652221142d8c1935009338a4d4b3674baa",
+      "webpSha256": "69ed53bcc077e6e40079660eb5cd1de74f229623f9e9a5139dbebc8cef9f6dbc",
+      "alphaPreserved": true,
+      "rgbaPixelsIdentical": true
+    },
+    {
+      "source": "rupai_illustrations/Thoughtful Dreamer with Calendar, Key, and Coin.png",
+      "android": "android_app/app/src/main/res/drawable-nodpi/plan_commitments.webp",
+      "width": 1448,
+      "height": 1086,
+      "sourceSha256": "a620051bca35f0a9b23a46c7a2c3d6b4921cf9cdea8fb2cb318e0454dbff2be5",
+      "webpSha256": "618d52b2fc25c80b3bd3406e7394584563271df0fecee1f93132153c94f2af51",
+      "alphaPreserved": true,
+      "rgbaPixelsIdentical": true
+    },
+    {
+      "source": "rupai_illustrations/Upside-Down Map Adventure.png",
+      "android": "android_app/app/src/main/res/drawable-nodpi/error_recovery.webp",
+      "width": 1254,
+      "height": 1254,
+      "sourceSha256": "a99b9e8e99a1dd6fd3533f7902584ce40865d5afcbc06e83f4049c7e683721c6",
+      "webpSha256": "493f1d9b37d26a72610b90212c4133b1e3f40f5f344b4d6e7bf8725aba1948d7",
+      "alphaPreserved": true,
+      "rgbaPixelsIdentical": true
+    },
+    {
+      "source": "rupai_illustrations/Woman Contemplates a Winding Path.png",
+      "android": "android_app/app/src/main/res/drawable-nodpi/advisor_next_step.webp",
+      "width": 1254,
+      "height": 1254,
+      "sourceSha256": "c14b177998c8a02defe3c838806a1e4d378676943b47839577d3975ce72909d1",
+      "webpSha256": "8035999e08638c1f9974ab323b1d678331f4836a6184933a722d3a46d6effbdb",
+      "alphaPreserved": true,
+      "rgbaPixelsIdentical": true
+    },
+    {
+      "source": "rupai_illustrations/Woman Managing Messages in a Privacy Safe.png",
+      "android": "android_app/app/src/main/res/drawable-nodpi/privacy_control.webp",
+      "width": 1448,
+      "height": 1086,
+      "sourceSha256": "32554c43eac73f9bd10a12685a5db0f0b791dc586d86e739fec54774b077fb78",
+      "webpSha256": "8e97e4f9102cb52a15c853df97bdbfeeb96573e46d1c8ccb7c4f6238c018fac2",
+      "alphaPreserved": true,
+      "rgbaPixelsIdentical": true
+    }
+  ]
+}

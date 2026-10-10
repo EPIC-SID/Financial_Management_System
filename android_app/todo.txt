@@ -91,10 +91,6 @@
 #  NEW FEATURES — Medium Priority (User Experience)
 # ──────────────────────────────────────────────────────────────
 
-[ ] Dark Mode Support
-    - Theme.kt only has light color scheme
-    - Add dark color scheme and system preference toggle
-
 [ ] Transaction Search
     - Search by merchant name, amount range, date range
     - Full-text search across descriptions

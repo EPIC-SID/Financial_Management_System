@@ -1,0 +1,4332 @@
+[
+  {
+    "Frame": "Archive\\RupAI\\Illustration brief v2.svg",
+    "Width": "1120",
+    "Height": "1430",
+    "Text": [
+      {
+        "Id": "RUPAI / ILLUSTRATION BRIEF",
+        "Copy": "RUPAI / ILLUSTRATION BRIEF",
+        "Font": "Inter",
+        "Size": "12",
+        "Fill": "#52A145",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "RUPAI / ILLUSTRATION BRIEF",
+            "X": "48",
+            "Y": "54.8636"
+          }
+        ]
+      },
+      {
+        "Id": "One family, across the journey.",
+        "Copy": "One family, across the journey.",
+        "Font": "Libre Baskerville",
+        "Size": "38",
+        "Fill": "#111111",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "One family, across the journey.",
+            "X": "48",
+            "Y": "109.8"
+          }
+        ]
+      },
+      {
+        "Id": "Use the supplied black-outline figures and green money layers. Final PNG or SVG artwork comes from Uday.",
+        "Copy": "Use the supplied black-outline figures and green money layers. Final PNG or SVG artwork comes from Uday.",
+        "Font": "Inter",
+        "Size": "15",
+        "Fill": "#60665D",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Use the supplied black-outline figures and green money layers. Final PNG or SVG artwork comes from Uday.",
+            "X": "48",
+            "Y": "148.455"
+          }
+        ]
+      },
+      {
+        "Id": "I01 / Welcome picture",
+        "Copy": "I01 / Welcome picture",
+        "Font": "Libre Baskerville",
+        "Size": "23",
+        "Fill": "#111111",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "I01 / Welcome picture",
+            "X": "48",
+            "Y": "214.55"
+          }
+        ]
+      },
+      {
+        "Id": "Person checking a phone; transaction slips resolve into one tidy stack.",
+        "Copy": "Person checking a phone; transaction slips resolve into one tidy stack.",
+        "Font": "Inter",
+        "Size": "15",
+        "Fill": "#60665D",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Person checking a phone; transaction slips resolve into one tidy stack.",
+            "X": "48",
+            "Y": "249.455"
+          }
+        ]
+      },
+      {
+        "Id": "320 Ã 240 display / 960 Ã 720 PNG / Welcome + install-page hero",
+        "Copy": "320 × 240 display / 960 × 720 PNG / Welcome + install-page hero",
+        "Font": "Inter",
+        "Size": "12",
+        "Fill": "#60665D",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "320 × 240 display / 960 × 720 PNG / Welcome + install-page hero",
+            "X": "48",
+            "Y": "279.864"
+          }
+        ]
+      },
+      {
+        "Id": "I02 / Privacy control",
+        "Copy": "I02 / Privacy control",
+        "Font": "Libre Baskerville",
+        "Size": "23",
+        "Fill": "#111111",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "I02 / Privacy control",
+            "X": "48",
+            "Y": "357.55"
+          }
+        ]
+      },
+      {
+        "Id": "Phone and message slips in a protective enclosure with an open control latch.",
+        "Copy": "Phone and message slips in a protective enclosure with an open control latch.",
+        "Font": "Inter",
+        "Size": "15",
+        "Fill": "#60665D",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Phone and message slips in a protective enclosure with an open control latch.",
+            "X": "48",
+            "Y": "392.455"
+          }
+        ]
+      },
+      {
+        "Id": "240 Ã 180 display / 720 Ã 540 PNG / Consent + privacy centre",
+        "Copy": "240 × 180 display / 720 × 540 PNG / Consent + privacy centre",
+        "Font": "Inter",
+        "Size": "12",
+        "Fill": "#60665D",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "240 × 180 display / 720 × 540 PNG / Consent + privacy centre",
+            "X": "48",
+            "Y": "422.864"
+          }
+        ]
+      },
+      {
+        "Id": "I03 / Cash cushion",
+        "Copy": "I03 / Cash cushion",
+        "Font": "Libre Baskerville",
+        "Size": "23",
+        "Fill": "#111111",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "I03 / Cash cushion",
+            "X": "48",
+            "Y": "500.55"
+          }
+        ]
+      },
+      {
+        "Id": "Green stack resting on a cushion or tray, with one reserve marker.",
+        "Copy": "Green stack resting on a cushion or tray, with one reserve marker.",
+        "Font": "Inter",
+        "Size": "15",
+        "Fill": "#60665D",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Green stack resting on a cushion or tray, with one reserve marker.",
+            "X": "48",
+            "Y": "535.455"
+          }
+        ]
+      },
+      {
+        "Id": "240 Ã 180 display / 720 Ã 540 PNG / Safety net + missing reserve",
+        "Copy": "240 × 180 display / 720 × 540 PNG / Safety net + missing reserve",
+        "Font": "Inter",
+        "Size": "12",
+        "Fill": "#60665D",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "240 × 180 display / 720 × 540 PNG / Safety net + missing reserve",
+            "X": "48",
+            "Y": "565.864"
+          }
+        ]
+      },
+      {
+        "Id": "I04 / Building picture",
+        "Copy": "I04 / Building picture",
+        "Font": "Libre Baskerville",
+        "Size": "23",
+        "Fill": "#111111",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "I04 / Building picture",
+            "X": "48",
+            "Y": "643.55"
+          }
+        ]
+      },
+      {
+        "Id": "Separate slips aligning into one orderly financial picture.",
+        "Copy": "Separate slips aligning into one orderly financial picture.",
+        "Font": "Inter",
+        "Size": "15",
+        "Fill": "#60665D",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Separate slips aligning into one orderly financial picture.",
+            "X": "48",
+            "Y": "678.455"
+          }
+        ]
+      },
+      {
+        "Id": "240 Ã 180 display / 720 Ã 540 PNG / Processing + recomputation",
+        "Copy": "240 × 180 display / 720 × 540 PNG / Processing + recomputation",
+        "Font": "Inter",
+        "Size": "12",
+        "Fill": "#60665D",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "240 × 180 display / 720 × 540 PNG / Processing + recomputation",
+            "X": "48",
+            "Y": "708.864"
+          }
+        ]
+      },
+      {
+        "Id": "I05 / No data yet",
+        "Copy": "I05 / No data yet",
+        "Font": "Libre Baskerville",
+        "Size": "23",
+        "Fill": "#111111",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "I05 / No data yet",
+            "X": "48",
+            "Y": "786.55"
+          }
+        ]
+      },
+      {
+        "Id": "Empty ledger tray beside a phone with a neutral message outline.",
+        "Copy": "Empty ledger tray beside a phone with a neutral message outline.",
+        "Font": "Inter",
+        "Size": "15",
+        "Fill": "#60665D",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Empty ledger tray beside a phone with a neutral message outline.",
+            "X": "48",
+            "Y": "821.455"
+          }
+        ]
+      },
+      {
+        "Id": "240 Ã 180 display / 720 Ã 540 PNG / Empty + filtered states",
+        "Copy": "240 × 180 display / 720 × 540 PNG / Empty + filtered states",
+        "Font": "Inter",
+        "Size": "12",
+        "Fill": "#60665D",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "240 × 180 display / 720 × 540 PNG / Empty + filtered states",
+            "X": "48",
+            "Y": "851.864"
+          }
+        ]
+      },
+      {
+        "Id": "I06 / Plan options",
+        "Copy": "I06 / Plan options",
+        "Font": "Libre Baskerville",
+        "Size": "23",
+        "Fill": "#111111",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "I06 / Plan options",
+            "X": "48",
+            "Y": "929.55"
+          }
+        ]
+      },
+      {
+        "Id": "Cushion route and loan document beside the same calm character.",
+        "Copy": "Cushion route and loan document beside the same calm character.",
+        "Font": "Inter",
+        "Size": "15",
+        "Fill": "#60665D",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Cushion route and loan document beside the same calm character.",
+            "X": "48",
+            "Y": "964.455"
+          }
+        ]
+      },
+      {
+        "Id": "240 Ã 180 display / 720 Ã 540 PNG / Plan introduction + comparison",
+        "Copy": "240 × 180 display / 720 × 540 PNG / Plan introduction + comparison",
+        "Font": "Inter",
+        "Size": "12",
+        "Fill": "#60665D",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "240 × 180 display / 720 × 540 PNG / Plan introduction + comparison",
+            "X": "48",
+            "Y": "994.864"
+          }
+        ]
+      },
+      {
+        "Id": "Five small object masters",
+        "Copy": "Five small object masters",
+        "Font": "Libre Baskerville",
+        "Size": "25",
+        "Fill": "#111111",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Five small object masters",
+            "X": "48",
+            "Y": "1099.25"
+          }
+        ]
+      },
+      {
+        "Id": "SMS phone / CSV statement / sample-profile card / dated commitment / reserve stack",
+        "Copy": "SMS phone / CSV statement / sample-profile card / dated commitment / reserve stack",
+        "Font": "Inter",
+        "Size": "15",
+        "Fill": "#111111",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "SMS phone / CSV statement / sample-profile card / dated commitment / reserve stack",
+            "X": "48",
+            "Y": "1139.45"
+          }
+        ]
+      },
+      {
+        "Id": "48â64 px display. Supply 192 px PNG, or preferably transparent SVG.",
+        "Copy": "48–64 px display. Supply 192 px PNG, or preferably transparent SVG.",
+        "Font": "Inter",
+        "Size": "14",
+        "Fill": "#60665D",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "48–64 px display. Supply 192 px PNG, or preferably transparent SVG.",
+            "X": "48",
+            "Y": "1170.59"
+          }
+        ]
+      },
+      {
+        "Id": "Palette / #52A145, #111111 and white. Keep 8â12% breathing room around the subject.",
+        "Copy": "Palette / #52A145, #111111 and white. Keep 8–12% breathing room around the subject.",
+        "Font": "Inter",
+        "Size": "14",
+        "Fill": "#111111",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Palette / #52A145, #111111 and white. Keep 8–12% breathing room around the subject.",
+            "X": "72",
+            "Y": "1246.59"
+          }
+        ]
+      },
+      {
+        "Id": "Separate layers for optional motion. Keep essential numbers and status text out of the art.",
+        "Copy": "Separate layers for optional motion. Keep essential numbers and status text out of the art.",
+        "Font": "Inter",
+        "Size": "14",
+        "Fill": "#111111",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Separate layers for optional motion. Keep essential numbers and status text out of the art.",
+            "X": "72",
+            "Y": "1278.59"
+          }
+        ]
+      },
+      {
+        "Id": "Use functional 24 px outline icons in navigation and dense financial rows.",
+        "Copy": "Use functional 24 px outline icons in navigation and dense financial rows.",
+        "Font": "Inter",
+        "Size": "14",
+        "Fill": "#111111",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Use functional 24 px outline icons in navigation and dense financial rows.",
+            "X": "72",
+            "Y": "1310.59"
+          }
+        ]
+      },
+      {
+        "Id": "Reuse the existing logo, character and persona portraits. Avoid stock 3D coins or a new mascot.",
+        "Copy": "Reuse the existing logo, character and persona portraits. Avoid stock 3D coins or a new mascot.",
+        "Font": "Inter",
+        "Size": "14",
+        "Fill": "#111111",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Reuse the existing logo, character and persona portraits. Avoid stock 3D coins or a new mascot.",
+            "X": "72",
+            "Y": "1342.59"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "Frame": "Archive\\RupAI\\v2\\Install landing desktop.svg",
+    "Width": "1440",
+    "Height": "1930",
+    "Text": [
+      {
+        "Id": "RupAI",
+        "Copy": "RupAI",
+        "Font": "Libre Baskerville",
+        "Size": "32",
+        "Fill": "#111111",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "RupAI",
+            "X": "80",
+            "Y": "68.2"
+          }
+        ]
+      },
+      {
+        "Id": "Product",
+        "Copy": "Product",
+        "Font": "Inter",
+        "Size": "15",
+        "Fill": "#111111",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Product",
+            "X": "791",
+            "Y": "64.4545"
+          }
+        ]
+      },
+      {
+        "Id": "How it works",
+        "Copy": "How it works",
+        "Font": "Inter",
+        "Size": "15",
+        "Fill": "#111111",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "How it works",
+            "X": "896",
+            "Y": "64.4545"
+          }
+        ]
+      },
+      {
+        "Id": "Get RupAI for Android",
+        "Copy": "Get RupAI for Android",
+        "Font": "Inter",
+        "Size": "16",
+        "Fill": "#111111",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Get RupAI for Android",
+            "X": "1157.86",
+            "Y": "58.3182"
+          }
+        ]
+      },
+      {
+        "Id": "A FINANCIAL HEALTH COPILOT FOR ANDROID",
+        "Copy": "A FINANCIAL HEALTH COPILOT FOR ANDROID",
+        "Font": "Inter",
+        "Size": "12",
+        "Fill": "#60665D",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "A FINANCIAL HEALTH COPILOT FOR ANDROID",
+            "X": "80",
+            "Y": "209.864"
+          }
+        ]
+      },
+      {
+        "Id": "Your money.",
+        "Copy": "Your money.",
+        "Font": "Libre Baskerville",
+        "Size": "58",
+        "Fill": "#111111",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Your money.",
+            "X": "80",
+            "Y": "285.3"
+          }
+        ]
+      },
+      {
+        "Id": "A clearer picture.",
+        "Copy": "A clearer picture.",
+        "Font": "Libre Baskerville",
+        "Size": "58",
+        "Fill": "#111111",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "A clearer picture.",
+            "X": "80",
+            "Y": "361.3"
+          }
+        ]
+      },
+      {
+        "Id": "A better next step.",
+        "Copy": "A better next step.",
+        "Font": "Libre Baskerville",
+        "Size": "58",
+        "Fill": "#111111",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "A better next step.",
+            "X": "80",
+            "Y": "437.3"
+          }
+        ]
+      },
+      {
+        "Id": "Bring your balances, dues and plans into one view.",
+        "Copy": "Bring your balances, dues and plans into one view.",
+        "Font": "Inter",
+        "Size": "20",
+        "Fill": "#60665D",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Bring your balances, dues and plans into one view.",
+            "X": "80",
+            "Y": "504.273"
+          }
+        ]
+      },
+      {
+        "Id": "See what is coming up before you choose what to do.",
+        "Copy": "See what is coming up before you choose what to do.",
+        "Font": "Inter",
+        "Size": "20",
+        "Fill": "#60665D",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "See what is coming up before you choose what to do.",
+            "X": "80",
+            "Y": "538.273"
+          }
+        ]
+      },
+      {
+        "Id": "Get RupAI for Android_2",
+        "Copy": "Get RupAI for Android",
+        "Font": "Inter",
+        "Size": "16",
+        "Fill": "#111111",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Get RupAI for Android",
+            "X": "131.359",
+            "Y": "622.318"
+          }
+        ]
+      },
+      {
+        "Id": "See the app",
+        "Copy": "See the app",
+        "Font": "Inter",
+        "Size": "16",
+        "Fill": "#111111",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "See the app",
+            "X": "418.945",
+            "Y": "622.318"
+          }
+        ]
+      },
+      {
+        "Id": "Designed around your financial picture.",
+        "Copy": "Designed around your financial picture.",
+        "Font": "Inter",
+        "Size": "14",
+        "Fill": "#60665D",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Designed around your financial picture.",
+            "X": "80",
+            "Y": "679.591"
+          }
+        ]
+      },
+      {
+        "Id": "9:41",
+        "Copy": "9:41",
+        "Font": "Inter",
+        "Size": "13",
+        "Fill": "#111111",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "9:41",
+            "X": "929",
+            "Y": "184.727"
+          }
+        ]
+      },
+      {
+        "Id": "5G",
+        "Copy": "5G ",
+        "Font": "Inter",
+        "Size": "12",
+        "Fill": "#111111",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "5G ",
+            "X": "1254.78",
+            "Y": "184.864"
+          }
+        ]
+      },
+      {
+        "Id": "RupAI_2",
+        "Copy": "RupAI",
+        "Font": "Libre Baskerville",
+        "Size": "26",
+        "Fill": "#111111",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "RupAI",
+            "X": "929",
+            "Y": "227.1"
+          }
+        ]
+      },
+      {
+        "Id": "Demo profile",
+        "Copy": "Demo profile",
+        "Font": "Inter",
+        "Size": "12",
+        "Fill": "#60665D",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Demo profile",
+            "X": "1198.68",
+            "Y": "225.864"
+          }
+        ]
+      },
+      {
+        "Id": "YOUR MONEY, IN VIEW",
+        "Copy": "YOUR MONEY, IN VIEW",
+        "Font": "Inter",
+        "Size": "11",
+        "Fill": "#60665D",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "YOUR MONEY, IN VIEW",
+            "X": "929",
+            "Y": "272.5"
+          }
+        ]
+      },
+      {
+        "Id": "Room to breathe.",
+        "Copy": "Room to breathe.",
+        "Font": "Libre Baskerville",
+        "Size": "27",
+        "Fill": "#111111",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Room to breathe.",
+            "X": "929",
+            "Y": "309.95"
+          }
+        ]
+      },
+      {
+        "Id": "A picture of this month, with next steps.",
+        "Copy": "A picture of this month, with next steps.",
+        "Font": "Inter",
+        "Size": "14",
+        "Fill": "#60665D",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "A picture of this month, with next steps.",
+            "X": "929",
+            "Y": "342.591"
+          }
+        ]
+      },
+      {
+        "Id": "PROJECTED MONTH-END CUSHION",
+        "Copy": "PROJECTED MONTH-END CUSHION",
+        "Font": "Inter",
+        "Size": "10",
+        "Fill": "#111111",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "PROJECTED MONTH-END CUSHION",
+            "X": "949",
+            "Y": "401.636"
+          }
+        ]
+      },
+      {
+        "Id": "â¹18,400",
+        "Copy": "₹18,400",
+        "Font": "Inter",
+        "Size": "40",
+        "Fill": "#111111",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "₹18,400",
+            "X": "949",
+            "Y": "452.545"
+          }
+        ]
+      },
+      {
+        "Id": "After upcoming commitments",
+        "Copy": "After upcoming commitments",
+        "Font": "Inter",
+        "Size": "13",
+        "Fill": "#111111",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "After upcoming commitments",
+            "X": "949",
+            "Y": "482.727"
+          }
+        ]
+      },
+      {
+        "Id": "Estimate Â· Based on your demo data",
+        "Copy": "Estimate · Based on your demo data",
+        "Font": "Inter",
+        "Size": "12",
+        "Fill": "#111111",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Estimate · Based on your demo data",
+            "X": "949",
+            "Y": "526.864"
+          }
+        ]
+      },
+      {
+        "Id": "Coming up",
+        "Copy": "Coming up",
+        "Font": "Inter",
+        "Size": "20",
+        "Fill": "#111111",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Coming up",
+            "X": "929",
+            "Y": "591.273"
+          }
+        ]
+      },
+      {
+        "Id": "Credit card bill",
+        "Copy": "Credit card bill",
+        "Font": "Inter",
+        "Size": "15",
+        "Fill": "#111111",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Credit card bill",
+            "X": "929",
+            "Y": "615.455"
+          }
+        ]
+      },
+      {
+        "Id": "12 Oct",
+        "Copy": "12 Oct",
+        "Font": "Inter",
+        "Size": "12",
+        "Fill": "#60665D",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "12 Oct",
+            "X": "929",
+            "Y": "637.864"
+          }
+        ]
+      },
+      {
+        "Id": "â¹4,200",
+        "Copy": "₹4,200",
+        "Font": "Inter",
+        "Size": "18",
+        "Fill": "#111111",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "₹4,200",
+            "X": "1211.9",
+            "Y": "625.545"
+          }
+        ]
+      },
+      {
+        "Id": "SIP contribution",
+        "Copy": "SIP contribution",
+        "Font": "Inter",
+        "Size": "15",
+        "Fill": "#111111",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "SIP contribution",
+            "X": "929",
+            "Y": "675.455"
+          }
+        ]
+      },
+      {
+        "Id": "15 Oct",
+        "Copy": "15 Oct",
+        "Font": "Inter",
+        "Size": "12",
+        "Fill": "#60665D",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "15 Oct",
+            "X": "929",
+            "Y": "697.864"
+          }
+        ]
+      },
+      {
+        "Id": "â¹2,000",
+        "Copy": "₹2,000",
+        "Font": "Inter",
+        "Size": "18",
+        "Fill": "#111111",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "₹2,000",
+            "X": "1212.04",
+            "Y": "685.545"
+          }
+        ]
+      },
+      {
+        "Id": "Before your next due date",
+        "Copy": "Before your next due date",
+        "Font": "Inter",
+        "Size": "15",
+        "Fill": "#111111",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Before your next due date",
+            "X": "945",
+            "Y": "767.455"
+          }
+        ]
+      },
+      {
+        "Id": "Review the plan behind your cushion.",
+        "Copy": "Review the plan behind your cushion.",
+        "Font": "Inter",
+        "Size": "13",
+        "Fill": "#60665D",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Review the plan behind your cushion.",
+            "X": "945",
+            "Y": "792.727"
+          }
+        ]
+      },
+      {
+        "Id": "Review my plan",
+        "Copy": "Review my plan",
+        "Font": "Inter",
+        "Size": "16",
+        "Fill": "#111111",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Review my plan",
+            "X": "979.188",
+            "Y": "877.318"
+          }
+        ]
+      },
+      {
+        "Id": "Details",
+        "Copy": "Details",
+        "Font": "Inter",
+        "Size": "14",
+        "Fill": "#111111",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Details",
+            "X": "1172",
+            "Y": "877.591"
+          }
+        ]
+      },
+      {
+        "Id": "Cockpit",
+        "Copy": "Cockpit",
+        "Font": "Inter",
+        "Size": "12",
+        "Fill": "#111111",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Cockpit",
+            "X": "946.93",
+            "Y": "973.864"
+          }
+        ]
+      },
+      {
+        "Id": "Plan",
+        "Copy": "Plan",
+        "Font": "Inter",
+        "Size": "12",
+        "Fill": "#60665D",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Plan",
+            "X": "1044.13",
+            "Y": "973.864"
+          }
+        ]
+      },
+      {
+        "Id": "Activity",
+        "Copy": "Activity",
+        "Font": "Inter",
+        "Size": "12",
+        "Fill": "#60665D",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Activity",
+            "X": "1122.46",
+            "Y": "973.864"
+          }
+        ]
+      },
+      {
+        "Id": "Copilot",
+        "Copy": "Copilot",
+        "Font": "Inter",
+        "Size": "12",
+        "Fill": "#60665D",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Copilot",
+            "X": "1211.04",
+            "Y": "973.864"
+          }
+        ]
+      },
+      {
+        "Id": "Know what needs",
+        "Copy": "Know what needs",
+        "Font": "Libre Baskerville",
+        "Size": "42",
+        "Fill": "#111111",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Know what needs",
+            "X": "80",
+            "Y": "846.7"
+          }
+        ]
+      },
+      {
+        "Id": "your attention.",
+        "Copy": "your attention.",
+        "Font": "Libre Baskerville",
+        "Size": "42",
+        "Fill": "#111111",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "your attention.",
+            "X": "80",
+            "Y": "904.7"
+          }
+        ]
+      },
+      {
+        "Id": "Cash flow and commitments, with the next step in reach.",
+        "Copy": "Cash flow and commitments, with the next step in reach.",
+        "Font": "Inter",
+        "Size": "18",
+        "Fill": "#60665D",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Cash flow and commitments, with the next step in reach.",
+            "X": "80",
+            "Y": "955.545"
+          }
+        ]
+      },
+      {
+        "Id": "01",
+        "Copy": "01",
+        "Font": "Inter",
+        "Size": "14",
+        "Fill": "#52A145",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "01",
+            "X": "80",
+            "Y": "1109.59"
+          }
+        ]
+      },
+      {
+        "Id": "Build your picture",
+        "Copy": "Build your picture",
+        "Font": "Libre Baskerville",
+        "Size": "28",
+        "Fill": "#111111",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Build your picture",
+            "X": "167",
+            "Y": "1109.3"
+          }
+        ]
+      },
+      {
+        "Id": "Add income, balances and upcoming commitments.",
+        "Copy": "Add income, balances and upcoming commitments.",
+        "Font": "Inter",
+        "Size": "18",
+        "Fill": "#60665D",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Add income, balances and upcoming commitments.",
+            "X": "624",
+            "Y": "1109.55"
+          }
+        ]
+      },
+      {
+        "Id": "02",
+        "Copy": "02",
+        "Font": "Inter",
+        "Size": "14",
+        "Fill": "#52A145",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "02",
+            "X": "80",
+            "Y": "1228.59"
+          }
+        ]
+      },
+      {
+        "Id": "Look ahead",
+        "Copy": "Look ahead",
+        "Font": "Libre Baskerville",
+        "Size": "28",
+        "Fill": "#111111",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Look ahead",
+            "X": "167",
+            "Y": "1228.3"
+          }
+        ]
+      },
+      {
+        "Id": "Review estimated cash flow alongside known dues.",
+        "Copy": "Review estimated cash flow alongside known dues.",
+        "Font": "Inter",
+        "Size": "18",
+        "Fill": "#60665D",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Review estimated cash flow alongside known dues.",
+            "X": "624",
+            "Y": "1228.55"
+          }
+        ]
+      },
+      {
+        "Id": "03",
+        "Copy": "03",
+        "Font": "Inter",
+        "Size": "14",
+        "Fill": "#52A145",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "03",
+            "X": "80",
+            "Y": "1347.59"
+          }
+        ]
+      },
+      {
+        "Id": "Choose a plan",
+        "Copy": "Choose a plan",
+        "Font": "Libre Baskerville",
+        "Size": "28",
+        "Fill": "#111111",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Choose a plan",
+            "X": "167",
+            "Y": "1347.3"
+          }
+        ]
+      },
+      {
+        "Id": "Compare the next step against your cash cushion.",
+        "Copy": "Compare the next step against your cash cushion.",
+        "Font": "Inter",
+        "Size": "18",
+        "Fill": "#60665D",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Compare the next step against your cash cushion.",
+            "X": "624",
+            "Y": "1347.55"
+          }
+        ]
+      },
+      {
+        "Id": "Start with the picture",
+        "Copy": "Start with the picture",
+        "Font": "Libre Baskerville",
+        "Size": "42",
+        "Fill": "white",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Start with the picture",
+            "X": "120",
+            "Y": "1585.7"
+          }
+        ]
+      },
+      {
+        "Id": "you have today.",
+        "Copy": "you have today.",
+        "Font": "Libre Baskerville",
+        "Size": "42",
+        "Fill": "white",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "you have today.",
+            "X": "120",
+            "Y": "1645.7"
+          }
+        ]
+      },
+      {
+        "Id": "You can fill the gaps as you go.",
+        "Copy": "You can fill the gaps as you go.",
+        "Font": "Inter",
+        "Size": "18",
+        "Fill": "white",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "You can fill the gaps as you go.",
+            "X": "120",
+            "Y": "1710.55"
+          }
+        ]
+      },
+      {
+        "Id": "Get RupAI for Android_3",
+        "Copy": "Get RupAI for Android",
+        "Font": "Inter",
+        "Size": "16",
+        "Fill": "#111111",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Get RupAI for Android",
+            "X": "1099.86",
+            "Y": "1657.32"
+          }
+        ]
+      },
+      {
+        "Id": "RupAI_3",
+        "Copy": "RupAI",
+        "Font": "Libre Baskerville",
+        "Size": "25",
+        "Fill": "#111111",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "RupAI",
+            "X": "80",
+            "Y": "1874.25"
+          }
+        ]
+      },
+      {
+        "Id": "Android app Â· Installation destination pending",
+        "Copy": "Android app · Installation destination pending",
+        "Font": "Inter",
+        "Size": "13",
+        "Fill": "#60665D",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Android app · Installation destination pending",
+            "X": "1082.3",
+            "Y": "1874.73"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "Frame": "Archive\\RupAI\\v2\\Install landing mobile.svg",
+    "Width": "390",
+    "Height": "1660",
+    "Text": [
+      {
+        "Id": "RupAI",
+        "Copy": "RupAI",
+        "Font": "Libre Baskerville",
+        "Size": "28",
+        "Fill": "#111111",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "RupAI",
+            "X": "24",
+            "Y": "49.3"
+          }
+        ]
+      },
+      {
+        "Id": "Get the app",
+        "Copy": "Get the app",
+        "Font": "Inter",
+        "Size": "14",
+        "Fill": "#111111",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Get the app",
+            "X": "287.865",
+            "Y": "45.5909"
+          }
+        ]
+      },
+      {
+        "Id": "FOR ANDROID",
+        "Copy": "FOR ANDROID",
+        "Font": "Inter",
+        "Size": "11",
+        "Fill": "#60665D",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "FOR ANDROID",
+            "X": "24",
+            "Y": "121.5"
+          }
+        ]
+      },
+      {
+        "Id": "Your money.",
+        "Copy": "Your money.",
+        "Font": "Libre Baskerville",
+        "Size": "32",
+        "Fill": "#111111",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Your money.",
+            "X": "24",
+            "Y": "177.2"
+          }
+        ]
+      },
+      {
+        "Id": "A clearer picture.",
+        "Copy": "A clearer picture.",
+        "Font": "Libre Baskerville",
+        "Size": "32",
+        "Fill": "#111111",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "A clearer picture.",
+            "X": "24",
+            "Y": "225.2"
+          }
+        ]
+      },
+      {
+        "Id": "A better next step.",
+        "Copy": "A better next step.",
+        "Font": "Libre Baskerville",
+        "Size": "32",
+        "Fill": "#111111",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "A better next step.",
+            "X": "24",
+            "Y": "273.2"
+          }
+        ]
+      },
+      {
+        "Id": "Balances, dues and plans in one view.",
+        "Copy": "Balances, dues and plans in one view.",
+        "Font": "Inter",
+        "Size": "16",
+        "Fill": "#60665D",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Balances, dues and plans in one view.",
+            "X": "24",
+            "Y": "323.318"
+          }
+        ]
+      },
+      {
+        "Id": "See what is coming up. Choose a next step.",
+        "Copy": "See what is coming up. Choose a next step.",
+        "Font": "Inter",
+        "Size": "15",
+        "Fill": "#60665D",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "See what is coming up. Choose a next step.",
+            "X": "24",
+            "Y": "348.455"
+          }
+        ]
+      },
+      {
+        "Id": "Get RupAI for Android",
+        "Copy": "Get RupAI for Android",
+        "Font": "Inter",
+        "Size": "16",
+        "Fill": "#111111",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Get RupAI for Android",
+            "X": "112.859",
+            "Y": "416.318"
+          }
+        ]
+      },
+      {
+        "Id": "See the app",
+        "Copy": "See the app",
+        "Font": "Inter",
+        "Size": "16",
+        "Fill": "#111111",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "See the app",
+            "X": "149.445",
+            "Y": "484.318"
+          }
+        ]
+      },
+      {
+        "Id": "PROJECTED MONTH-END CUSHION",
+        "Copy": "PROJECTED MONTH-END CUSHION",
+        "Font": "Inter",
+        "Size": "10",
+        "Fill": "#111111",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "PROJECTED MONTH-END CUSHION",
+            "X": "44",
+            "Y": "587.636"
+          }
+        ]
+      },
+      {
+        "Id": "â¹18,400",
+        "Copy": "₹18,400",
+        "Font": "Inter",
+        "Size": "40",
+        "Fill": "#111111",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "₹18,400",
+            "X": "44",
+            "Y": "644.545"
+          }
+        ]
+      },
+      {
+        "Id": "After upcoming commitments",
+        "Copy": "After upcoming commitments",
+        "Font": "Inter",
+        "Size": "14",
+        "Fill": "#111111",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "After upcoming commitments",
+            "X": "44",
+            "Y": "678.591"
+          }
+        ]
+      },
+      {
+        "Id": "Demo profile Â· Estimate",
+        "Copy": "Demo profile · Estimate",
+        "Font": "Inter",
+        "Size": "12",
+        "Fill": "#111111",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Demo profile · Estimate",
+            "X": "44",
+            "Y": "734.864"
+          }
+        ]
+      },
+      {
+        "Id": "Know what needs",
+        "Copy": "Know what needs",
+        "Font": "Libre Baskerville",
+        "Size": "27",
+        "Fill": "#111111",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Know what needs",
+            "X": "24",
+            "Y": "827.95"
+          }
+        ]
+      },
+      {
+        "Id": "your attention.",
+        "Copy": "your attention.",
+        "Font": "Libre Baskerville",
+        "Size": "27",
+        "Fill": "#111111",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "your attention.",
+            "X": "24",
+            "Y": "864.95"
+          }
+        ]
+      },
+      {
+        "Id": "01",
+        "Copy": "01",
+        "Font": "Inter",
+        "Size": "12",
+        "Fill": "#52A145",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "01",
+            "X": "24",
+            "Y": "933.864"
+          }
+        ]
+      },
+      {
+        "Id": "Build your picture",
+        "Copy": "Build your picture",
+        "Font": "Libre Baskerville",
+        "Size": "20",
+        "Fill": "#111111",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Build your picture",
+            "X": "68",
+            "Y": "933.5"
+          }
+        ]
+      },
+      {
+        "Id": "Add income, balances and",
+        "Copy": "Add income, balances and",
+        "Font": "Inter",
+        "Size": "14",
+        "Fill": "#60665D",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Add income, balances and",
+            "X": "68",
+            "Y": "963.591"
+          }
+        ]
+      },
+      {
+        "Id": "upcoming commitments.",
+        "Copy": "upcoming commitments.",
+        "Font": "Inter",
+        "Size": "14",
+        "Fill": "#60665D",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "upcoming commitments.",
+            "X": "68",
+            "Y": "984.591"
+          }
+        ]
+      },
+      {
+        "Id": "02",
+        "Copy": "02",
+        "Font": "Inter",
+        "Size": "12",
+        "Fill": "#52A145",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "02",
+            "X": "24",
+            "Y": "1052.86"
+          }
+        ]
+      },
+      {
+        "Id": "Look ahead",
+        "Copy": "Look ahead",
+        "Font": "Libre Baskerville",
+        "Size": "20",
+        "Fill": "#111111",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Look ahead",
+            "X": "68",
+            "Y": "1052.5"
+          }
+        ]
+      },
+      {
+        "Id": "Review estimated cash flow",
+        "Copy": "Review estimated cash flow",
+        "Font": "Inter",
+        "Size": "14",
+        "Fill": "#60665D",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Review estimated cash flow",
+            "X": "68",
+            "Y": "1082.59"
+          }
+        ]
+      },
+      {
+        "Id": "alongside known dues.",
+        "Copy": "alongside known dues.",
+        "Font": "Inter",
+        "Size": "14",
+        "Fill": "#60665D",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "alongside known dues.",
+            "X": "68",
+            "Y": "1103.59"
+          }
+        ]
+      },
+      {
+        "Id": "03",
+        "Copy": "03",
+        "Font": "Inter",
+        "Size": "12",
+        "Fill": "#52A145",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "03",
+            "X": "24",
+            "Y": "1171.86"
+          }
+        ]
+      },
+      {
+        "Id": "Choose a plan",
+        "Copy": "Choose a plan",
+        "Font": "Libre Baskerville",
+        "Size": "20",
+        "Fill": "#111111",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Choose a plan",
+            "X": "68",
+            "Y": "1171.5"
+          }
+        ]
+      },
+      {
+        "Id": "Compare your next step",
+        "Copy": "Compare your next step",
+        "Font": "Inter",
+        "Size": "14",
+        "Fill": "#60665D",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Compare your next step",
+            "X": "68",
+            "Y": "1201.59"
+          }
+        ]
+      },
+      {
+        "Id": "against your cash cushion.",
+        "Copy": "against your cash cushion.",
+        "Font": "Inter",
+        "Size": "14",
+        "Fill": "#60665D",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "against your cash cushion.",
+            "X": "68",
+            "Y": "1222.59"
+          }
+        ]
+      },
+      {
+        "Id": "Start with the picture",
+        "Copy": "Start with the picture",
+        "Font": "Libre Baskerville",
+        "Size": "23",
+        "Fill": "white",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Start with the picture",
+            "X": "44",
+            "Y": "1356.55"
+          }
+        ]
+      },
+      {
+        "Id": "you have today.",
+        "Copy": "you have today.",
+        "Font": "Libre Baskerville",
+        "Size": "23",
+        "Fill": "white",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "you have today.",
+            "X": "44",
+            "Y": "1390.55"
+          }
+        ]
+      },
+      {
+        "Id": "You can fill the gaps as you go.",
+        "Copy": "You can fill the gaps as you go.",
+        "Font": "Inter",
+        "Size": "14",
+        "Fill": "white",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "You can fill the gaps as you go.",
+            "X": "44",
+            "Y": "1427.59"
+          }
+        ]
+      },
+      {
+        "Id": "Get RupAI for Android_2",
+        "Copy": "Get RupAI for Android",
+        "Font": "Inter",
+        "Size": "16",
+        "Fill": "#111111",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Get RupAI for Android",
+            "X": "112.859",
+            "Y": "1502.32"
+          }
+        ]
+      },
+      {
+        "Id": "RupAI_2",
+        "Copy": "RupAI",
+        "Font": "Libre Baskerville",
+        "Size": "23",
+        "Fill": "#111111",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "RupAI",
+            "X": "24",
+            "Y": "1611.55"
+          }
+        ]
+      },
+      {
+        "Id": "Install link pending",
+        "Copy": "Install link pending",
+        "Font": "Inter",
+        "Size": "12",
+        "Fill": "#60665D",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Install link pending",
+            "X": "260.777",
+            "Y": "1611.86"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "Frame": "RupAI\\v4\\CTA v2.svg",
+    "Width": "720",
+    "Height": "1170",
+    "Text": [
+      {
+        "Id": "RUPAI / CTA V2 ONLY",
+        "Copy": "RUPAI / CTA V2 ONLY",
+        "Font": "Inter",
+        "Size": "12",
+        "Fill": "#36732E",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "RUPAI / CTA V2 ONLY",
+            "X": "40",
+            "Y": "41.8636"
+          }
+        ]
+      },
+      {
+        "Id": "Clear actions.",
+        "Copy": "Clear actions.",
+        "Font": "Libre Baskerville",
+        "Size": "42",
+        "Fill": "#111111",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Clear actions.",
+            "X": "40",
+            "Y": "104.7"
+          }
+        ]
+      },
+      {
+        "Id": "16 sp labels. 56 dp default height. Controls grow with text.",
+        "Copy": "16 sp labels. 56 dp default height. Controls grow with text.",
+        "Font": "Inter",
+        "Size": "16",
+        "Fill": "#60665D",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "16 sp labels. 56 dp default height. Controls grow with text.",
+            "X": "40",
+            "Y": "144.318"
+          }
+        ]
+      },
+      {
+        "Id": "CTA v2 / Light",
+        "Copy": "CTA v2 / Light",
+        "Font": "Inter",
+        "Size": "20",
+        "Fill": "#111111",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "CTA v2 / Light",
+            "X": "64",
+            "Y": "229.273"
+          }
+        ]
+      },
+      {
+        "Id": "Default",
+        "Copy": "Default",
+        "Font": "Inter",
+        "Size": "14",
+        "Fill": "#60665D",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Default",
+            "X": "64",
+            "Y": "273.591"
+          }
+        ]
+      },
+      {
+        "Id": "See plan",
+        "Copy": "See plan",
+        "Font": "Inter",
+        "Size": "16",
+        "Fill": "white",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "See plan",
+            "X": "168.375",
+            "Y": "324.318"
+          }
+        ]
+      },
+      {
+        "Id": "Explore demo",
+        "Copy": "Explore demo",
+        "Font": "Inter",
+        "Size": "16",
+        "Fill": "#111111",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Explore demo",
+            "X": "460.25",
+            "Y": "324.318"
+          }
+        ]
+      },
+      {
+        "Id": "Pressed",
+        "Copy": "Pressed",
+        "Font": "Inter",
+        "Size": "14",
+        "Fill": "#60665D",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Pressed",
+            "X": "64",
+            "Y": "410.591"
+          }
+        ]
+      },
+      {
+        "Id": "See plan_2",
+        "Copy": "See plan",
+        "Font": "Inter",
+        "Size": "16",
+        "Fill": "white",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "See plan",
+            "X": "168.375",
+            "Y": "461.318"
+          }
+        ]
+      },
+      {
+        "Id": "Explore demo_2",
+        "Copy": "Explore demo",
+        "Font": "Inter",
+        "Size": "16",
+        "Fill": "#111111",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Explore demo",
+            "X": "460.25",
+            "Y": "461.318"
+          }
+        ]
+      },
+      {
+        "Id": "Focused",
+        "Copy": "Focused",
+        "Font": "Inter",
+        "Size": "14",
+        "Fill": "#60665D",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Focused",
+            "X": "64",
+            "Y": "547.591"
+          }
+        ]
+      },
+      {
+        "Id": "See plan_3",
+        "Copy": "See plan",
+        "Font": "Inter",
+        "Size": "16",
+        "Fill": "white",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "See plan",
+            "X": "168.375",
+            "Y": "598.318"
+          }
+        ]
+      },
+      {
+        "Id": "Explore demo_3",
+        "Copy": "Explore demo",
+        "Font": "Inter",
+        "Size": "16",
+        "Fill": "#111111",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Explore demo",
+            "X": "460.25",
+            "Y": "598.318"
+          }
+        ]
+      },
+      {
+        "Id": "Disabled",
+        "Copy": "Disabled",
+        "Font": "Inter",
+        "Size": "14",
+        "Fill": "#60665D",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Disabled",
+            "X": "64",
+            "Y": "684.591"
+          }
+        ]
+      },
+      {
+        "Id": "See plan_4",
+        "Copy": "See plan",
+        "Font": "Inter",
+        "Size": "16",
+        "Fill": "#60665D",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "See plan",
+            "X": "168.375",
+            "Y": "735.318"
+          }
+        ]
+      },
+      {
+        "Id": "Add an account to enable this action.",
+        "Copy": "Add an account to enable this action.",
+        "Font": "Inter",
+        "Size": "14",
+        "Fill": "#60665D",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Add an account to enable this action.",
+            "X": "64",
+            "Y": "779.591"
+          }
+        ]
+      },
+      {
+        "Id": "Explore demo_4",
+        "Copy": "Explore demo",
+        "Font": "Inter",
+        "Size": "16",
+        "Fill": "#60665D",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Explore demo",
+            "X": "460.25",
+            "Y": "735.318"
+          }
+        ]
+      },
+      {
+        "Id": "Add an account to enable this action._2",
+        "Copy": "Add an account to enable this action.",
+        "Font": "Inter",
+        "Size": "14",
+        "Fill": "#60665D",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Add an account to enable this action.",
+            "X": "368",
+            "Y": "779.591"
+          }
+        ]
+      },
+      {
+        "Id": "Loading",
+        "Copy": "Loading",
+        "Font": "Inter",
+        "Size": "14",
+        "Fill": "#60665D",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Loading",
+            "X": "64",
+            "Y": "821.591"
+          }
+        ]
+      },
+      {
+        "Id": "Savingâ¦",
+        "Copy": "Saving…",
+        "Font": "Inter",
+        "Size": "16",
+        "Fill": "white",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Saving…",
+            "X": "169.07",
+            "Y": "872.318"
+          }
+        ]
+      },
+      {
+        "Id": "Savingâ¦_2",
+        "Copy": "Saving…",
+        "Font": "Inter",
+        "Size": "16",
+        "Fill": "#111111",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Saving…",
+            "X": "480.07",
+            "Y": "872.318"
+          }
+        ]
+      },
+      {
+        "Id": "130% / 200%: wrap labels, stack rows and grow heights.",
+        "Copy": "130% / 200%: wrap labels, stack rows and grow heights.",
+        "Font": "Inter",
+        "Size": "16",
+        "Fill": "#111111",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "130% / 200%: wrap labels, stack rows and grow heights.",
+            "X": "40",
+            "Y": "1031.32"
+          }
+        ]
+      },
+      {
+        "Id": "Disabled controls show a reason. Missing values: âNot addedâ.",
+        "Copy": "Disabled controls show a reason. Missing values: “Not added”.",
+        "Font": "Inter",
+        "Size": "16",
+        "Fill": "#111111",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Disabled controls show a reason. Missing values: “Not added”.",
+            "X": "40",
+            "Y": "1069.32"
+          }
+        ]
+      },
+      {
+        "Id": "One flat v2 family on Home, forms and landing pages.",
+        "Copy": "One flat v2 family on Home, forms and landing pages.",
+        "Font": "Inter",
+        "Size": "16",
+        "Fill": "#111111",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "One flat v2 family on Home, forms and landing pages.",
+            "X": "40",
+            "Y": "1109.32"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "Frame": "RupAI\\v4\\Foundations.svg",
+    "Width": "1400",
+    "Height": "1910",
+    "Text": [
+      {
+        "Id": "RUPAI / FOUNDATIONS 04",
+        "Copy": "RUPAI / FOUNDATIONS 04",
+        "Font": "Inter",
+        "Size": "12",
+        "Fill": "#36732E",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "RUPAI / FOUNDATIONS 04",
+            "X": "40",
+            "Y": "41.8636"
+          }
+        ]
+      },
+      {
+        "Id": "Calm, clear and considered.",
+        "Copy": "Calm, clear and considered.",
+        "Font": "Libre Baskerville",
+        "Size": "42",
+        "Fill": "#111111",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Calm, clear and considered.",
+            "X": "40",
+            "Y": "104.7"
+          }
+        ]
+      },
+      {
+        "Id": "Flat semantic surfaces, a serif headline, readable supporting text. Native Android first.",
+        "Copy": "Flat semantic surfaces, a serif headline, readable supporting text. Native Android first.",
+        "Font": "Inter",
+        "Size": "16",
+        "Fill": "#60665D",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Flat semantic surfaces, a serif headline, readable supporting text. Native Android first.",
+            "X": "40",
+            "Y": "144.318"
+          }
+        ]
+      },
+      {
+        "Id": "Palette / Light",
+        "Copy": "Palette / Light",
+        "Font": "Inter",
+        "Size": "22",
+        "Fill": "#111111",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Palette / Light",
+            "X": "404",
+            "Y": "229.5"
+          }
+        ]
+      },
+      {
+        "Id": "Canvas",
+        "Copy": "Canvas",
+        "Font": "Inter",
+        "Size": "16",
+        "Fill": "#111111",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Canvas",
+            "X": "484",
+            "Y": "282.318"
+          }
+        ]
+      },
+      {
+        "Id": "#FFFFFF",
+        "Copy": "#FFFFFF",
+        "Font": "Inter",
+        "Size": "14",
+        "Fill": "#60665D",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "#FFFFFF",
+            "X": "937.867",
+            "Y": "282.591"
+          }
+        ]
+      },
+      {
+        "Id": "Surface",
+        "Copy": "Surface",
+        "Font": "Inter",
+        "Size": "16",
+        "Fill": "#111111",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Surface",
+            "X": "484",
+            "Y": "340.318"
+          }
+        ]
+      },
+      {
+        "Id": "#F6F7F5",
+        "Copy": "#F6F7F5",
+        "Font": "Inter",
+        "Size": "14",
+        "Fill": "#60665D",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "#F6F7F5",
+            "X": "937.266",
+            "Y": "340.591"
+          }
+        ]
+      },
+      {
+        "Id": "Green / summary",
+        "Copy": "Green / summary",
+        "Font": "Inter",
+        "Size": "16",
+        "Fill": "#111111",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Green / summary",
+            "X": "484",
+            "Y": "398.318"
+          }
+        ]
+      },
+      {
+        "Id": "#E9F3E6",
+        "Copy": "#E9F3E6",
+        "Font": "Inter",
+        "Size": "14",
+        "Fill": "#60665D",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "#E9F3E6",
+            "X": "935.83",
+            "Y": "398.591"
+          }
+        ]
+      },
+      {
+        "Id": "Pink / error",
+        "Copy": "Pink / error",
+        "Font": "Inter",
+        "Size": "16",
+        "Fill": "#111111",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Pink / error",
+            "X": "484",
+            "Y": "456.318"
+          }
+        ]
+      },
+      {
+        "Id": "#FBE1E7",
+        "Copy": "#FBE1E7",
+        "Font": "Inter",
+        "Size": "14",
+        "Fill": "#60665D",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "#FBE1E7",
+            "X": "938.605",
+            "Y": "456.591"
+          }
+        ]
+      },
+      {
+        "Id": "Text / primary",
+        "Copy": "Text / primary",
+        "Font": "Inter",
+        "Size": "16",
+        "Fill": "#111111",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Text / primary",
+            "X": "484",
+            "Y": "514.318"
+          }
+        ]
+      },
+      {
+        "Id": "#111111",
+        "Copy": "#111111",
+        "Font": "Inter",
+        "Size": "14",
+        "Fill": "#60665D",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "#111111",
+            "X": "948.121",
+            "Y": "514.591"
+          }
+        ]
+      },
+      {
+        "Id": "Text / secondary",
+        "Copy": "Text / secondary",
+        "Font": "Inter",
+        "Size": "16",
+        "Fill": "#111111",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Text / secondary",
+            "X": "484",
+            "Y": "572.318"
+          }
+        ]
+      },
+      {
+        "Id": "#60665D",
+        "Copy": "#60665D",
+        "Font": "Inter",
+        "Size": "14",
+        "Fill": "#60665D",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "#60665D",
+            "X": "933.629",
+            "Y": "572.591"
+          }
+        ]
+      },
+      {
+        "Id": "Typography / Latin",
+        "Copy": "Typography / Latin",
+        "Font": "Libre Baskerville",
+        "Size": "24",
+        "Fill": "#111111",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Typography / Latin",
+            "X": "40",
+            "Y": "723.4"
+          }
+        ]
+      },
+      {
+        "Id": "Your money, in view.",
+        "Copy": "Your money, in view.",
+        "Font": "Libre Baskerville",
+        "Size": "36",
+        "Fill": "#111111",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Your money, in view.",
+            "X": "40",
+            "Y": "779.1"
+          }
+        ]
+      },
+      {
+        "Id": "H1 / Libre Baskerville 32â40 / Sitka when available",
+        "Copy": "H1 / Libre Baskerville 32–40 / Sitka when available",
+        "Font": "Inter",
+        "Size": "14",
+        "Fill": "#60665D",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "H1 / Libre Baskerville 32–40 / Sitka when available",
+            "X": "720",
+            "Y": "779.591"
+          }
+        ]
+      },
+      {
+        "Id": "Your ledger",
+        "Copy": "Your ledger",
+        "Font": "Inter",
+        "Size": "24",
+        "Fill": "#111111",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Your ledger",
+            "X": "40",
+            "Y": "854.227"
+          }
+        ]
+      },
+      {
+        "Id": "H2 / Inter Medium 24",
+        "Copy": "H2 / Inter Medium 24",
+        "Font": "Inter",
+        "Size": "14",
+        "Fill": "#60665D",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "H2 / Inter Medium 24",
+            "X": "720",
+            "Y": "854.591"
+          }
+        ]
+      },
+      {
+        "Id": "A little room to breathe",
+        "Copy": "A little room to breathe",
+        "Font": "Inter",
+        "Size": "20",
+        "Fill": "#111111",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "A little room to breathe",
+            "X": "40",
+            "Y": "929.273"
+          }
+        ]
+      },
+      {
+        "Id": "H3 / Inter Regular 20",
+        "Copy": "H3 / Inter Regular 20",
+        "Font": "Inter",
+        "Size": "14",
+        "Fill": "#60665D",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "H3 / Inter Regular 20",
+            "X": "720",
+            "Y": "929.591"
+          }
+        ]
+      },
+      {
+        "Id": "Give every amount a clear source.",
+        "Copy": "Give every amount a clear source.",
+        "Font": "Inter",
+        "Size": "16",
+        "Fill": "#111111",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Give every amount a clear source.",
+            "X": "40",
+            "Y": "1004.32"
+          }
+        ]
+      },
+      {
+        "Id": "Body / Inter Regular 16; compact body 14 minimum",
+        "Copy": "Body / Inter Regular 16; compact body 14 minimum",
+        "Font": "Inter",
+        "Size": "14",
+        "Fill": "#60665D",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Body / Inter Regular 16; compact body 14 minimum",
+            "X": "720",
+            "Y": "1004.59"
+          }
+        ]
+      },
+      {
+        "Id": "â Predicted Â· Medium confidence",
+        "Copy": "≈ Predicted · Medium confidence",
+        "Font": "Inter",
+        "Size": "12",
+        "Fill": "#111111",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "≈ Predicted · Medium confidence",
+            "X": "40",
+            "Y": "1079.86"
+          }
+        ]
+      },
+      {
+        "Id": "Caption / 12 minimum; legend glyph 16",
+        "Copy": "Caption / 12 minimum; legend glyph 16",
+        "Font": "Inter",
+        "Size": "14",
+        "Fill": "#60665D",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Caption / 12 minimum; legend glyph 16",
+            "X": "720",
+            "Y": "1079.59"
+          }
+        ]
+      },
+      {
+        "Id": "Devanagari pairing",
+        "Copy": "Devanagari pairing",
+        "Font": "Libre Baskerville",
+        "Size": "24",
+        "Fill": "#111111",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Devanagari pairing",
+            "X": "40",
+            "Y": "1191.4"
+          }
+        ]
+      },
+      {
+        "Id": "à¤à¤ªà¤à¤¾ à¤ªà¥à¤¸à¤¾, à¤à¤ à¤¸à¤¾à¤«à¤¼ à¤¤à¤¸à¥à¤µà¥à¤°à¥¤",
+        "Copy": "आपका पैसा, एक साफ़ तस्वीर।",
+        "Font": "Eczar",
+        "Size": "32",
+        "Fill": "#111111",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "आपका पैसा, एक साफ़ तस्वीर।",
+            "X": "40",
+            "Y": "1252.64"
+          }
+        ]
+      },
+      {
+        "Id": "à¤¹à¤° à¤²à¥à¤¨-à¤¦à¥à¤¨ à¤à¤¾ à¤¸à¥à¤ªà¤·à¥à¤ à¤¹à¤¿à¤¸à¤¾à¤¬à¥¤",
+        "Copy": "हर लेन-देन का स्पष्ट हिसाब।",
+        "Font": "Noto Sans Devanagari",
+        "Size": "16",
+        "Fill": "#111111",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "हर लेन-देन का स्पष्ट हिसाब।",
+            "X": "40",
+            "Y": "1296.4"
+          }
+        ]
+      },
+      {
+        "Id": "H1 / Eczar Regular",
+        "Copy": "H1 / Eczar Regular",
+        "Font": "Inter",
+        "Size": "14",
+        "Fill": "#60665D",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "H1 / Eczar Regular",
+            "X": "720",
+            "Y": "1247.59"
+          }
+        ]
+      },
+      {
+        "Id": "Body / Noto Sans Devanagari Regular + Medium",
+        "Copy": "Body / Noto Sans Devanagari Regular + Medium",
+        "Font": "Inter",
+        "Size": "14",
+        "Fill": "#60665D",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Body / Noto Sans Devanagari Regular + Medium",
+            "X": "720",
+            "Y": "1297.59"
+          }
+        ]
+      },
+      {
+        "Id": "Space / 4, 8, 12, 16, 20, 24, 32, 48 dp. Keep dp spacing independent of sp text scaling.",
+        "Copy": "Space / 4, 8, 12, 16, 20, 24, 32, 48 dp. Keep dp spacing independent of sp text scaling.",
+        "Font": "Inter",
+        "Size": "16",
+        "Fill": "#60665D",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Space / 4, 8, 12, 16, 20, 24, 32, 48 dp. Keep dp spacing independent of sp text scaling.",
+            "X": "40",
+            "Y": "1401.32"
+          }
+        ]
+      },
+      {
+        "Id": "Radius / small 8, input 12, button 16, card 20, sheet 24 dp.",
+        "Copy": "Radius / small 8, input 12, button 16, card 20, sheet 24 dp.",
+        "Font": "Inter",
+        "Size": "16",
+        "Fill": "#60665D",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Radius / small 8, input 12, button 16, card 20, sheet 24 dp.",
+            "X": "40",
+            "Y": "1453.32"
+          }
+        ]
+      },
+      {
+        "Id": "Elevation / base 0 dp; raised 1 dp; sheet 3 dp. Buttons remain flat.",
+        "Copy": "Elevation / base 0 dp; raised 1 dp; sheet 3 dp. Buttons remain flat.",
+        "Font": "Inter",
+        "Size": "16",
+        "Fill": "#60665D",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Elevation / base 0 dp; raised 1 dp; sheet 3 dp. Buttons remain flat.",
+            "X": "40",
+            "Y": "1505.32"
+          }
+        ]
+      },
+      {
+        "Id": "Money / tabular numerals everywhere; retain currency, sign and Indian grouping. Never align with spaces.",
+        "Copy": "Money / tabular numerals everywhere; retain currency, sign and Indian grouping. Never align with spaces.",
+        "Font": "Inter",
+        "Size": "16",
+        "Fill": "#60665D",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Money / tabular numerals everywhere; retain currency, sign and Indian grouping. Never align with spaces.",
+            "X": "40",
+            "Y": "1557.32"
+          }
+        ]
+      },
+      {
+        "Id": "Text scale / 100%, 130%, 200%. HUG heights, wrapped labels, stacked CTA rows; scroll content naturally.",
+        "Copy": "Text scale / 100%, 130%, 200%. HUG heights, wrapped labels, stacked CTA rows; scroll content naturally.",
+        "Font": "Inter",
+        "Size": "16",
+        "Fill": "#60665D",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Text scale / 100%, 130%, 200%. HUG heights, wrapped labels, stacked CTA rows; scroll content naturally.",
+            "X": "40",
+            "Y": "1609.32"
+          }
+        ]
+      },
+      {
+        "Id": "Icons / 24 dp outline, 1.75â2 dp stroke, 48 dp target; decorative art is hidden from screen readers.",
+        "Copy": "Icons / 24 dp outline, 1.75–2 dp stroke, 48 dp target; decorative art is hidden from screen readers.",
+        "Font": "Inter",
+        "Size": "16",
+        "Fill": "#60665D",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Icons / 24 dp outline, 1.75–2 dp stroke, 48 dp target; decorative art is hidden from screen readers.",
+            "X": "40",
+            "Y": "1661.32"
+          }
+        ]
+      },
+      {
+        "Id": "Chart / solid observed line; dashed prediction line plus â and range endpoints. Pink always has error text.",
+        "Copy": "Chart / solid observed line; dashed prediction line plus ≈ and range endpoints. Pink always has error text.",
+        "Font": "Inter",
+        "Size": "16",
+        "Fill": "#60665D",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Chart / solid observed line; dashed prediction line plus ≈ and range endpoints. Pink always has error text.",
+            "X": "40",
+            "Y": "1713.32"
+          }
+        ]
+      },
+      {
+        "Id": "No gradients / no fades, no gradient masks, no background dither wallpaper. Coin dithering is discrete art.",
+        "Copy": "No gradients / no fades, no gradient masks, no background dither wallpaper. Coin dithering is discrete art.",
+        "Font": "Inter",
+        "Size": "16",
+        "Fill": "#60665D",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "No gradients / no fades, no gradient masks, no background dither wallpaper. Coin dithering is discrete art.",
+            "X": "40",
+            "Y": "1765.32"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "Frame": "RupAI\\v4\\Home.svg",
+    "Width": "700",
+    "Height": "1200",
+    "Text": [
+      {
+        "Id": "RUPAI / APPROVED DIRECTION 04",
+        "Copy": "RUPAI / APPROVED DIRECTION 04",
+        "Font": "Inter",
+        "Size": "12",
+        "Fill": "#36732E",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "RUPAI / APPROVED DIRECTION 04",
+            "X": "40",
+            "Y": "41.8636"
+          }
+        ]
+      },
+      {
+        "Id": "Your money, in view.",
+        "Copy": "Your money, in view.",
+        "Font": "Libre Baskerville",
+        "Size": "42",
+        "Fill": "#111111",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Your money, in view.",
+            "X": "40",
+            "Y": "104.7"
+          }
+        ]
+      },
+      {
+        "Id": "Ledger, forecast confidence and one small coin stack.",
+        "Copy": "Ledger, forecast confidence and one small coin stack.",
+        "Font": "Inter",
+        "Size": "16",
+        "Fill": "#60665D",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Ledger, forecast confidence and one small coin stack.",
+            "X": "40",
+            "Y": "144.318"
+          }
+        ]
+      },
+      {
+        "Id": "RupAI",
+        "Copy": "RupAI",
+        "Font": "Libre Baskerville",
+        "Size": "26",
+        "Fill": "#111111",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "RupAI",
+            "X": "179",
+            "Y": "224.1"
+          }
+        ]
+      },
+      {
+        "Id": "Your money, in view._2",
+        "Copy": "Your money, in view.",
+        "Font": "Libre Baskerville",
+        "Size": "27",
+        "Fill": "#111111",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Your money, in view.",
+            "X": "179",
+            "Y": "269.95"
+          }
+        ]
+      },
+      {
+        "Id": "October Â· Synthetic demo",
+        "Copy": "October · Synthetic demo",
+        "Font": "Inter",
+        "Size": "14",
+        "Fill": "#60665D",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "October · Synthetic demo",
+            "X": "179",
+            "Y": "302.591"
+          }
+        ]
+      },
+      {
+        "Id": "Month-end cushion",
+        "Copy": "Month-end cushion",
+        "Font": "Inter",
+        "Size": "14",
+        "Fill": "#111111",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Month-end cushion",
+            "X": "199",
+            "Y": "364.591"
+          }
+        ]
+      },
+      {
+        "Id": "â¹18Kââ¹26K",
+        "Copy": "₹18K–₹26K",
+        "Font": "Inter",
+        "Size": "32",
+        "Fill": "#111111",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "₹18K–₹26K",
+            "X": "199",
+            "Y": "410.136"
+          }
+        ]
+      },
+      {
+        "Id": "â Predicted Â· Medium confidence",
+        "Copy": "≈ Predicted · Medium confidence",
+        "Font": "Inter",
+        "Size": "14",
+        "Fill": "#111111",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "≈ Predicted · Medium confidence",
+            "X": "199",
+            "Y": "443.591"
+          }
+        ]
+      },
+      {
+        "Id": "Medium",
+        "Copy": "Medium",
+        "Font": "Inter",
+        "Size": "12",
+        "Fill": "#111111",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Medium",
+            "X": "455.637",
+            "Y": "408.864"
+          }
+        ]
+      },
+      {
+        "Id": "confidence",
+        "Copy": "confidence",
+        "Font": "Inter",
+        "Size": "12",
+        "Fill": "#60665D",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "confidence",
+            "X": "437.801",
+            "Y": "426.864"
+          }
+        ]
+      },
+      {
+        "Id": "After upcoming commitments",
+        "Copy": "After upcoming commitments",
+        "Font": "Inter",
+        "Size": "14",
+        "Fill": "#60665D",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "After upcoming commitments",
+            "X": "199",
+            "Y": "475.591"
+          }
+        ]
+      },
+      {
+        "Id": "See plan",
+        "Copy": "See plan",
+        "Font": "Inter",
+        "Size": "16",
+        "Fill": "white",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "See plan",
+            "X": "317.375",
+            "Y": "533.318"
+          }
+        ]
+      },
+      {
+        "Id": "Ledger",
+        "Copy": "Ledger",
+        "Font": "Inter",
+        "Size": "22",
+        "Fill": "#111111",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Ledger",
+            "X": "179",
+            "Y": "616.5"
+          }
+        ]
+      },
+      {
+        "Id": "View all â",
+        "Copy": "View all →",
+        "Font": "Inter",
+        "Size": "14",
+        "Fill": "#111111",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "View all →",
+            "X": "452.928",
+            "Y": "616.591"
+          }
+        ]
+      },
+      {
+        "Id": "Observed cash Â· â¹45,200",
+        "Copy": "Observed cash · ₹45,200",
+        "Font": "Inter",
+        "Size": "14",
+        "Fill": "#60665D",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Observed cash · ₹45,200",
+            "X": "179",
+            "Y": "651.591"
+          }
+        ]
+      },
+      {
+        "Id": "Groceries",
+        "Copy": "Groceries",
+        "Font": "Inter",
+        "Size": "16",
+        "Fill": "#111111",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Groceries",
+            "X": "179",
+            "Y": "695.318"
+          }
+        ]
+      },
+      {
+        "Id": "Today Â· Food",
+        "Copy": "Today · Food",
+        "Font": "Inter",
+        "Size": "14",
+        "Fill": "#60665D",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Today · Food",
+            "X": "179",
+            "Y": "722.591"
+          }
+        ]
+      },
+      {
+        "Id": "ââ¹850",
+        "Copy": "−₹850",
+        "Font": "Inter",
+        "Size": "16",
+        "Fill": "#111111",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "−₹850",
+            "X": "470.734",
+            "Y": "705.318"
+          }
+        ]
+      },
+      {
+        "Id": "Salary",
+        "Copy": "Salary",
+        "Font": "Inter",
+        "Size": "16",
+        "Fill": "#111111",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Salary",
+            "X": "179",
+            "Y": "771.318"
+          }
+        ]
+      },
+      {
+        "Id": "8 Oct Â· Income",
+        "Copy": "8 Oct · Income",
+        "Font": "Inter",
+        "Size": "14",
+        "Fill": "#60665D",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "8 Oct · Income",
+            "X": "179",
+            "Y": "798.591"
+          }
+        ]
+      },
+      {
+        "Id": "+â¹85,000",
+        "Copy": "+₹85,000",
+        "Font": "Inter",
+        "Size": "16",
+        "Fill": "#111111",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "+₹85,000",
+            "X": "445.609",
+            "Y": "781.318"
+          }
+        ]
+      },
+      {
+        "Id": "Rent",
+        "Copy": "Rent",
+        "Font": "Inter",
+        "Size": "16",
+        "Fill": "#111111",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Rent",
+            "X": "179",
+            "Y": "847.318"
+          }
+        ]
+      },
+      {
+        "Id": "1 Oct Â· Home",
+        "Copy": "1 Oct · Home",
+        "Font": "Inter",
+        "Size": "14",
+        "Fill": "#60665D",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "1 Oct · Home",
+            "X": "179",
+            "Y": "874.591"
+          }
+        ]
+      },
+      {
+        "Id": "ââ¹22,000",
+        "Copy": "−₹22,000",
+        "Font": "Inter",
+        "Size": "16",
+        "Fill": "#111111",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "−₹22,000",
+            "X": "445.609",
+            "Y": "857.318"
+          }
+        ]
+      },
+      {
+        "Id": "Coming up Â· Credit card bill",
+        "Copy": "Coming up · Credit card bill",
+        "Font": "Inter",
+        "Size": "16",
+        "Fill": "#111111",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Coming up · Credit card bill",
+            "X": "179",
+            "Y": "945.318"
+          }
+        ]
+      },
+      {
+        "Id": "12 Oct Â· Confirmed Â· â¹4,200",
+        "Copy": "12 Oct · Confirmed · ₹4,200",
+        "Font": "Inter",
+        "Size": "14",
+        "Fill": "#60665D",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "12 Oct · Confirmed · ₹4,200",
+            "X": "179",
+            "Y": "977.591"
+          }
+        ]
+      },
+      {
+        "Id": "Home",
+        "Copy": "Home",
+        "Font": "Inter",
+        "Size": "12",
+        "Fill": "#111111",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Home",
+            "X": "202.021",
+            "Y": "1053.86"
+          }
+        ]
+      },
+      {
+        "Id": "Plan",
+        "Copy": "Plan",
+        "Font": "Inter",
+        "Size": "12",
+        "Fill": "#60665D",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Plan",
+            "X": "294.127",
+            "Y": "1053.86"
+          }
+        ]
+      },
+      {
+        "Id": "Ledger_2",
+        "Copy": "Ledger",
+        "Font": "Inter",
+        "Size": "12",
+        "Fill": "#60665D",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Ledger",
+            "X": "373.775",
+            "Y": "1053.86"
+          }
+        ]
+      },
+      {
+        "Id": "Advisor",
+        "Copy": "Advisor",
+        "Font": "Inter",
+        "Size": "12",
+        "Fill": "#60665D",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Advisor",
+            "X": "459.758",
+            "Y": "1053.86"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "Frame": "RupAI\\v4\\Illustration slots.svg",
+    "Width": "1120",
+    "Height": "1020",
+    "Text": [
+      {
+        "Id": "RUPAI / ILLUSTRATION SLOTS",
+        "Copy": "RUPAI / ILLUSTRATION SLOTS",
+        "Font": "Inter",
+        "Size": "12",
+        "Fill": "#36732E",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "RUPAI / ILLUSTRATION SLOTS",
+            "X": "40",
+            "Y": "41.8636"
+          }
+        ]
+      },
+      {
+        "Id": "One small moment per screen.",
+        "Copy": "One small moment per screen.",
+        "Font": "Libre Baskerville",
+        "Size": "42",
+        "Fill": "#111111",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "One small moment per screen.",
+            "X": "40",
+            "Y": "104.7"
+          }
+        ]
+      },
+      {
+        "Id": "Website-generated Bayer coin stacks. Flat ink and green. Artwork is decorative; values stay in native text.",
+        "Copy": "Website-generated Bayer coin stacks. Flat ink and green. Artwork is decorative; values stay in native text.",
+        "Font": "Inter",
+        "Size": "16",
+        "Fill": "#60665D",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Website-generated Bayer coin stacks. Flat ink and green. Artwork is decorative; values stay in native text.",
+            "X": "40",
+            "Y": "144.318"
+          }
+        ]
+      },
+      {
+        "Id": "Home / artwork placeholder",
+        "Copy": "Home / artwork placeholder",
+        "Font": "Inter",
+        "Size": "20",
+        "Fill": "#111111",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Home / artwork placeholder",
+            "X": "64",
+            "Y": "231.273"
+          }
+        ]
+      },
+      {
+        "Id": "Month-end cushion",
+        "Copy": "Month-end cushion",
+        "Font": "Inter",
+        "Size": "18",
+        "Fill": "#111111",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Month-end cushion",
+            "X": "64",
+            "Y": "429.545"
+          }
+        ]
+      },
+      {
+        "Id": "72 Ã 54 dp beside the range; one stack.",
+        "Copy": "72 × 54 dp beside the range; one stack.",
+        "Font": "Inter",
+        "Size": "14",
+        "Fill": "#60665D",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "72 × 54 dp beside the range; one stack.",
+            "X": "64",
+            "Y": "467.591"
+          }
+        ]
+      },
+      {
+        "Id": "Plan / artwork placeholder",
+        "Copy": "Plan / artwork placeholder",
+        "Font": "Inter",
+        "Size": "20",
+        "Fill": "#111111",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Plan / artwork placeholder",
+            "X": "604",
+            "Y": "231.273"
+          }
+        ]
+      },
+      {
+        "Id": "A little room ahead",
+        "Copy": "A little room ahead",
+        "Font": "Inter",
+        "Size": "18",
+        "Fill": "#111111",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "A little room ahead",
+            "X": "604",
+            "Y": "429.545"
+          }
+        ]
+      },
+      {
+        "Id": "160 Ã 120 dp in the summary; one stack.",
+        "Copy": "160 × 120 dp in the summary; one stack.",
+        "Font": "Inter",
+        "Size": "14",
+        "Fill": "#60665D",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "160 × 120 dp in the summary; one stack.",
+            "X": "604",
+            "Y": "467.591"
+          }
+        ]
+      },
+      {
+        "Id": "Ledger / artwork placeholder",
+        "Copy": "Ledger / artwork placeholder",
+        "Font": "Inter",
+        "Size": "20",
+        "Fill": "#111111",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Ledger / artwork placeholder",
+            "X": "64",
+            "Y": "571.273"
+          }
+        ]
+      },
+      {
+        "Id": "Your transactions, in order",
+        "Copy": "Your transactions, in order",
+        "Font": "Inter",
+        "Size": "18",
+        "Fill": "#111111",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Your transactions, in order",
+            "X": "64",
+            "Y": "769.545"
+          }
+        ]
+      },
+      {
+        "Id": "120 Ã 90 dp in the empty state; one stack.",
+        "Copy": "120 × 90 dp in the empty state; one stack.",
+        "Font": "Inter",
+        "Size": "14",
+        "Fill": "#60665D",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "120 × 90 dp in the empty state; one stack.",
+            "X": "64",
+            "Y": "807.591"
+          }
+        ]
+      },
+      {
+        "Id": "Advisor / artwork placeholder",
+        "Copy": "Advisor / artwork placeholder",
+        "Font": "Inter",
+        "Size": "20",
+        "Fill": "#111111",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Advisor / artwork placeholder",
+            "X": "604",
+            "Y": "571.273"
+          }
+        ]
+      },
+      {
+        "Id": "A clear next step",
+        "Copy": "A clear next step",
+        "Font": "Inter",
+        "Size": "18",
+        "Fill": "#111111",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "A clear next step",
+            "X": "604",
+            "Y": "769.545"
+          }
+        ]
+      },
+      {
+        "Id": "160 Ã 120 dp before guidance; one stack.",
+        "Copy": "160 × 120 dp before guidance; one stack.",
+        "Font": "Inter",
+        "Size": "14",
+        "Fill": "#60665D",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "160 × 120 dp before guidance; one stack.",
+            "X": "604",
+            "Y": "807.591"
+          }
+        ]
+      },
+      {
+        "Id": "No gradient masks, fades, animated grain or texture behind text. Preserve the exact Bayer-dot geometry.",
+        "Copy": "No gradient masks, fades, animated grain or texture behind text. Preserve the exact Bayer-dot geometry.",
+        "Font": "Inter",
+        "Size": "16",
+        "Fill": "#60665D",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "No gradient masks, fades, animated grain or texture behind text. Preserve the exact Bayer-dot geometry.",
+            "X": "40",
+            "Y": "921.318"
+          }
+        ]
+      },
+      {
+        "Id": "Flat ink and green. Test at device size for moirÃ© before shipping.",
+        "Copy": "Flat ink and green. Test at device size for moiré before shipping.",
+        "Font": "Inter",
+        "Size": "16",
+        "Fill": "#60665D",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Flat ink and green. Test at device size for moiré before shipping.",
+            "X": "40",
+            "Y": "963.318"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "Frame": "RupAI\\v4\\Landing and privacy.svg",
+    "Width": "1120",
+    "Height": "980",
+    "Text": [
+      {
+        "Id": "RUPAI / LANDING AND CONSENT",
+        "Copy": "RUPAI / LANDING AND CONSENT",
+        "Font": "Inter",
+        "Size": "12",
+        "Fill": "#36732E",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "RUPAI / LANDING AND CONSENT",
+            "X": "40",
+            "Y": "41.8636"
+          }
+        ]
+      },
+      {
+        "Id": "Your money. A clearer next step.",
+        "Copy": "Your money. A clearer next step.",
+        "Font": "Libre Baskerville",
+        "Size": "42",
+        "Fill": "#111111",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Your money. A clearer next step.",
+            "X": "40",
+            "Y": "104.7"
+          }
+        ]
+      },
+      {
+        "Id": "Privacy and permission copy stays next to the installation action, never buried below the fold.",
+        "Copy": "Privacy and permission copy stays next to the installation action, never buried below the fold.",
+        "Font": "Inter",
+        "Size": "16",
+        "Fill": "#60665D",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Privacy and permission copy stays next to the installation action, never buried below the fold.",
+            "X": "40",
+            "Y": "144.318"
+          }
+        ]
+      },
+      {
+        "Id": "Get RupAI for Android",
+        "Copy": "Get RupAI for Android",
+        "Font": "Inter",
+        "Size": "16",
+        "Fill": "white",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Get RupAI for Android",
+            "X": "107.859",
+            "Y": "235.318"
+          }
+        ]
+      },
+      {
+        "Id": "Bank-alert parsing runs on your phone.",
+        "Copy": "Bank-alert parsing runs on your phone.",
+        "Font": "Inter",
+        "Size": "16",
+        "Fill": "#111111",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Bank-alert parsing runs on your phone.",
+            "X": "40",
+            "Y": "303.318"
+          }
+        ]
+      },
+      {
+        "Id": "AI categorization sends merchant details and message snippets to our backend.",
+        "Copy": "AI categorization sends merchant details and message snippets to our backend.",
+        "Font": "Inter",
+        "Size": "16",
+        "Fill": "#60665D",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "AI categorization sends merchant details and message snippets to our backend.",
+            "X": "40",
+            "Y": "335.318"
+          }
+        ]
+      },
+      {
+        "Id": "Why SMS permission?",
+        "Copy": "Why SMS permission?",
+        "Font": "Libre Baskerville",
+        "Size": "24",
+        "Fill": "#111111",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Why SMS permission?",
+            "X": "40",
+            "Y": "409.4"
+          }
+        ]
+      },
+      {
+        "Id": "With your permission, RupAI reads supported bank alerts to find transactions.",
+        "Copy": "With your permission, RupAI reads supported bank alerts to find transactions.",
+        "Font": "Inter",
+        "Size": "16",
+        "Fill": "#111111",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "With your permission, RupAI reads supported bank alerts to find transactions.",
+            "X": "40",
+            "Y": "451.318"
+          }
+        ]
+      },
+      {
+        "Id": "Android grants access to the inbox; RupAI filters bank alerts in the app.",
+        "Copy": "Android grants access to the inbox; RupAI filters bank alerts in the app.",
+        "Font": "Inter",
+        "Size": "16",
+        "Fill": "#60665D",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Android grants access to the inbox; RupAI filters bank alerts in the app.",
+            "X": "40",
+            "Y": "483.318"
+          }
+        ]
+      },
+      {
+        "Id": "You can decline and add data manually. Revoke access in Android settings.",
+        "Copy": "You can decline and add data manually. Revoke access in Android settings.",
+        "Font": "Inter",
+        "Size": "16",
+        "Fill": "#60665D",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "You can decline and add data manually. Revoke access in Android settings.",
+            "X": "40",
+            "Y": "515.318"
+          }
+        ]
+      },
+      {
+        "Id": "Copy is a design requirement for implementation.",
+        "Copy": "Copy is a design requirement for implementation.",
+        "Font": "Inter",
+        "Size": "20",
+        "Fill": "#111111",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Copy is a design requirement for implementation.",
+            "X": "40",
+            "Y": "587.273"
+          }
+        ]
+      },
+      {
+        "Id": "Do not claim all processing is on-device, or that no information leaves the phone.",
+        "Copy": "Do not claim all processing is on-device, or that no information leaves the phone.",
+        "Font": "Inter",
+        "Size": "16",
+        "Fill": "#60665D",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Do not claim all processing is on-device, or that no information leaves the phone.",
+            "X": "40",
+            "Y": "627.318"
+          }
+        ]
+      },
+      {
+        "Id": "Manual entry and denial recovery must be verified before shipping this flow.",
+        "Copy": "Manual entry and denial recovery must be verified before shipping this flow.",
+        "Font": "Inter",
+        "Size": "16",
+        "Fill": "#60665D",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Manual entry and denial recovery must be verified before shipping this flow.",
+            "X": "40",
+            "Y": "659.318"
+          }
+        ]
+      },
+      {
+        "Id": "SMS permission / Optional",
+        "Copy": "SMS permission / Optional",
+        "Font": "Inter",
+        "Size": "20",
+        "Fill": "#111111",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "SMS permission / Optional",
+            "X": "40",
+            "Y": "749.273"
+          }
+        ]
+      },
+      {
+        "Id": "Allow bank-alert access",
+        "Copy": "Allow bank-alert access",
+        "Font": "Inter",
+        "Size": "16",
+        "Fill": "white",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Allow bank-alert access",
+            "X": "99.6719",
+            "Y": "817.318"
+          }
+        ]
+      },
+      {
+        "Id": "Add data manually",
+        "Copy": "Add data manually",
+        "Font": "Inter",
+        "Size": "16",
+        "Fill": "#111111",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Add data manually",
+            "X": "449.719",
+            "Y": "817.318"
+          }
+        ]
+      },
+      {
+        "Id": "No v1 buttons. No gradients. One supporting coin-stack artwork per screen.",
+        "Copy": "No v1 buttons. No gradients. One supporting coin-stack artwork per screen.",
+        "Font": "Inter",
+        "Size": "16",
+        "Fill": "#60665D",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "No v1 buttons. No gradients. One supporting coin-stack artwork per screen.",
+            "X": "40",
+            "Y": "903.318"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "Frame": "RupAI\\v4\\Navigation.svg",
+    "Width": "720",
+    "Height": "750",
+    "Text": [
+      {
+        "Id": "RUPAI / NAVIGATION",
+        "Copy": "RUPAI / NAVIGATION",
+        "Font": "Inter",
+        "Size": "12",
+        "Fill": "#36732E",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "RUPAI / NAVIGATION",
+            "X": "40",
+            "Y": "41.8636"
+          }
+        ]
+      },
+      {
+        "Id": "Clear destinations.",
+        "Copy": "Clear destinations.",
+        "Font": "Libre Baskerville",
+        "Size": "42",
+        "Fill": "#111111",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Clear destinations.",
+            "X": "40",
+            "Y": "104.7"
+          }
+        ]
+      },
+      {
+        "Id": "Home / Plan / Ledger / Advisor. Quiet capsule is the default.",
+        "Copy": "Home / Plan / Ledger / Advisor. Quiet capsule is the default.",
+        "Font": "Inter",
+        "Size": "16",
+        "Fill": "#60665D",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Home / Plan / Ledger / Advisor. Quiet capsule is the default.",
+            "X": "40",
+            "Y": "144.318"
+          }
+        ]
+      },
+      {
+        "Id": "Quiet capsule / Default",
+        "Copy": "Quiet capsule / Default",
+        "Font": "Inter",
+        "Size": "20",
+        "Fill": "#111111",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Quiet capsule / Default",
+            "X": "64",
+            "Y": "233.273"
+          }
+        ]
+      },
+      {
+        "Id": "Home",
+        "Copy": "Home",
+        "Font": "Inter",
+        "Size": "12",
+        "Fill": "#111111",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Home",
+            "X": "212.021",
+            "Y": "305.864"
+          }
+        ]
+      },
+      {
+        "Id": "Plan",
+        "Copy": "Plan",
+        "Font": "Inter",
+        "Size": "12",
+        "Fill": "#60665D",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Plan",
+            "X": "304.127",
+            "Y": "305.864"
+          }
+        ]
+      },
+      {
+        "Id": "Ledger",
+        "Copy": "Ledger",
+        "Font": "Inter",
+        "Size": "12",
+        "Fill": "#60665D",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Ledger",
+            "X": "383.775",
+            "Y": "305.864"
+          }
+        ]
+      },
+      {
+        "Id": "Advisor",
+        "Copy": "Advisor",
+        "Font": "Inter",
+        "Size": "12",
+        "Fill": "#60665D",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Advisor",
+            "X": "469.758",
+            "Y": "305.864"
+          }
+        ]
+      },
+      {
+        "Id": "Editorial rail / Optional",
+        "Copy": "Editorial rail / Optional",
+        "Font": "Inter",
+        "Size": "20",
+        "Fill": "#111111",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Editorial rail / Optional",
+            "X": "64",
+            "Y": "396.273"
+          }
+        ]
+      },
+      {
+        "Id": "Home_2",
+        "Copy": "Home",
+        "Font": "Inter",
+        "Size": "12",
+        "Fill": "#111111",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Home",
+            "X": "212.021",
+            "Y": "473.864"
+          }
+        ]
+      },
+      {
+        "Id": "Plan_2",
+        "Copy": "Plan",
+        "Font": "Inter",
+        "Size": "12",
+        "Fill": "#60665D",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Plan",
+            "X": "304.127",
+            "Y": "473.864"
+          }
+        ]
+      },
+      {
+        "Id": "Ledger_2",
+        "Copy": "Ledger",
+        "Font": "Inter",
+        "Size": "12",
+        "Fill": "#60665D",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Ledger",
+            "X": "383.775",
+            "Y": "473.864"
+          }
+        ]
+      },
+      {
+        "Id": "Advisor_2",
+        "Copy": "Advisor",
+        "Font": "Inter",
+        "Size": "12",
+        "Fill": "#60665D",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Advisor",
+            "X": "469.758",
+            "Y": "473.864"
+          }
+        ]
+      },
+      {
+        "Id": "200%: two columns, growing cells and 48 dp targets.",
+        "Copy": "200%: two columns, growing cells and 48 dp targets.",
+        "Font": "Inter",
+        "Size": "16",
+        "Fill": "#111111",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "200%: two columns, growing cells and 48 dp targets.",
+            "X": "40",
+            "Y": "633.318"
+          }
+        ]
+      },
+      {
+        "Id": "Editorial: 4 dp ink rule, outline and second indicator.",
+        "Copy": "Editorial: 4 dp ink rule, outline and second indicator.",
+        "Font": "Inter",
+        "Size": "16",
+        "Fill": "#111111",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Editorial: 4 dp ink rule, outline and second indicator.",
+            "X": "40",
+            "Y": "673.318"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "Frame": "RupAI\\v4\\States and ranges.svg",
+    "Width": "720",
+    "Height": "1420",
+    "Text": [
+      {
+        "Id": "RUPAI / FEEDBACK AND DATA",
+        "Copy": "RUPAI / FEEDBACK AND DATA",
+        "Font": "Inter",
+        "Size": "12",
+        "Fill": "#36732E",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "RUPAI / FEEDBACK AND DATA",
+            "X": "40",
+            "Y": "41.8636"
+          }
+        ]
+      },
+      {
+        "Id": "Every state has a reason.",
+        "Copy": "Every state has a reason.",
+        "Font": "Libre Baskerville",
+        "Size": "42",
+        "Fill": "#111111",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Every state has a reason.",
+            "X": "40",
+            "Y": "104.7"
+          }
+        ]
+      },
+      {
+        "Id": "Clear errors, disabled reasons and labelled forecast ranges.",
+        "Copy": "Clear errors, disabled reasons and labelled forecast ranges.",
+        "Font": "Inter",
+        "Size": "16",
+        "Fill": "#60665D",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Clear errors, disabled reasons and labelled forecast ranges.",
+            "X": "40",
+            "Y": "144.318"
+          }
+        ]
+      },
+      {
+        "Id": "Couldnât refresh your picture",
+        "Copy": "Couldn’t refresh your picture",
+        "Font": "Inter",
+        "Size": "20",
+        "Fill": "#A52A48",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Couldn’t refresh your picture",
+            "X": "84",
+            "Y": "259.273"
+          }
+        ]
+      },
+      {
+        "Id": "Your saved ledger is still available.",
+        "Copy": "Your saved ledger is still available.",
+        "Font": "Inter",
+        "Size": "16",
+        "Fill": "#111111",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Your saved ledger is still available.",
+            "X": "84",
+            "Y": "293.318"
+          }
+        ]
+      },
+      {
+        "Id": "Try again â",
+        "Copy": "Try again →",
+        "Font": "Inter",
+        "Size": "16",
+        "Fill": "#A52A48",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Try again →",
+            "X": "84",
+            "Y": "333.318"
+          }
+        ]
+      },
+      {
+        "Id": "Monthly income / Not added",
+        "Copy": "Monthly income / Not added",
+        "Font": "Inter",
+        "Size": "16",
+        "Fill": "#111111",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Monthly income / Not added",
+            "X": "64",
+            "Y": "420.318"
+          }
+        ]
+      },
+      {
+        "Id": "Income estimate disabled",
+        "Copy": "Income estimate disabled",
+        "Font": "Inter",
+        "Size": "16",
+        "Fill": "#60665D",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Income estimate disabled",
+            "X": "84",
+            "Y": "476.318"
+          }
+        ]
+      },
+      {
+        "Id": "Add an income source to enable this estimate.",
+        "Copy": "Add an income source to enable this estimate.",
+        "Font": "Inter",
+        "Size": "14",
+        "Fill": "#60665D",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Add an income source to enable this estimate.",
+            "X": "64",
+            "Y": "526.591"
+          }
+        ]
+      },
+      {
+        "Id": "Loading ledger",
+        "Copy": "Loading ledger",
+        "Font": "Inter",
+        "Size": "20",
+        "Fill": "#111111",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Loading ledger",
+            "X": "64",
+            "Y": "577.273"
+          }
+        ]
+      },
+      {
+        "Id": "No transactions yet",
+        "Copy": "No transactions yet",
+        "Font": "Inter",
+        "Size": "20",
+        "Fill": "#111111",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "No transactions yet",
+            "X": "64",
+            "Y": "727.273"
+          }
+        ]
+      },
+      {
+        "Id": "Add data to build your ledger.",
+        "Copy": "Add data to build your ledger.",
+        "Font": "Inter",
+        "Size": "16",
+        "Fill": "#60665D",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Add data to build your ledger.",
+            "X": "64",
+            "Y": "761.318"
+          }
+        ]
+      },
+      {
+        "Id": "Add data",
+        "Copy": "Add data",
+        "Font": "Inter",
+        "Size": "16",
+        "Fill": "white",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Add data",
+            "X": "179.516",
+            "Y": "826.318"
+          }
+        ]
+      },
+      {
+        "Id": "Observed â Predicted â Suggested â",
+        "Copy": "Observed ✓ Predicted ≈ Suggested →",
+        "Font": "Inter",
+        "Size": "16",
+        "Fill": "#111111",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Observed ✓ Predicted ≈ Suggested →",
+            "X": "64",
+            "Y": "903.318"
+          }
+        ]
+      },
+      {
+        "Id": "â¹18K",
+        "Copy": "₹18K",
+        "Font": "Inter",
+        "Size": "14",
+        "Fill": "#111111",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "₹18K",
+            "X": "64",
+            "Y": "977.591"
+          }
+        ]
+      },
+      {
+        "Id": "â¹26K",
+        "Copy": "₹26K",
+        "Font": "Inter",
+        "Size": "14",
+        "Fill": "#111111",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "₹26K",
+            "X": "621.178",
+            "Y": "977.591"
+          }
+        ]
+      },
+      {
+        "Id": "â Forecast interval Â· Medium confidence",
+        "Copy": "≈ Forecast interval · Medium confidence",
+        "Font": "Inter",
+        "Size": "16",
+        "Fill": "#111111",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "≈ Forecast interval · Medium confidence",
+            "X": "64",
+            "Y": "1021.32"
+          }
+        ]
+      },
+      {
+        "Id": "Source: demo balances and confirmed dues",
+        "Copy": "Source: demo balances and confirmed dues",
+        "Font": "Inter",
+        "Size": "14",
+        "Fill": "#60665D",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Source: demo balances and confirmed dues",
+            "X": "64",
+            "Y": "1062.59"
+          }
+        ]
+      },
+      {
+        "Id": "Low / Key inputs are missing or stale; the range is especially uncertain.",
+        "Copy": "Low / Key inputs are missing or stale; the range is especially uncertain.",
+        "Font": "Inter",
+        "Size": "16",
+        "Fill": "#111111",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Low / Key inputs are missing or stale; the range is especially uncertain.",
+            "X": "40",
+            "Y": "1219.32"
+          }
+        ]
+      },
+      {
+        "Id": "Medium / Some inputs are recent; assumptions still affect the range.",
+        "Copy": "Medium / Some inputs are recent; assumptions still affect the range.",
+        "Font": "Inter",
+        "Size": "16",
+        "Fill": "#111111",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "Medium / Some inputs are recent; assumptions still affect the range.",
+            "X": "40",
+            "Y": "1271.32"
+          }
+        ]
+      },
+      {
+        "Id": "High / Required inputs are recent and complete; uncertainty still remains.",
+        "Copy": "High / Required inputs are recent and complete; uncertainty still remains.",
+        "Font": "Inter",
+        "Size": "16",
+        "Fill": "#111111",
+        "Style": "white-space: pre",
+        "Spans": [
+          {
+            "Text": "High / Required inputs are recent and complete; uncertainty still remains.",
+            "X": "40",
+            "Y": "1323.32"
+          }
+        ]
+      }
+    ]
+  }
+]

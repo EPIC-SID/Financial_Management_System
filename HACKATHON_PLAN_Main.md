@@ -502,7 +502,7 @@ flowchart TD
 
 ### Phase 5A — UI/UX Polish, Accessibility & Bronze Aesthetic Hardening
 - **Assigned Track:** Track 1 (UI/UX Specialist)
-- **Objective:** Elevate visual polish to maximize Round 2 UI/UX and Innovativeness scores: animations, dark/bronze mode consistency, loading skeletons, and Indian currency formatting.
+- **Objective:** Elevate visual polish to maximize Round 2 UI/UX and Innovativeness scores: animations, light-theme consistency, loading skeletons, and Indian currency formatting.
 - **Files to Modify:**
   - `app/src/main/java/com/example/financeapp/ui/theme/Theme.kt`
   - UI components across `ui/components/`
@@ -513,7 +513,7 @@ flowchart TD
   3. Ensure Indian numbering convention everywhere (`₹1,50,000` rather than `₹150,000`).
   4. Ensure zero UI truncation or overlapping on standard phone screens.
 - **Verification:**
-  - Walk through all 4 bottom tabs in light and dark mode.
+  - Walk through all 4 bottom tabs in the light theme.
 - **Definition of Done:** Clean, modern consumer FinTech aesthetic (Cred/Jupiter caliber).
 
 ---
@@ -553,7 +553,7 @@ flowchart TD
 | **Phase 3D** | Track 4 (AI/ML) | What-If simulation bottom sheet & 4-tab bottom navigation | Launch emulator: Test sliders & tab navigation |
 | **Phase 4A** | All Tracks | Dynamic transaction injection & reactivity verification | Emulator: Tap injection FAB & verify instant updates |
 | **Phase 4B** | Track 3 (Math) | CLI benchmark evaluator & model validation dialog | `./gradlew test --tests "*ModelValidationBenchmarkTest*"` |
-| **Phase 5A** | Track 1 (UI/UX) | Visual polish, animations, and typography hardening | Full UI walkthrough light & dark mode |
+| **Phase 5A** | Track 1 (UI/UX) | Visual polish, animations, and typography hardening | Full UI walkthrough in the light theme |
 | **Phase 5B** | All Tracks | 3-minute pitch deck & timed live judging rehearsal | 3-minute dry-run demo |
 
 ---

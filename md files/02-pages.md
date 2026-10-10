@@ -205,7 +205,7 @@ Amount (currency field), direction, date, category, note, "Repeats?" with interv
 ## 6. Settings pages
 
 ### S1 Settings
-Profile, financial inputs (S1a), notifications, theme (system, light, dark), privacy center (S2), Judge mode switch, about and version.
+Profile, financial inputs (S1a), notifications, privacy center (S2), Judge mode switch, about and version.
 
 ### S1a Edit financial inputs
 Income type and typical amount, minimum cushion, loans (outstanding, rate, EMI, months left), credit cards (limit, minimum due), SIPs (amount, debit day), goals. Saving triggers recomputation and a "What changed" summary.
