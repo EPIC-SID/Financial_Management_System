@@ -70,6 +70,7 @@ class InterpretResponse(StrictModel):
 class NarrateRequest(StrictModel):
     intent: Intent
     bundle: AggregateBundle
+    languageCode: Literal["en", "hi-Latn", "hi-Deva", "mr-Deva"] = "en"
 
 
 class TextFact(StrictModel):
@@ -115,6 +116,7 @@ class NarrateResponse(StrictModel):
     recommended: list[RecommendedAction]
     intent: Intent
     source: Literal["REMOTE"] = "REMOTE"
+    languageCode: Literal["en", "hi-Latn", "hi-Deva", "mr-Deva"] = "en"
 
 
 # shortcut: limiter is process-local; use a shared gateway/store before deploying multiple workers.
@@ -185,10 +187,21 @@ async def interpret(body: InterpretRequest):
 
 @router.post("/narrate", response_model=NarrateResponse)
 async def narrate(body: NarrateRequest):
+    languages = {"en": "English", "hi-Latn": "Hinglish in Latin script",
+                 "hi-Deva": "Hindi in Devanagari script", "mr-Deva": "Marathi in Devanagari script"}
+    trade_offs = {
+        "en": "Actions require engine simulation before commitment.",
+        "hi-Latn": "Koi action lene se pehle engine simulation zaroori hai.",
+        "hi-Deva": "कोई कदम लेने से पहले इंजन सिमुलेशन जरूरी है।",
+        "mr-Deva": "कोणतीही कृती करण्यापूर्वी इंजिन सिम्युलेशन आवश्यक आहे.",
+    }
     result = await generate(body, TextNarration,
+        f"Write in {languages[body.languageCode]}. "
         "Write observed facts, predictions, and recommendations using only supplied aggregate values. "
         "Do not calculate, invent numbers, use tools, or claim guaranteed outcomes. "
-        "Do not number lists. Percentages may format supplied fractional rates. Use ASCII digits.")
+        "Do not number lists. Percentages may format supplied fractional rates. Use ASCII digits. "
+        "Use INR for money and % for percentages; preserve signs and plan identifiers. "
+        "Do not use number words or translated scale words/units such as lakh, hazaar or crore.")
     b = body.bundle
     return NarrateResponse(
         observed=[ObservedFact(text=result.observed[0].text,
@@ -197,8 +210,8 @@ async def narrate(body: NarrateRequest):
             range=NumberRange(p10=b.forecastP10, p50=b.forecastP50, p90=b.forecastP90),
             confidenceLabel=b.confidenceLabel, horizon=f"{b.horizonMonths} months")],
         recommended=[RecommendedAction(text=result.recommended[0].text, impact=Impact(),
-            tradeOff="Actions require engine simulation before commitment.")],
-        intent=body.intent,
+            tradeOff=trade_offs[body.languageCode])],
+        intent=body.intent, languageCode=body.languageCode,
     )
 
 

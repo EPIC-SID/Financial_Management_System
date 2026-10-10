@@ -19,7 +19,8 @@ import java.net.URL
 class BackendClient(
     private val transport: suspend (String, JsonObject) -> JsonObject = { path, body -> post(path, body) },
     private val localAdvisor: LocalAdvisor = LocalAdvisor(),
-    private val verifier: NumberVerifier = NumberVerifier()
+    private val verifier: NumberVerifier = NumberVerifier(),
+    private val localizedAdvisor: ((CopilotIntent, ResultBundle, String) -> StructuredResponse)? = null
 ) {
     suspend fun interpret(question: String): CopilotIntent {
         val localIntent = IntentRouter().route(question)
@@ -35,18 +36,33 @@ class BackendClient(
     }
 
     suspend fun answer(question: String, resultProvider: (CopilotIntent) -> ResultBundle): StructuredResponse {
-        val intent = interpret(question)
-        return narrate(intent, resultProvider(intent))
+        return answer(question, "en", resultProvider)
     }
 
-    suspend fun narrate(intent: CopilotIntent, bundle: ResultBundle): StructuredResponse {
-        val local = localAdvisor.advise(intent, bundle)
+    suspend fun answer(question: String, languageCode: String,
+        resultProvider: (CopilotIntent) -> ResultBundle): StructuredResponse {
+        requireLanguage(languageCode)
+        val intent = interpret(question)
+        return narrate(intent, resultProvider(intent), languageCode)
+    }
+
+    private fun requireLanguage(code: String) {
+        require(code in setOf("en", "hi-Latn", "hi-Deva", "mr-Deva")) { "Unsupported narration language" }
+        require(code == "en" || localizedAdvisor != null) { "Localized fallback provider required" }
+    }
+
+    suspend fun narrate(intent: CopilotIntent, bundle: ResultBundle, languageCode: String = "en"): StructuredResponse {
+        requireLanguage(languageCode)
+        val local = localizedAdvisor?.invoke(intent, bundle, languageCode) ?: localAdvisor.advise(intent, bundle)
+        // Validate the injected template before any request; never silently label English as regional.
+        verifier.verifyOrFallback(local, intent, bundle, local)
         return try {
             val horizon = Regex("([1-9]|1[0-9]|2[0-4]) months?").matchEntire(bundle.horizon)
                 ?: return local
             if (bundle.recommendedPlanId !in setOf("Plan A", "Plan B", "Status quo")) return local
             val payload = buildJsonObject {
                 put("intent", intent.name)
+                put("languageCode", languageCode)
                 put("bundle", buildJsonObject {
                     put("liquidRunwayMonths", bundle.liquidRunwayMonths)
                     put("projectedShortfallRisk", bundle.projectedShortfallRisk)
@@ -65,6 +81,9 @@ class BackendClient(
                 })
             }
             val response = transport("/api/v1/copilot/narrate", payload)
+            require(response["languageCode"]?.jsonPrimitive?.let { it.isString && it.content == languageCode }
+                ?: (languageCode == "en"))
+            validateMetadata(response, intent, bundle)
             fun text(section: String): String = response.getValue(section).jsonArray.single()
                 .jsonObject.getValue("text").jsonPrimitive.also { require(it.isString && it.content.length <= 2000) }.content
             // The model may rewrite text; engine metadata remains authoritative.
@@ -73,12 +92,36 @@ class BackendClient(
                 predicted = listOf(local.predicted.single().copy(text = text("predicted"))),
                 recommended = listOf(local.recommended.single().copy(text = text("recommended"))),
                 source = ResponseSource.REMOTE
-            ), intent, bundle)
+            ), intent, bundle, local)
         } catch (cancelled: CancellationException) {
             throw cancelled
         } catch (_: Exception) {
             local
         }
+    }
+
+    private fun validateMetadata(response: JsonObject, intent: CopilotIntent, bundle: ResultBundle) {
+        fun stringField(body: JsonObject, key: String, expected: String) {
+            body[key]?.jsonPrimitive?.let { require(it.isString && it.content == expected) }
+        }
+        fun numberField(body: JsonObject, key: String, expected: Double) {
+            val value = body.getValue(key).jsonPrimitive
+            require(!value.isString && value.double == expected)
+        }
+        stringField(response, "intent", intent.name)
+        stringField(response, "source", "REMOTE")
+        val predicted = response.getValue("predicted").jsonArray.single().jsonObject
+        stringField(predicted, "horizon", bundle.horizon)
+        stringField(predicted, "confidenceLabel", bundle.confidenceLabel.name)
+        predicted["range"]?.jsonObject?.let {
+            numberField(it, "p10", bundle.forecastP10)
+            numberField(it, "p50", bundle.forecastP50)
+            numberField(it, "p90", bundle.forecastP90)
+        }
+        response.getValue("recommended").jsonArray.single().jsonObject["impact"]?.jsonObject?.let {
+            for (key in listOf("runwayDeltaMonths", "riskDelta", "interestSaved")) numberField(it, key, 0.0)
+        }
+        // Legacy English servers may omit metadata. Supplied values never override local engine facts.
     }
 
     companion object {

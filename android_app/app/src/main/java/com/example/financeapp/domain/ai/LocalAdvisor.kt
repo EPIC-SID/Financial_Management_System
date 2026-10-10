@@ -10,7 +10,8 @@ import com.example.financeapp.domain.model.ResponseSource
 import com.example.financeapp.domain.model.ResultBundle
 import com.example.financeapp.domain.model.StructuredResponse
 import java.util.Locale
-import kotlin.math.roundToInt
+import java.math.BigDecimal
+import java.math.RoundingMode
 
 class LocalAdvisor {
     fun advise(intent: CopilotIntent, bundle: ResultBundle): StructuredResponse {
@@ -76,7 +77,8 @@ class LocalAdvisor {
         CopilotIntent.GENERAL_INQUIRY -> emptyList()
     }
 
-    private fun money(value: Double): String = "Rs. ${value.roundToInt()}"
+    private fun money(value: Double): String = "Rs. ${BigDecimal.valueOf(value)
+        .setScale(2, RoundingMode.HALF_UP).stripTrailingZeros().toPlainString()}"
 
     private fun percent(value: Double): String = "${oneDecimal(value * 100)}%"
 
