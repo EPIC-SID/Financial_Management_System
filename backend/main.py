@@ -24,6 +24,7 @@ from analytics import detect_recurring
 from auth import get_user_id
 from categorizer import categorize_batch, categorize_merchant
 from insights import analyze_spending, get_advisor_response
+from copilot import install_copilot
 from models import (
     AdvisorRequest,
     AdvisorResponse,
@@ -73,6 +74,8 @@ app = FastAPI(
     docs_url="/docs",     # Swagger UI at /docs
     redoc_url="/redoc",   # ReDoc UI at /redoc
 )
+
+install_copilot(app)
 
 # CORS — allow the Android app and any web frontend to call this API
 app.add_middleware(
