@@ -165,7 +165,7 @@ flowchart TD
 
 ### Phase 5: UI Polish, Pitch Deck & Demo Hardening (Hours 19 – 24)
 *Goal: Maximize Round 2 Evaluation scores (Presentation, UI/UX, Innovativeness).*
-- **M1 & M2:** Polish animations, dark mode, loading skeletons, haptic feedback, and error handling.
+- **M1 & M2:** Polish animations, light-theme consistency, loading skeletons, haptic feedback, and error handling.
 - **M3 & M4:** Ensure zero-latency failover (fallback to cached responses if AI rate limit strikes).
 - **All Team:** Prepare 3-minute pitch deck, killer 2-minute live demo run-through, and architectural slide.
 

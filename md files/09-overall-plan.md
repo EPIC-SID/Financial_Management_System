@@ -197,7 +197,7 @@ Each phase lists owner, objective, files, dependencies, key steps, verification 
 - **Files:** `ui/theme/Color.kt`, `Type.kt`, `Shape.kt`, `Spacing.kt`, `Theme.kt`; `ui/components/TypeTag.kt`, `StatusPill.kt`, `MetricCard.kt`; `ui/util/IndianFormat.kt`.
 - **Steps:** implement tokens from [05](05-frontend-ui-style.md); add `IndianFormatTest`.
 - **Verification:** Compose previews render; `./gradlew test --tests "*IndianFormatTest"`.
-- **Done:** tokens and primitives preview correctly in light and dark.
+- **Done:** tokens and primitives preview correctly in the light theme.
 
 ### Stage 2: Engines (hours 3-9)
 
@@ -303,7 +303,7 @@ Each phase lists owner, objective, files, dependencies, key steps, verification 
 ### Stage 5: Hardening and demo (hours 18-24)
 
 #### 5A. Polish (T1)
-Entry animations (sparingly), skeletons, Indian formatting everywhere, dark mode check, no truncation, TalkBack summaries for charts, contrast verification.
+Entry animations (sparingly), skeletons, Indian formatting everywhere, light-theme check, no truncation, TalkBack summaries for charts, contrast verification.
 
 #### 5B. Demo rehearsal (all)
 Timed three-minute dry runs ([07](07-ui-ux-flow.md), section 4); backup screen recording; offline test with airplane mode; one warm proxy instance. **Code freeze at hour 22.**
@@ -462,7 +462,7 @@ This section turns the tracks in section 5 into a working routine. The idea: **a
 | 3-9 | `HealthScore.kt` plus test; Cockpit, Plan and Copilot screens on fixtures; fan chart with fake bands | Recurring, income, liability and SIP detectors; repository; `ConsolidatedView`; verdict | Forecast, calibration, backtest, planner, risk | Orchestrator, number verifier, conflict resolver, impact simulator (against T3's signatures) |
 | 9-14 | Replace fixtures with real ViewModels as engines land; accounts sheet; onboarding | Onboarding ingest flow; Demo mode data and injectors; real SMS parsers if time | Evaluator, benchmark test, evidence exporter | `WhatIfSheet`; `BackendClient`; warm proxy deployed |
 | 14-18 | Fix integration issues on screens; Model report screen | Reactivity and the "What changed" summary | Run the benchmark; write the evidence README | Integration Lead: merge, wire navigation, `assembleDebug` and `test` |
-| 18-22 | Polish, TalkBack summaries, contrast, dark mode | Demo scenario dry runs; fix data bugs | Check every quoted number against the latest run | Offline and airplane-mode test; fallback paths |
+| 18-22 | Polish, TalkBack summaries, contrast, light-theme consistency | Demo scenario dry runs; fix data bugs | Check every quoted number against the latest run | Offline and airplane-mode test; fallback paths |
 | 22-24 | Rehearse | Rehearse | Rehearse; evidence pack check | Rehearse; screen recording backup |
 
 ### 16.4 Handoffs: who gives what to whom

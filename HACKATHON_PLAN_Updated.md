@@ -75,7 +75,7 @@ flowchart TD
     end
 
     subgraph Polish["Stage 5: Demo Hardening & Presentation (Hours 18 - 24)"]
-        P5A["Phase 5A: UI Polish & Dark/Bronze Theme (Track 1)"]
+        P5A["Phase 5A: UI Polish & Light FinTech Theme (Track 1)"]
         P5B["Phase 5B: Presentation Deck & Live Demo Script (All Tracks)"]
     end
 
@@ -475,7 +475,7 @@ Every phase below is completely self-contained and formatted for your standard a
 
 ### Phase 5A — UI/UX Polish, Accessibility & Bronze Aesthetic Hardening
 - **Assigned Track:** Track 1 (UI/UX Specialist)
-- **Objective:** Elevate UI/UX to maximize Round 2 Evaluation scores (UI/UX and Innovativeness) with seamless animations, dark/bronze mode consistency, loading skeletons, and zero-error edge cases.
+- **Objective:** Elevate UI/UX to maximize Round 2 Evaluation scores (UI/UX and Innovativeness) with seamless animations, light-theme consistency, loading skeletons, and zero-error edge cases.
 - **Files to Create/Modify:**
   - `app/src/main/java/com/example/financeapp/ui/theme/Theme.kt`
   - Various UI composables across `ui/components/`
@@ -489,7 +489,7 @@ Every phase below is completely self-contained and formatted for your standard a
 - **Do Not Build Yet:** None.
 - **Manual Steps Before Testing:** None.
 - **How to Test:**
-  - Run full walkthrough across all 4 bottom navigation tabs on both light and dark themes.
+  - Run full walkthrough across all 4 bottom navigation tabs in the light theme.
 - **Expected Result:** Butter-smooth 60fps animations, polished Bronze theme, clean typography.
 - **Definition of Done:** App delivers an elite consumer FinTech experience (Cred/Jupiter caliber).
 

@@ -1,9 +1,9 @@
 # 05 - Frontend UI Style (Design System)
 
-**Stack:** Jetpack Compose, Material 3, light and dark themes.
+**Stack:** Jetpack Compose, Material 3, light theme only.
 **Related docs:** [02 Pages](02-pages.md) · [03 Target audience](03-target-audience.md) · [07 UI/UX flow](07-ui-ux-flow.md) · [08 Tech stack](08-tech-stack.md)
 
-This is the single source of truth for how the app looks and sounds. Tokens here map one to one to the Kotlin files in section 11.
+Light is the only supported theme. The current visual specification is [RupAI refinement 04](../output/design-system/DESIGN-REFINEMENT-04.md) and its Figma boards. The bronze tokens below are legacy implementation references.
 
 ---
 
@@ -20,25 +20,25 @@ This is the single source of truth for how the app looks and sounds. Tokens here
 
 ## 2. Visual identity in one paragraph
 
-A warm, calm, financial-grade interface. Warm off-white (or warm near-black in dark mode) surfaces, bronze as the single brand accent, and a small set of semantic colors that always mean the same thing: blue for predictions, teal for observed facts, green / amber / red for status. Numbers are set large in a geometric sans with tabular figures; reading text is in a neutral humanist sans. Cards are quiet, outlined and tonal, with no decorative gradients.
+A warm, calm, financial-grade interface. Warm off-white surfaces, bronze as the single brand accent, and a small set of semantic colors that always mean the same thing: blue for predictions, teal for observed facts, green / amber / red for status. Numbers are set large in a geometric sans with tabular figures; reading text is in a neutral humanist sans. Cards are quiet, outlined and tonal, with no decorative gradients.
 
 ## 3. Color
 
 ### 3.1 Brand (bronze)
 
-| Token | Light | Dark | Use |
-|---|---|---|---|
-| `BronzePrimary` | #CD7F32 | #E3A25E | Primary fills, active nav indicator, focus ring |
-| `BronzeDark` | #8C531B | #F0C494 | Bronze text and icons on surfaces (plain `BronzePrimary` text does not reach contrast on white) |
-| `BronzeContainer` | #F6E3CF | #4A2F14 | Selected cards, tonal buttons |
-| `OnBronze` | #1F1A14 | #1F1A14 | Text on bronze fills |
+| Token | Light | Use |
+|---|---|---|
+| `BronzePrimary` | #CD7F32 | Primary fills, active nav indicator, focus ring |
+| `BronzeDark` | #8C531B | Bronze text and icons on surfaces (plain `BronzePrimary` text does not reach contrast on white) |
+| `BronzeContainer` | #F6E3CF | Selected cards, tonal buttons |
+| `OnBronze` | #1F1A14 | Text on bronze fills |
 
 ### 3.2 Statement-type tags (never reused for status)
 
-| Tag (label shown) | Enum | Color | Container (light / dark) | Icon |
+| Tag (label shown) | Enum | Color | Container (light) | Icon |
 |---|---|---|---|---|
-| Observed | `FACT` | #00897B | #D5EFEB / #0F3B37 | check_circle |
-| Predicted | `PREDICTION` | #2F6FDB | #DCE8FB / #162C52 | query_stats |
+| Observed | `FACT` | #00897B | #D5EFEB | check_circle |
+| Predicted | `PREDICTION` | #2F6FDB | #DCE8FB | query_stats |
 | Recommended | `RECOMMENDATION` | `BronzePrimary` | `BronzeContainer` | arrow_forward |
 
 Prediction is blue, not amber, because amber already means "watch" and blue matches the forecast band. Labels use sentence case (Observed, Predicted, Recommended), not all caps, for readability. They match the wording of the problem statement.
@@ -55,14 +55,14 @@ Status is never conveyed by color alone: always an icon and a word.
 
 ### 3.4 Neutrals
 
-| Token | Light | Dark |
-|---|---|---|
-| `Background` | #FBF8F4 | #14110D |
-| `Surface` | #FFFFFF | #1D1914 |
-| `SurfaceVariant` | #F3ECE3 | #2A241D |
-| `Outline` | #D9CFC2 | #3D352B |
-| `TextPrimary` | #1F1A14 | #F2EBE1 |
-| `TextSecondary` | #6B6257 | #B5AA9A |
+| Token | Light |
+|---|---|
+| `Background` | #FBF8F4 |
+| `Surface` | #FFFFFF |
+| `SurfaceVariant` | #F3ECE3 |
+| `Outline` | #D9CFC2 |
+| `TextPrimary` | #1F1A14 |
+| `TextSecondary` | #6B6257 |
 
 ### 3.5 Chart colors
 
@@ -277,17 +277,17 @@ Examples:
 - Contrast per section 3; status never by color alone.
 - Charts expose a text summary to TalkBack ("Balance stays above your cushion in 8 of 10 cases through March") and a table toggle.
 - Focus order follows visual order; dialogs trap focus.
-- Support dark theme, font scaling to 200%, screen readers and reduced motion from day one.
+- Support font scaling to 200%, screen readers and reduced motion from day one.
 
 ## 12. Compose implementation map
 
 | File | Contents |
 |---|---|
-| `ui/theme/Color.kt` | All tokens in section 3, light and dark schemes |
+| `ui/theme/Color.kt` | All tokens in section 3, the light scheme |
 | `ui/theme/Type.kt` | Manrope and Inter styles, tabular-figure helper |
 | `ui/theme/Shape.kt` | Radius scale |
 | `ui/theme/Spacing.kt` | Spacing scale |
-| `ui/theme/Theme.kt` | Material 3 theme, dark-mode switch |
+| `ui/theme/Theme.kt` | Material 3 light theme |
 | `ui/components/TypeTag.kt` | Observed, Predicted, Recommended pills |
 | `ui/components/StatusPill.kt`, `ConfidenceChip.kt` | Status and confidence |
 | `ui/components/MetricCard.kt`, `VerdictCard.kt`, `PlanCard.kt`, `InsightCard.kt` | Card family |
@@ -305,11 +305,8 @@ Build order: tokens and `IndianFormat`, then `TypeTag` and cards, then charts, t
 import androidx.compose.ui.graphics.Color
 
 val BronzePrimaryLight = Color(0xFFCD7F32)
-val BronzePrimaryDark  = Color(0xFFE3A25E)
 val BronzeTextLight    = Color(0xFF8C531B)
-val BronzeTextDark     = Color(0xFFF0C494)
 val BronzeContainerLight = Color(0xFFF6E3CF)
-val BronzeContainerDark  = Color(0xFF4A2F14)
 val OnBronze = Color(0xFF1F1A14)
 
 // Statement types
@@ -328,12 +325,6 @@ val SurfaceLight    = Color(0xFFFFFFFF)
 val OutlineLight    = Color(0xFFD9CFC2)
 val TextPrimaryLight   = Color(0xFF1F1A14)
 val TextSecondaryLight = Color(0xFF6B6257)
-// Neutrals (dark)
-val BackgroundDark = Color(0xFF14110D)
-val SurfaceDark    = Color(0xFF1D1914)
-val OutlineDark    = Color(0xFF3D352B)
-val TextPrimaryDark   = Color(0xFFF2EBE1)
-val TextSecondaryDark = Color(0xFFB5AA9A)
 ```
 
 ### 12.2 Spacing (starter code)
