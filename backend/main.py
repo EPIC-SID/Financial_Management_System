@@ -59,6 +59,7 @@ VERSION = "1.0.0"
 async def lifespan(app: FastAPI):
     """Startup and shutdown events."""
     logger.info(f"RupAI Backend v{VERSION} starting up")
+    logger.info(f"Groq API key configured:   {bool(os.getenv('GROQ_API_KEY'))}")
     logger.info(f"Gemini API key configured: {bool(os.getenv('GEMINI_API_KEY'))}")
     logger.info(f"Places API key configured: {bool(os.getenv('PLACES_API_KEY'))}")
     logger.info(f"Supabase URL configured:   {bool(os.getenv('SUPABASE_URL'))}")
@@ -119,6 +120,7 @@ async def health_check() -> HealthResponse:
         status="ok",
         version=VERSION,
         services={
+            "groq": "configured" if os.getenv("GROQ_API_KEY") else "missing_key",
             "gemini": "configured" if os.getenv("GEMINI_API_KEY") else "missing_key",
             "places": "configured" if os.getenv("PLACES_API_KEY") else "missing_key",
             "supabase": "configured" if os.getenv("SUPABASE_URL") else "missing_key",

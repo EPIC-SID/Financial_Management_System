@@ -37,6 +37,18 @@ logger = logging.getLogger(__name__)
 
 _supabase_client: Optional[Client] = None
 
+CONFIDENT_CATEGORIES: set[str] = {
+    "FOOD", "TRAVEL", "SHOPPING", "BILLS",
+    "ENTERTAINMENT", "INVESTMENTS", "HEALTH", "EDUCATION"
+}
+
+
+def is_cachable_category(category: Optional[str]) -> bool:
+    """Returns True only for high-confidence non-fallback categories."""
+    if not category:
+        return False
+    return category.strip().upper() in CONFIDENT_CATEGORIES
+
 
 def get_supabase() -> Client:
     """Returns a singleton Supabase client using the service role key."""
@@ -58,7 +70,7 @@ def _normalize_key(merchant: str) -> str:
 def get_from_cache(merchant: str) -> Optional[str]:
     """
     Look up a merchant in the Supabase shared cache.
-    Returns the category string or None if not found.
+    Returns the category string or None if not found or uncertain.
     """
     key = _normalize_key(merchant)
     try:
@@ -71,6 +83,11 @@ def get_from_cache(merchant: str) -> Optional[str]:
             .execute()
         )
         if result.data:
+            cat = result.data[0]["category"]
+            if not is_cachable_category(cat):
+                logger.info(f"Ignoring uncertain/invalid cache hit '{cat}' for merchant '{merchant}'")
+                return None
+
             # Increment call_count in background (fire-and-forget, don't block)
             try:
                 client.table("merchant_categories").update(
@@ -78,7 +95,7 @@ def get_from_cache(merchant: str) -> Optional[str]:
                 ).eq("merchant_key", key).execute()
             except Exception:
                 pass  # Don't fail the request if this update fails
-            return result.data[0]["category"]
+            return cat
         return None
     except Exception as e:
         logger.warning(f"Cache lookup failed for '{merchant}': {e}")
@@ -88,8 +105,13 @@ def get_from_cache(merchant: str) -> Optional[str]:
 def save_to_cache(merchant: str, category: str, source: str) -> None:
     """
     Save a categorization result to the Supabase shared cache.
+    Rejects uncertain / fallback categories (MISCELLANEOUS, FALLBACK, UNKNOWN).
     Uses upsert so duplicate merchants are handled gracefully.
     """
+    if not is_cachable_category(category):
+        logger.info(f"Refusing to cache uncertain/transient category '{category}' for merchant '{merchant}'")
+        return
+
     key = _normalize_key(merchant)
     try:
         client = get_supabase()
@@ -110,7 +132,8 @@ def save_to_cache(merchant: str, category: str, source: str) -> None:
 def get_batch_from_cache(merchants: list[str]) -> dict[str, str]:
     """
     Batch lookup for multiple merchants in a single Supabase query.
-    Returns a dict of { normalized_key: category } for all cache hits.
+    Returns a dict of { normalized_key: category } for all valid cache hits.
+    Ignores uncertain or invalid categories.
     """
     if not merchants:
         return {}
@@ -123,7 +146,11 @@ def get_batch_from_cache(merchants: list[str]) -> dict[str, str]:
             .in_("merchant_key", keys)
             .execute()
         )
-        return {row["merchant_key"]: row["category"] for row in (result.data or [])}
+        return {
+            row["merchant_key"]: row["category"]
+            for row in (result.data or [])
+            if is_cachable_category(row.get("category"))
+        }
     except Exception as e:
         logger.warning(f"Batch cache lookup failed: {e}")
         return {}

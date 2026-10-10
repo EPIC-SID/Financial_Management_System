@@ -7,21 +7,122 @@ import java.util.Locale
 import java.util.TimeZone
 
 object SmsParser {
-    // Regex to find amount: matches Rs, Rs., INR, ₹ followed by number (possibly with commas and decimals)
-    private val amountRegex = Regex("(?i)(?:Rs\\.?|INR|₹)\\s*([\\d,]+(?:\\.\\d{1,2})?)")
+    // Pattern 1: Action verb + optional preposition + optional currency + amount
+    private val actionAmountRegex = Regex("(?i)(?:debited|credited|spent|paid|sent|transferred|deducted|withdrawn|deposited|payment of)\\s*(?:by|for|of|with|in)?\\s*(?:Rs\\.?|INR|₹)?\\s*([\\d]+(?:\\.\\d{1,2})?)")
+    
+    // Pattern 2: Currency followed by amount
+    private val currencyAmountRegex = Regex("(?i)(?:Rs\\.?|INR|₹)\\s*([\\d]+(?:\\.\\d{1,2})?)")
     
     // Keywords for debit
     private val debitKeywords = listOf("debited", "spent", "paid", "sent", "transferred", "payment of", "deducted", "withdrawn")
     // Keywords for credit
     private val creditKeywords = listOf("credited", "received", "added", "deposited", "refunded")
 
+    private val stopDelimiters = Regex("(?i)\\b(?:ref|on|via|using|acct|a/c|ac|dated|val|avl|bal|upi|link|txn|txnid|order)\\b|[\\.\\n,;]")
+
+    private fun extractAmount(body: String): Double? {
+        // 1. Try action-associated amount first (e.g. "debited by 450.00", "paid Rs 200")
+        val actionMatch = actionAmountRegex.find(body)
+        if (actionMatch != null) {
+            val amt = actionMatch.groupValues.getOrNull(1)?.toDoubleOrNull()
+            if (amt != null && amt > 0.0) return amt
+        }
+
+        // 2. Try currency amounts that are NOT balance mentions
+        val currencyMatches = currencyAmountRegex.findAll(body)
+        for (m in currencyMatches) {
+            val prefix = body.substring(0, m.range.first).lowercase().takeLast(25)
+            val isBalance = prefix.contains("bal") || prefix.contains("balance")
+            if (!isBalance) {
+                val amt = m.groupValues.getOrNull(1)?.toDoubleOrNull()
+                if (amt != null && amt > 0.0) return amt
+            }
+        }
+
+        // 3. Fallback
+        val fallbackMatch = currencyAmountRegex.find(body)
+        return fallbackMatch?.groupValues?.getOrNull(1)?.toDoubleOrNull()
+    }
+
+    private fun extractMerchant(body: String, isDebit: Boolean): String {
+        // 1. UPI P2M pattern: UPI/P2M/<num>/<Merchant>/... or UPI/<num>/<Merchant>/...
+        val upiP2mMatch = Regex("(?i)UPI/(?:P2M/)?\\w+/([^/\\n\\r]+)").find(body)
+        if (upiP2mMatch != null) {
+            val candidate = cleanMerchantName(upiP2mMatch.groupValues[1])
+            if (candidate != "Unknown Merchant") return candidate
+        }
+
+        // 2. Parenthesized merchant name, e.g., to user@bank (Medical Store)
+        val parenMatch = Regex("(?i)(?:to|at)\\s+[^@\\s]+@[^\\s]+\\s*\\(([^)]+)\\)").find(body)
+        if (parenMatch != null) {
+            val candidate = cleanMerchantName(parenMatch.groupValues[1])
+            if (candidate != "Unknown Merchant") return candidate
+        }
+
+        // 3. Keyword-based extraction
+        val startIndex = if (isDebit) {
+            val toIndex = body.indexOf("to ", ignoreCase = true)
+            val towardsIndex = body.indexOf("towards ", ignoreCase = true)
+            val atIndex = body.indexOf("at ", ignoreCase = true)
+            val forIndex = body.indexOf("for ", ignoreCase = true)
+            when {
+                towardsIndex != -1 -> towardsIndex + "towards ".length
+                toIndex != -1 -> toIndex + "to ".length
+                atIndex != -1 -> atIndex + "at ".length
+                forIndex != -1 -> forIndex + "for ".length
+                else -> -1
+            }
+        } else {
+            val fromIndex = body.indexOf("from ", ignoreCase = true)
+            val byIndex = body.indexOf("by ", ignoreCase = true)
+            when {
+                fromIndex != -1 -> fromIndex + "from ".length
+                byIndex != -1 -> byIndex + "by ".length
+                else -> -1
+            }
+        }
+
+        if (startIndex != -1) {
+            val sub = body.substring(startIndex)
+            val cleanSub = sub.split(stopDelimiters)[0].trim()
+            val candidate = cleanMerchantName(cleanSub)
+            if (candidate != "Unknown Merchant") return candidate
+        }
+
+        return if (isDebit) "Debit Transaction" else "Credit Transaction"
+    }
+
+    private fun cleanMerchantName(name: String): String {
+        var clean = name.trim()
+        if (clean.contains("@")) {
+            clean = clean.split("@")[0]
+        }
+        val ignoreWords = setOf(
+            "ref", "using", "acct", "a/c", "ac", "no", "on", "towards", "for", "via",
+            "upi", "card", "vpa", "no.", "bank", "link", "txn", "txnid", "account",
+            "inr", "rs", "rs.", "amount", "is", "of"
+        )
+        val words = clean.split(Regex("\\s+")).filter { word ->
+            val wLower = word.lowercase().trim('.', ',', ':', ';', '-', '(', ')')
+            wLower.isNotEmpty() && !ignoreWords.contains(wLower) && !wLower.matches(Regex("\\d+"))
+        }
+        val result = words.take(4).joinToString(" ").trim()
+        return result.ifEmpty { "Unknown Merchant" }
+    }
+
+    internal fun determineCategory(merchant: String, isCredit: Boolean, amount: Double = 0.0): String {
+        return CategorizationPolicy.determineCategory(merchant, isCredit, amount)
+    }
+
+    internal fun determineCategory(merchant: String, isCredit: Boolean): String {
+        return determineCategory(merchant, isCredit, 0.0)
+    }
+
     fun parse(smsBody: String, smsId: String, timestamp: Long): TransactionData? {
         val body = smsBody.replace(",", "") // remove commas to make regex match simpler
         
         // 1. Find Amount
-        val amountMatch = amountRegex.find(body) ?: return null
-        val amountStr = amountMatch.groups[1]?.value ?: return null
-        val baseAmount = amountStr.toDoubleOrNull() ?: return null
+        val baseAmount = extractAmount(body) ?: return null
 
         // 2. Determine type (Debit or Credit)
         val isDebit = debitKeywords.any { body.contains(it, ignoreCase = true) }
@@ -33,54 +134,10 @@ object SmsParser {
         val finalAmount = if (isDebit) -baseAmount else baseAmount
 
         // 3. Extract Merchant
-        var merchant = "Unknown"
-        
-        // Try to extract merchant from VPA or "to/towards/at"
-        if (isDebit) {
-            val toIndex = body.indexOf("to ", ignoreCase = true)
-            val towardsIndex = body.indexOf("towards ", ignoreCase = true)
-            val atIndex = body.indexOf("at ", ignoreCase = true)
-            val forIndex = body.indexOf("for ", ignoreCase = true)
-            
-            val startIndex = when {
-                towardsIndex != -1 -> towardsIndex + "towards ".length
-                toIndex != -1 -> toIndex + "to ".length
-                atIndex != -1 -> atIndex + "at ".length
-                forIndex != -1 -> forIndex + "for ".length
-                else -> -1
-            }
-            
-            if (startIndex != -1) {
-                val sub = body.substring(startIndex)
-                val cleanSub = sub.split(Regex("[\\.\\n]"))[0].trim()
-                val words = cleanSub.split(" ")
-                val merchantName = words.take(2).joinToString(" ")
-                merchant = cleanMerchantName(merchantName)
-            }
-        } else {
-            val fromIndex = body.indexOf("from ", ignoreCase = true)
-            val byIndex = body.indexOf("by ", ignoreCase = true)
-            
-            val startIndex = when {
-                fromIndex != -1 -> fromIndex + "from ".length
-                byIndex != -1 -> byIndex + "by ".length
-                else -> -1
-            }
-            
-            if (startIndex != -1) {
-                val sub = body.substring(startIndex)
-                val cleanSub = sub.split(Regex("[\\.\\n]"))[0].trim()
-                val words = cleanSub.split(" ")
-                merchant = cleanMerchantName(words.take(2).joinToString(" "))
-            }
-        }
+        val merchant = extractMerchant(body, isDebit)
 
-        if (merchant.isBlank() || merchant == "Unknown") {
-            merchant = if (isDebit) "Debit Transaction" else "Credit Transaction"
-        }
-
-        // 4. Determine Category
-        val category = determineCategory(merchant, isCredit)
+        // 4. Determine Category (incorporating micro-debit heuristics & business context)
+        val category = determineCategory(merchant, isCredit, baseAmount)
 
         // Convert timestamp to ISO 8601 string
         val sdf = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US)
@@ -97,17 +154,6 @@ object SmsParser {
         )
     }
 
-    /**
-     * Full 4-layer categorization pipeline.
-     *
-     * Layer 1 — VpaResolver  (0ms):   detects payment gateway from UPI VPA handle
-     * Layer 2 — Regex        (0ms):   known brand/keyword match (this file)
-     * Layer 3 — Places API   (~200ms): Google Places for local shop lookup
-     * Layer 4 — Gemini 2.0   (~500ms): LLM fallback for anything unresolvable
-     *
-     * Both Layer 3 and Layer 4 are cached in SharedPreferences — same merchant
-     * is NEVER sent to an API more than once, even across app restarts.
-     */
     suspend fun parseWithAi(context: Context, smsBody: String, smsId: String, timestamp: Long): TransactionData? {
         val transaction = parse(smsBody, smsId, timestamp) ?: return null
 
@@ -138,10 +184,6 @@ object SmsParser {
         return transaction.copy(category = aiCategory)
     }
 
-    /**
-     * Converts a parsed [TransactionData] to a [TransactionEntity] for local Room DB storage.
-     * smsId must be non-null — guaranteed by the parser when called from sync flow.
-     */
     fun TransactionData.toEntity(): TransactionEntity {
         return TransactionEntity(
             smsId = this.smsId ?: error("smsId must not be null when converting to entity"),
@@ -150,122 +192,16 @@ object SmsParser {
             category = this.category,
             description = this.description,
             transactionDate = this.transactionDate,
-            isCategorizedByAi = false  // AI worker will update this later if needed
+            isCategorizedByAi = false
         )
     }
 
-    /**
-     * Strips sensitive data (account numbers, UPI VPAs, reference numbers)
-     * from SMS text before storing as description.
-     */
     private fun sanitizeDescription(text: String): String {
         var sanitized = text
-        // Mask bank account numbers (sequences of 8+ digits)
         sanitized = sanitized.replace(Regex("\\b\\d{8,}\\b"), "****")
-        // Mask UPI VPAs (e.g., user@bank)
         sanitized = sanitized.replace(Regex("[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+"), "***@***")
-        // Mask card numbers (4 groups of 4 digits or ending in XX1234)
         sanitized = sanitized.replace(Regex("\\b(?:\\d{4}[\\s-]?){3}\\d{4}\\b"), "****-****-****-****")
         sanitized = sanitized.replace(Regex("(?i)(?:XX|xx)\\d{4,}"), "XX****")
         return sanitized
-    }
-
-    private fun cleanMerchantName(name: String): String {
-        var clean = name.trim()
-        
-        // Remove trailing "UPI" or VPA handles
-        if (clean.contains("@")) {
-            clean = clean.split("@")[0]
-        }
-        
-        // Remove common words like "Ref", "using", "A/C", "No", etc.
-        val ignoreWords = listOf("ref", "using", "acct", "a/c", "ac", "no", "on", "towards", "for", "via", "upi", "card", "vpa", "no.", "bank", "link")
-        val words = clean.split(" ").filter { word ->
-            val wLower = word.lowercase().trim('.', ',', ':', ';', '-')
-            !ignoreWords.contains(wLower) && !wLower.matches(Regex("\\d+"))
-        }
-        
-        return words.joinToString(" ").trim().ifEmpty { "Unknown Merchant" }
-    }
-
-    internal fun determineCategory(merchant: String, isCredit: Boolean): String {
-        if (isCredit) return "INCOME"
-        val m = merchant.lowercase()
-
-        // --- KNOWN PERSONS (instant MISCELLANEOUS, no API call needed) ---
-        val knownPersons = listOf("atharva", "rushikesh", "roshan", "okkhanjojdkar", "shashank", "ramdas")
-        if (knownPersons.any { m.contains(it) }) return "MISCELLANEOUS"
-
-        return when {
-            m.contains("swiggy") || m.contains("zomato") || m.contains("starbucks") ||
-            m.contains("restaurant") || m.contains("cafe") || m.contains("food") ||
-            m.contains("eats") || m.contains("kitchen") || m.contains("dhaba") ||
-            m.contains("mithai") || m.contains("sweet") || m.contains("bakery") ||
-            m.contains("bakers") || m.contains("pizza") || m.contains("burger") ||
-            m.contains("dominos") || m.contains("mcdonalds") || m.contains("kfc") ||
-            m.contains("subway") || m.contains("haldiram") || m.contains("blinkit") ||
-            m.contains("zepto") || m.contains("instamart") || m.contains("bigbasket") ||
-            m.contains("grofers") || m.contains("chai") || m.contains("tea") ||
-            m.contains("juice") || m.contains("vending") || m.contains("canteen") ||
-            m.contains("tiffin") || m.contains("mess") || m.contains("snacks") ||
-            m.contains("hotel") || m.contains("shankar") || m.contains("dairy") ||
-            m.contains("daba") || m.contains("eatery") || m.contains("thali") ||
-            m.contains("paratha") || m.contains("dosa") || m.contains("biryani") ||
-            // --- LOCAL VENDORS (hardcoded for demo) ---
-            m.contains("vaishnav") || m.contains("trimurti") -> "FOOD"
-
-            m.contains("uber") || m.contains("ola") || m.contains("rapido") ||
-            m.contains("metro") || m.contains("petrol") || m.contains("fuel") ||
-            m.contains("hpcl") || m.contains("bpcl") || m.contains("iocl") ||
-            m.contains("cab") || m.contains("taxi") || m.contains("bus") ||
-            m.contains("irctc") || m.contains("railway") || m.contains("train") ||
-            m.contains("flight") || m.contains("airline") || m.contains("airport") ||
-            m.contains("indigo") || m.contains("spicejet") || m.contains("parking") ||
-            m.contains("fastag") || m.contains("toll") || m.contains("auto") -> "TRAVEL"
-
-            m.contains("amazon") || m.contains("flipkart") || m.contains("myntra") ||
-            m.contains("nykaa") || m.contains("shopping") || m.contains("retail") ||
-            m.contains("decathlon") || m.contains("store") || m.contains("supermarket") ||
-            m.contains("grocery") || m.contains("meesho") || m.contains("ajio") ||
-            m.contains("croma") || m.contains("dmart") || m.contains("ikea") ||
-            m.contains("super") || m.contains("mart") || m.contains("bazar") ||
-            m.contains("bazaar") || m.contains("traders") || m.contains("kirana") ||
-            m.contains("provision") || m.contains("provisions") || m.contains("general") ||
-            m.contains("enterprises") || m.contains("footwear") || m.contains("fashion") ||
-            m.contains("textile") || m.contains("textiles") || m.contains("cloth") ||
-            m.contains("garments") || m.contains("jewellers") || m.contains("opticals") ||
-            m.contains("hardware") || m.contains("electronics") || m.contains("mobile") -> "SHOPPING"
-
-            m.contains("jio") || m.contains("airtel") || m.contains("vodafone") ||
-            m.contains("bsnl") || m.contains("recharge") || m.contains("electricity") ||
-            m.contains("bill") || m.contains("water") || m.contains("gas") ||
-            m.contains("utility") || m.contains("bescom") || m.contains("msedcl") ||
-            m.contains("broadband") || m.contains("wifi") || m.contains("rent") ||
-            m.contains("emi") || m.contains("insurance") || m.contains("premium") -> "BILLS"
-
-            m.contains("movie") || m.contains("netflix") || m.contains("prime") ||
-            m.contains("hotstar") || m.contains("spotify") || m.contains("youtube") ||
-            m.contains("entertainment") || m.contains("cinema") || m.contains("pvr") ||
-            m.contains("inox") || m.contains("bookmyshow") || m.contains("gaming") ||
-            m.contains("steam") || m.contains("playstation") -> "ENTERTAINMENT"
-
-            m.contains("invest") || m.contains("groww") || m.contains("zerodha") ||
-            m.contains("shares") || m.contains("stock") || m.contains("sip") ||
-            m.contains("ppf") || m.contains("nps") || m.contains("upstox") ||
-            m.contains("smallcase") -> "INVESTMENTS"
-
-            m.contains("pharmacy") || m.contains("medical") || m.contains("hospital") ||
-            m.contains("clinic") || m.contains("doctor") || m.contains("apollo") ||
-            m.contains("medplus") || m.contains("1mg") || m.contains("pharmeasy") ||
-            m.contains("netmeds") || m.contains("diagnostic") ||
-            m.contains("health") || m.contains("chemist") || m.contains("medicine") -> "HEALTH"
-
-            m.contains("school") || m.contains("college") || m.contains("university") ||
-            m.contains("tuition") || m.contains("udemy") || m.contains("coursera") ||
-            m.contains("byju") || m.contains("unacademy") || m.contains("stationery") ||
-            m.contains("education") || m.contains("library") -> "EDUCATION"
-
-            else -> "MISCELLANEOUS"
-        }
     }
 }
