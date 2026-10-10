@@ -103,20 +103,17 @@ class TransactionViewModel(application: Application) : AndroidViewModel(applicat
                     Log.d("TransactionViewModel", "Inserted ${newEntities.size} new transactions")
                 }
 
-                // Only check AI backlog if we actually inserted new transactions this sync.
-                // Checking all-time pendingAiCount on every sync caused the "Categorizing 283..."
-                // toast to fire on every period-change button press, even with 0 new rows.
                 val newMiscCount = newEntities.count { it.category == "MISCELLANEOUS" && !it.isCategorizedByAi }
+                val pendingMiscCount = dao.getMiscellaneousNotAiProcessed().size
 
-                _syncMessage.value = when {
-                    newEntities.isEmpty()   -> "Already up to date."
-                    newMiscCount > 0        -> "Synced ${newEntities.size} transaction(s). Categorizing $newMiscCount in background…"
-                    else                    -> "Synced ${newEntities.size} transaction(s)."
-                }
+                _syncMessage.value = CategorizationRetryPolicy.buildSyncMessage(
+                    newEntitiesCount = newEntities.size,
+                    newMiscCount = newMiscCount,
+                    pendingMiscCount = pendingMiscCount
+                )
 
-                // Enqueue AI worker only when there are newly inserted rows that need categorization.
-                // The worker itself uses ExistingWorkPolicy.KEEP so it won't run if already active.
-                if (newMiscCount > 0) {
+                // Enqueue AI worker if newly inserted rows need categorization OR if pending rows need recovery
+                if (CategorizationRetryPolicy.shouldEnqueueRetry(newMiscCount, pendingMiscCount)) {
                     AiCategorizationWorker.enqueue(context)
                 }
 
@@ -125,6 +122,24 @@ class TransactionViewModel(application: Application) : AndroidViewModel(applicat
                 _syncMessage.value = "Sync failed: ${e.localizedMessage}"
             } finally {
                 _isSyncing.value = false
+            }
+        }
+    }
+
+    /**
+     * Retries categorization for any pending MISCELLANEOUS rows that have not yet been AI-processed.
+     * Can be called independently of SMS sync.
+     */
+    fun retryPendingCategorization() {
+        viewModelScope.launch(Dispatchers.IO) {
+            val context = getApplication<Application>()
+            val pending = dao.getMiscellaneousNotAiProcessed()
+            if (pending.isNotEmpty()) {
+                Log.d("TransactionViewModel", "Retrying categorization for ${pending.size} pending transactions")
+                AiCategorizationWorker.enqueue(context)
+                _syncMessage.value = "Retrying categorization for ${pending.size} transaction(s) in background…"
+            } else {
+                _syncMessage.value = "No pending categorizations to retry."
             }
         }
     }

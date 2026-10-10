@@ -1,11 +1,11 @@
 """
 Categorization pipeline — Endpoints 2 & 3.
 
-Layer order (same as the original Android pipeline, but now server-side):
+Layer order:
   1. Supabase shared global cache (merchant_categories table)  — 0ms, free
   2. Google Places Text Search API                             — ~200ms
-  3. Gemini 2.0 Flash LLM                                     — ~500ms
-  4. Fallback → MISCELLANEOUS
+  3. Groq LPU LLM (sub-300ms, llama-3.3-70b-versatile)        — ~200ms
+  4. Fallback → MISCELLANEOUS (transient, never cached)
 
 API keys are ONLY on this server — never in the APK.
 """
@@ -16,16 +16,20 @@ import os
 from typing import Optional
 
 import httpx
-from google import genai
-from google.genai import types as genai_types
 
-from cache import get_from_cache, save_to_cache, get_batch_from_cache
+from cache import (
+    CONFIDENT_CATEGORIES,
+    is_cachable_category,
+    get_from_cache,
+    save_to_cache,
+    get_batch_from_cache,
+)
+from llm import call_llm
 from models import BatchCategorizeItem, CategorizeResponse
 
 logger = logging.getLogger(__name__)
 
 PLACES_API_KEY = os.getenv("PLACES_API_KEY", "")
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
 PLACES_ENDPOINT = "https://places.googleapis.com/v1/places:searchText"
 
 VALID_CATEGORIES = {
@@ -65,38 +69,22 @@ PLACE_TYPE_TO_CATEGORY: dict[str, str] = {
 }
 
 
-def _init_gemini() -> Optional[genai.Client]:
-    """Initializes and returns the Gemini client, or None if key is missing."""
-    if not GEMINI_API_KEY:
-        logger.error("GEMINI_API_KEY is not set")
-        return None
-    try:
-        return genai.Client(api_key=GEMINI_API_KEY)
-    except Exception as e:
-        logger.error(f"Failed to initialize Gemini client: {e}")
-        return None
-
-
-# Initialize client once at module load
-_gemini_client: Optional[genai.Client] = _init_gemini()
-
-
 # ─────────────────────────────────────────────
 #  Layer 2: Google Places API
 # ─────────────────────────────────────────────
 
 async def _call_places_api(merchant: str) -> Optional[str]:
-    """Calls Google Places Text Search API and returns a category or None."""
+    """Calls Google Places Text Search API and returns a confident category or None."""
     if not PLACES_API_KEY:
         return None
     try:
-        async with httpx.AsyncClient(timeout=6.0) as client:
+        async with httpx.AsyncClient(timeout=4.0) as client:
             response = await client.post(
                 PLACES_ENDPOINT,
                 headers={
                     "Content-Type": "application/json",
                     "X-Goog-Api-Key": PLACES_API_KEY,
-                    "X-Goog-FieldMask": "places.types",  # Only request types — minimizes cost
+                    "X-Goog-FieldMask": "places.types",
                 },
                 json={
                     "textQuery": merchant,
@@ -117,7 +105,7 @@ async def _call_places_api(merchant: str) -> Optional[str]:
             types = places[0].get("types", [])
             for place_type in types:
                 category = PLACE_TYPE_TO_CATEGORY.get(place_type.lower())
-                if category:
+                if category and is_cachable_category(category):
                     return category
             return None
     except Exception as e:
@@ -126,16 +114,12 @@ async def _call_places_api(merchant: str) -> Optional[str]:
 
 
 # ─────────────────────────────────────────────
-#  Layer 3: Gemini LLM
+#  Layer 3: Groq LLM (Bounded 5s timeout)
 # ─────────────────────────────────────────────
 
-async def _call_gemini(merchant: str, sms_snippet: str) -> Optional[str]:
-    """Calls Gemini 2.0 Flash and returns a validated category string."""
-    client = _gemini_client
-    if client is None:
-        return None
-    try:
-        prompt = f"""You are a financial transaction categorizer for Indian users.
+async def _call_llm_categorizer(merchant: str, sms_snippet: str) -> tuple[Optional[str], str]:
+    """Calls Groq (or fallback) with bounded timeout and returns (category, provider_name)."""
+    prompt = f"""You are a financial transaction categorizer for Indian users.
 Given a merchant name and a brief transaction description, reply with ONLY one word from this exact list:
 FOOD, TRAVEL, SHOPPING, BILLS, ENTERTAINMENT, INVESTMENTS, HEALTH, EDUCATION, MISCELLANEOUS
 
@@ -156,30 +140,26 @@ Merchant: "{merchant}"
 Description: "{sms_snippet[:100]}"
 Category:"""
 
-        # Run blocking Gemini call in a thread pool to not block the event loop
-        loop = asyncio.get_event_loop()
-        response = await loop.run_in_executor(
-            None,
-            lambda: client.models.generate_content(
-                model="gemini-2.0-flash",
-                contents=prompt,
-            )
-        )
-        raw = (response.text or "").strip().upper()
-        return raw if raw in VALID_CATEGORIES else "MISCELLANEOUS"
-    except Exception as e:
-        logger.error(f"Gemini failed for '{merchant}': {e}")
-        return None
+    raw_reply, provider = await call_llm(prompt, timeout=5.0)
+    if not raw_reply:
+        return None, provider
+
+    clean_cat = raw_reply.strip().upper()
+    if clean_cat in CONFIDENT_CATEGORIES:
+        return clean_cat, provider
+    return None, provider
 
 
 # ─────────────────────────────────────────────
 #  Public API: Categorize Single
 # ─────────────────────────────────────────────
 
-async def categorize_merchant(merchant: str, sms_snippet: str) -> CategorizeResponse:
+async def categorize_merchant(merchant: str, sms_snippet: str = "") -> CategorizeResponse:
     """
     Full categorization pipeline for a single merchant.
-    Returns CategorizeResponse with category and source.
+    Guarantees:
+    - Uncertain cache hits (MISCELLANEOUS/FALLBACK) are ignored and re-resolved.
+    - Transient fallbacks are NEVER cached.
     """
     merchant = merchant.strip()
     if not merchant:
@@ -187,26 +167,27 @@ async def categorize_merchant(merchant: str, sms_snippet: str) -> CategorizeResp
 
     # Layer 1: Supabase shared global cache
     cached = get_from_cache(merchant)
-    if cached:
+    if cached and is_cachable_category(cached):
         logger.info(f"Global cache HIT: '{merchant}' → {cached}")
         return CategorizeResponse(merchant=merchant, category=cached, source="GLOBAL_CACHE")
 
     # Layer 2: Google Places API
     places_cat = await _call_places_api(merchant)
-    if places_cat:
+    if places_cat and is_cachable_category(places_cat):
         save_to_cache(merchant, places_cat, "PLACES")
         logger.info(f"Places resolved: '{merchant}' → {places_cat}")
         return CategorizeResponse(merchant=merchant, category=places_cat, source="PLACES")
 
-    # Layer 3: Gemini LLM
-    gemini_cat = await _call_gemini(merchant, sms_snippet)
-    if gemini_cat:
-        save_to_cache(merchant, gemini_cat, "GEMINI")
-        logger.info(f"Gemini resolved: '{merchant}' → {gemini_cat}")
-        return CategorizeResponse(merchant=merchant, category=gemini_cat, source="GEMINI")
+    # Layer 3: Groq LLM
+    llm_cat, provider = await _call_llm_categorizer(merchant, sms_snippet)
+    if llm_cat and is_cachable_category(llm_cat):
+        source_name = provider if provider != "NONE" else "GROQ"
+        save_to_cache(merchant, llm_cat, source_name)
+        logger.info(f"{source_name} resolved: '{merchant}' → {llm_cat}")
+        return CategorizeResponse(merchant=merchant, category=llm_cat, source=source_name)
 
-    # Fallback
-    logger.warning(f"All layers failed for '{merchant}' — returning MISCELLANEOUS")
+    # Fallback (never saved to cache)
+    logger.warning(f"All layers failed or uncertain for '{merchant}' — returning transient MISCELLANEOUS")
     return CategorizeResponse(merchant=merchant, category="MISCELLANEOUS", source="FALLBACK")
 
 
@@ -218,12 +199,13 @@ async def categorize_batch(
     transactions: list[BatchCategorizeItem],
 ) -> tuple[list[CategorizeResponse], int, int]:
     """
-    Categorize a batch of transactions efficiently.
+    Categorize a batch of transactions efficiently without cache poisoning.
 
     Strategy:
     1. Batch-check all merchants against Supabase cache in ONE query
-    2. For cache misses, deduplicate merchants (same merchant in batch = 1 API call)
-    3. Process cache misses concurrently (up to 5 at a time to respect rate limits)
+    2. Filter out uncertain/invalid cache hits
+    3. For cache misses, deduplicate merchants (same merchant in batch = 1 API call)
+    4. Process cache misses concurrently (up to 3 at a time to respect rate limits)
 
     Returns: (results, cache_hits_count, api_calls_count)
     """
@@ -234,30 +216,31 @@ async def categorize_batch(
     cache_hits = 0
     api_calls = 0
 
-    # Step 1: Deduplicate merchants for cache lookup
+    # Step 1: Query shared cache
     merchant_names = [t.merchant for t in transactions]
-    cache_map = get_batch_from_cache(merchant_names)  # Single Supabase query
+    cache_map = get_batch_from_cache(merchant_names)  # Already filters out non-confident entries
 
-    # Step 2: Separate cache hits from misses
+    # Step 2: Separate valid cache hits from misses
     cached_results: dict[str, CategorizeResponse] = {}
     for txn in transactions:
         key = txn.merchant.strip().lower()
-        if key in cache_map:
+        cat = cache_map.get(key)
+        if cat and is_cachable_category(cat):
             cached_results[txn.merchant] = CategorizeResponse(
                 merchant=txn.merchant,
-                category=cache_map[key],
+                category=cat,
                 source="GLOBAL_CACHE",
             )
             cache_hits += 1
 
-    # Step 3: Collect unique cache misses
+    # Step 3: Collect unique cache misses (excluding confirmed cache hits)
     misses = list({
         t.merchant: t for t in transactions
-        if t.merchant.strip().lower() not in cache_map
+        if t.merchant.strip().lower() not in cache_map or not is_cachable_category(cache_map.get(t.merchant.strip().lower()))
     }.values())
 
-    # Step 4: Process misses with a concurrency limit (semaphore)
-    semaphore = asyncio.Semaphore(3)  # Max 3 concurrent API calls
+    # Step 4: Process misses with a concurrency limit
+    semaphore = asyncio.Semaphore(3)
 
     async def _process_one(txn: BatchCategorizeItem) -> CategorizeResponse:
         async with semaphore:

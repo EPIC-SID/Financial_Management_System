@@ -4,22 +4,18 @@ AI financial insights — Endpoints 4 & 5.
 Endpoint 4: POST /api/v1/insights/analyze
   - Takes a user's transaction list + monthly income
   - Returns AI-generated spending summary, actionable tips, health score
-  - Powers the AiReviewScreen (currently a hardcoded placeholder)
+  - Powered by Groq LPU inference for instant generation
 
 Endpoint 5: POST /api/v1/insights/advisor
   - Natural language Q&A about the user's finances
   - Returns a conversational AI answer + follow-up suggestions
-  - Powers the "Finance Advisor" feature from todo.txt
 """
-import asyncio
 import json
 import logging
-import os
 from collections import defaultdict
 from typing import Optional
 
-from google import genai
-
+from llm import call_llm
 from models import (
     TransactionContext,
     SpendingAnalysisResponse,
@@ -28,16 +24,9 @@ from models import (
 
 logger = logging.getLogger(__name__)
 
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
-
-def _get_client() -> Optional[genai.Client]:
-    if not GEMINI_API_KEY:
-        return None
-    return genai.Client(api_key=GEMINI_API_KEY)
-
 
 def _build_transaction_summary(transactions: list[TransactionContext]) -> dict:
-    """Compute basic stats from the transaction list before sending to Gemini."""
+    """Compute basic stats from the transaction list before sending to LLM."""
     category_totals: dict[str, float] = defaultdict(float)
     total_spent = 0.0
     total_income = 0.0
@@ -117,32 +106,12 @@ Rules:
 - Insights should be data-driven observations
 - Savings tips should be practical for Indian users"""
 
-    client = _get_client()
-    if not client:
-        # Return a basic computed response if Gemini is unavailable
-        return SpendingAnalysisResponse(
-            summary=f"You spent ₹{stats['total_spent']:.0f} this period across {len(stats['category_totals'])} categories.",
-            insights=[f"Your top spending category is {stats['top_category']}."],
-            savings_tips=["Try to track your expenses weekly to identify patterns."],
-            top_category=stats["top_category"],
-            health_score=50,
-            total_spent=stats["total_spent"],
-            total_income=stats["total_income"],
-            category_breakdown=stats["category_totals"],
-        )
-
     try:
-        loop = asyncio.get_event_loop()
-        response = await loop.run_in_executor(
-            None,
-            lambda: client.models.generate_content(
-                model="gemini-2.0-flash",
-                contents=prompt,
-            )
-        )
-        raw = response.text or "{}"
-        # Strip markdown code blocks if Gemini wraps the JSON
-        raw = raw.strip().removeprefix("```json").removeprefix("```").removesuffix("```").strip()
+        raw_reply, _ = await call_llm(prompt, timeout=8.0)
+        if not raw_reply:
+            raise RuntimeError("LLM returned empty response or timed out")
+
+        raw = raw_reply.strip().removeprefix("```json").removeprefix("```").removesuffix("```").strip()
         parsed = json.loads(raw)
 
         return SpendingAnalysisResponse(
@@ -158,9 +127,9 @@ Rules:
     except Exception as e:
         logger.error(f"Spending analysis failed: {e}")
         return SpendingAnalysisResponse(
-            summary=f"You spent ₹{stats['total_spent']:.0f} this period.",
-            insights=[f"Top category: {stats['top_category']}"],
-            savings_tips=["Track your spending weekly to identify patterns."],
+            summary=f"You spent ₹{stats['total_spent']:.0f} this period across {len(stats['category_totals'])} categories.",
+            insights=[f"Your top spending category is {stats['top_category']}."],
+            savings_tips=["Try to track your expenses weekly to identify patterns."],
             top_category=stats["top_category"],
             health_score=50,
             total_spent=stats["total_spent"],
@@ -217,24 +186,12 @@ Respond in this EXACT JSON format (no markdown, just JSON):
   "follow_up_suggestions": ["Question 1 the user might want to ask next", "Question 2", "Question 3"]
 }}"""
 
-    client = _get_client()
-    if not client:
-        return AdvisorResponse(
-            answer="I'm unable to provide advice right now. Please try again later.",
-            follow_up_suggestions=[]
-        )
-
     try:
-        loop = asyncio.get_event_loop()
-        response = await loop.run_in_executor(
-            None,
-            lambda: client.models.generate_content(
-                model="gemini-2.0-flash",
-                contents=prompt,
-            )
-        )
-        raw = response.text or "{}"
-        raw = raw.strip().removeprefix("```json").removeprefix("```").removesuffix("```").strip()
+        raw_reply, _ = await call_llm(prompt, timeout=8.0)
+        if not raw_reply:
+            raise RuntimeError("LLM returned empty response or timed out")
+
+        raw = raw_reply.strip().removeprefix("```json").removeprefix("```").removesuffix("```").strip()
         parsed = json.loads(raw)
 
         return AdvisorResponse(
