@@ -207,3 +207,13 @@ Exact previews: `CockpitPreview` in `CockpitScreen.kt` → “Cockpit · 360 · 
 - `:app:testDebugUnitTest`, `:app:assembleDebug` and `:app:lintDebug` pass. The test report contains 22 tests with zero failures, errors or skips.
 - Lint retains 27 non-accessibility warnings by design: 14 `UnusedResources`, 10 `GradleDependency`, and one each of `DataExtractionRules`, `MissingApplicationIcon` and `OldTargetApi`. No missing-content-description warning remains.
 - Native screenshot review is still blocked because the installed Pixel 6 AVD stays `offline` in ADB after a clean cold boot; compiled previews are confirmed, rendered clipping is not.
+
+## Phase 3B — Plan and conflict
+
+No Plan or conflict-resolution frame exists in the supplied Figma source. The fixture-only implementation therefore follows `02-pages.md` M2/M4 and reuses the Phase 3A tokens, card outlines, typography, spacing and buttons; M7 Model report is intentionally absent.
+
+- The forecast Canvas draws the P10–P90 band with 15% green, a 2dp ink median, dashed ink reserve, outlined yellow today marker and touch scrubber. The band reveals left-to-right in 400ms and exposes a TalkBack text summary.
+- Period and plan choices use accessible segmented radio groups. Plan A uses green, Plan B uses ink/white, and Status quo uses a neutral card with a dashed outline.
+- Normal, computing, thin-history and infeasible fixtures are covered by `PlanPreviewProvider` at 360dp and 412dp, at both 100% and 200% font scale. `ConflictPreview` covers the M4 screen at the same sizes and scales.
+- 200% clipping safeguards: PlanCard metrics stack vertically, CTA and segmented controls grow rather than truncate, long notes wrap, and the seven-column period table scrolls horizontally. No fixed-width text is used outside the scrollable table.
+- Native rendered clipping remains unverified because the Pixel 6 AVD is still unavailable to ADB. Preview compilation and the source-level reflow safeguards above are verified; no rendered clipping defect is currently known.
