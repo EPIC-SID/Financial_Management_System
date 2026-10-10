@@ -1,24 +1,62 @@
 package com.example.financeapp.domain.model
 
-import com.example.financeapp.data.TransactionEntity
+import java.time.LocalDate
+import java.time.YearMonth
 
-data class RecurringObligation(
-    val name: String,
+enum class Direction { DEBIT, CREDIT }
+
+enum class Source { SMS, CSV, MANUAL, SYNTHETIC }
+
+data class Txn(
+    /** smsId, csv row hash, or uuid. */
+    val id: String,
+    val date: LocalDate,
+    /** Always positive; sign comes from [direction]. */
     val amount: Double,
-    val dayOfMonth: Int,
+    val direction: Direction,
     val category: String,
+    /** Salted hash; never the raw VPA or name. */
+    val counterpartyHash: String,
+    val accountId: String?,
+    /** Own-account transfer or card-bill payment. */
+    val isTransfer: Boolean,
+    val recurringId: String?,
+    val source: Source,
 )
 
-/** Everything the engines and screens need for one state of the world. */
+data class RecurringItem(
+    val id: String,
+    val label: String,
+    val amount: Double,
+    val intervalDays: Int,
+    val nextDue: LocalDate,
+    val confidence: Double,
+    /** RENT, EMI, CARD_BILL, SUBSCRIPTION, UTILITY, INSURANCE, OTHER */
+    val kind: String,
+)
+
+data class MonthlyAggregate(
+    val month: YearMonth,
+    val income: Double,
+    val essentials: Double,
+    val debtService: Double,
+    val discretionary: Double,
+    val investments: Double,
+)
+
+/** The single snapshot contract. The health score is computed from it, never stored; the reserve is [DeclaredInputs.minReserve]. */
 data class FinancialSnapshot(
-    val activeScenario: Scenario,
-    val currentBalance: Double,
-    val minReserve: Double,
-    val debts: List<Debt>,
-    val recurringObligations: List<RecurringObligation>,
-    /** Full 6-month history (Month -6 to -1) plus any injected transactions, oldest first. */
-    val recentTransactions: List<TransactionEntity>,
-    /** Month +1 to +6. */
-    val planningPeriods: List<PlanningPeriod>,
-    val savingsGoal: SavingsGoal? = null,
+    val asOf: LocalDate,
+    val cash: Double,
+    val accounts: List<Account>,
+    val liabilities: List<Liability>,
+    val investments: List<Investment>,
+    val recurring: List<RecurringItem>,
+    /** Income, essentials, variable, per month. */
+    val history: List<MonthlyAggregate>,
+    val declared: DeclaredInputs,
+    /** 0..1. */
+    val completeness: Double,
+    /** e.g. ["loan balance"] */
+    val missing: List<String>,
 )

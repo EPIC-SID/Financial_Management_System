@@ -2,64 +2,56 @@ package com.example.financeapp.domain.model
 
 enum class PeriodType { MONTHLY, WEEKLY }
 
-enum class ActionType { CUT_DISCRETIONARY, PREPAY_DEBT, BUILD_RESERVE, DEFER_GOAL }
+data class Goal(val name: String, val targetAmount: Double, val byPeriodIndex: Int)
 
-enum class StrategyType { AGGRESSIVE_DEBT_PAYOFF, BALANCED_RESERVE }
-
-enum class Scenario(val label: String) {
-    STABLE_INCOME("Stable"),
-    INCOME_REDUCTION("Income -30%"),
-    UNEXPECTED_EXPENSE("Emergency ₹25k"),
-    INFEASIBLE_TARGET("Infeasible"),
-    HIGH_UNCERTAINTY("High Uncertainty"),
-}
+data class DeclaredInputs(
+    /** FIXED, VARIABLE, MIXED */
+    val incomeType: String,
+    val typicalIncome: Double?,
+    /** Hard planner constraint. */
+    val minReserve: Double,
+    val goal: Goal?,
+    /** Tone only. */
+    val ageRange: String?,
+)
 
 data class PlanningPeriod(
-    val periodIndex: Int,
+    val index: Int,
     val label: String,
-    val startDate: String,
-    val projectedIncome: Double,
-    val essentialExpenses: Double,
-    val debtObligations: Double,
-    val projectedDiscretionary: Double,
-)
-
-data class CashReserveConstraint(val minRequiredReserve: Double)
-
-data class Debt(
-    val name: String,
-    val outstandingPrincipal: Double,
-    val annualInterestRate: Double,
-    val monthlyEmi: Double,
-)
-
-data class SavingsGoal(
-    val name: String,
-    val targetAmount: Double,
-    val deadlinePeriodIndex: Int,
-)
-
-data class ActionItem(
-    val actionType: ActionType,
-    val targetCategory: String,
-    val amountDelta: Double,
-    val description: String,
+    val opening: Double,
+    val income: Double,
+    val essentials: Double,
+    val debtService: Double,
+    val discretionary: Double,
+    val sip: Double,
+    val prepay: Double,
+    val saved: Double,
+    val ending: Double,
+    val reserve: Double,
+    val constraintOk: Boolean,
 )
 
 data class ActionSequence(
     val id: String,
     val name: String,
-    val strategyType: StrategyType,
-    val actionsPerPeriod: Map<Int, List<ActionItem>>,
-    val projectedBalances: List<Double>,
-    val terminalReserve: Double,
+    val periods: List<PlanningPeriod>,
+    /** Cash minus outstanding debt at horizon end. */
+    val terminalNetPosition: Double,
+    /** SIP contributions over the horizon, reported separately. */
+    val investedTotal: Double,
+    val interestPaid: Double,
+    val interestSavedVsStatusQuo: Double,
+    /** P(min balance < reserve) from Monte Carlo. */
     val shortfallRisk: Double,
-    val tradeOffSummary: String,
+    val tradeOff: String,
 )
 
 data class GoalConflict(
-    val conflictedGoal: String,
-    val shortfallAmount: Double,
+    val goal: String,
+    val shortfall: Double,
     val violatedConstraint: String,
-    val proposedRelaxation: String,
+    val firstViolatedPeriod: Int,
+    val relaxations: List<Relaxation>,
 )
+
+data class Relaxation(val kind: String, val description: String, val delta: Double, val riskAfter: Double)
