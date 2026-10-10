@@ -108,16 +108,16 @@ When individual phase tasks are completed, the Integration Lead merges branches 
 ```bash
 # 1. Merge Math Engines (Zero UI/Android dependencies)
 git checkout main
-git merge feat/track3-math
+git merge Siddhant
 
 # 2. Merge Data & Seeder (In-memory models & scenarios)
-git merge feat/track2-data
+git merge Snehal
 
 # 3. Merge Copilot & Simulator (AI engines)
-git merge feat/track4-copilot
+git merge Roshan
 
 # 4. Merge UI Screens & Components
-git merge feat/track1-ui
+git merge Uday
 
 # 5. Wire NavGraph.kt & verify full build
 ./gradlew assembleDebug
