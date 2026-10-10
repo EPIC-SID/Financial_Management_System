@@ -43,6 +43,7 @@ import com.example.financeapp.ui.theme.SurfaceNeutral
 
 enum class RupAiButtonVariant { PRIMARY, OUTLINE }
 enum class RupAiButtonState { DEFAULT, PRESSED, FOCUSED, DISABLED, LOADING }
+enum class RupAiButtonSize { COMPACT, DEFAULT, LARGE }
 
 @Composable
 fun RupAiButton(
@@ -50,6 +51,7 @@ fun RupAiButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     variant: RupAiButtonVariant = RupAiButtonVariant.PRIMARY,
+    size: RupAiButtonSize = RupAiButtonSize.DEFAULT,
     state: RupAiButtonState = RupAiButtonState.DEFAULT,
     disabledReason: String? = null,
     loadingLabel: String = "Saving…"
@@ -62,6 +64,16 @@ fun RupAiButton(
     val focused by interactions.collectIsFocusedAsState()
     val emphasized = !disabled && !loading &&
         (pressed || focused || state == RupAiButtonState.PRESSED || state == RupAiButtonState.FOCUSED)
+    val minimumHeight = when (size) {
+        RupAiButtonSize.COMPACT -> Spacing.compactButtonHeight
+        RupAiButtonSize.DEFAULT -> Spacing.defaultButtonHeight
+        RupAiButtonSize.LARGE -> Spacing.largeButtonHeight
+    }
+    val verticalPadding = when (size) {
+        RupAiButtonSize.COMPACT -> Spacing.xs
+        RupAiButtonSize.DEFAULT -> Spacing.sm
+        RupAiButtonSize.LARGE -> Spacing.md
+    }
     val fill = if (variant == RupAiButtonVariant.PRIMARY) ActionGreen else CanvasWhite
     val border = when {
         emphasized -> BorderStroke(2.dp, Ink)
@@ -71,7 +83,7 @@ fun RupAiButton(
     Column(modifier, verticalArrangement = Arrangement.spacedBy(Spacing.xs)) {
         Button(
             onClick = onClick,
-            modifier = Modifier.fillMaxWidth().heightIn(min = Spacing.defaultCtaHeight).semantics {
+            modifier = Modifier.fillMaxWidth().heightIn(min = minimumHeight).semantics {
                 if (loading) {
                     stateDescription = loadingLabel
                     liveRegion = LiveRegionMode.Polite
@@ -82,7 +94,7 @@ fun RupAiButton(
             shape = RoundedCornerShape(Radius.button),
             border = border,
             elevation = null,
-            contentPadding = PaddingValues(horizontal = Spacing.lg, vertical = Spacing.md),
+            contentPadding = PaddingValues(horizontal = Spacing.lg, vertical = verticalPadding),
             colors = ButtonDefaults.buttonColors(
                 containerColor = fill,
                 contentColor = Ink,
@@ -116,6 +128,19 @@ private fun RupAiButtonPreview(@PreviewParameter(RupAiButtonStatePreviewProvider
             RupAiButton("See plan", {}, state = state, disabledReason = "Add an account to enable this action.")
             RupAiButton("Explore demo", {}, variant = RupAiButtonVariant.OUTLINE, state = state,
                 disabledReason = "Add an account to enable this action.")
+        }
+    }
+}
+
+@Preview(name = "CTA · every size", widthDp = 320, showBackground = true)
+@Preview(name = "CTA · every size · 200%", widthDp = 320, fontScale = 2f, showBackground = true)
+@Composable
+private fun RupAiButtonSizesPreview() {
+    FinanceAppTheme {
+        Column(Modifier.padding(Spacing.md), verticalArrangement = Arrangement.spacedBy(Spacing.md)) {
+            RupAiButton("Compact · 40 dp", {}, size = RupAiButtonSize.COMPACT)
+            RupAiButton("Default · 48 dp", {}, size = RupAiButtonSize.DEFAULT)
+            RupAiButton("Large · 56 dp", {}, size = RupAiButtonSize.LARGE)
         }
     }
 }

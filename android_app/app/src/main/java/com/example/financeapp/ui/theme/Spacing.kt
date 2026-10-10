@@ -14,5 +14,7 @@ object Spacing {
     val xxl = 32.dp
     val xxxl = 48.dp
     val minimumTouchTarget = 48.dp
-    val defaultCtaHeight = 56.dp
+    val compactButtonHeight = 40.dp
+    val defaultButtonHeight = 48.dp
+    val largeButtonHeight = 56.dp
 }

@@ -17,6 +17,13 @@ val HeadlineSerif = FontFamily(Font(R.font.libre_baskerville_regular))
 val DevanagariSerif = FontFamily(Font(R.font.eczar_regular))
 val DevanagariSans = FontFamily(Font(R.font.noto_sans_devanagari_regular))
 
+val NumberHero = TextStyle(
+    fontFamily = Inter,
+    fontWeight = FontWeight.Medium,
+    fontSize = 40.sp,
+    lineHeight = 48.sp,
+    fontFeatureSettings = "tnum, lnum"
+)
 val NumberXL = TextStyle(
     fontFamily = Inter,
     fontWeight = FontWeight.Medium,
@@ -60,12 +67,10 @@ private val BaseTypography = Typography(
     labelSmall = TextStyle(fontFamily = Inter, fontWeight = FontWeight.Medium, fontSize = 12.sp, lineHeight = 16.sp)
 )
 
-// Amounts remain aligned even when presented using body/control typography.
+// Serif roles are for words only. Money uses NumberHero/NumberXL/NumberCompact, all Inter with tabular figures.
 val Typography = BaseTypography.run {
     fun TextStyle.tabular() = copy(fontFeatureSettings = "tnum, lnum")
     copy(
-        displayLarge = displayLarge.tabular(), displayMedium = displayMedium.tabular(),
-        displaySmall = displaySmall.tabular(), headlineLarge = headlineLarge.tabular(),
         headlineMedium = headlineMedium.tabular(), headlineSmall = headlineSmall.tabular(),
         titleLarge = titleLarge.tabular(), titleMedium = titleMedium.tabular(), titleSmall = titleSmall.tabular(),
         bodyLarge = bodyLarge.tabular(), bodyMedium = bodyMedium.tabular(), bodySmall = bodySmall.tabular(),

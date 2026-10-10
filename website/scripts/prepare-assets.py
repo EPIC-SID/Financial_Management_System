@@ -48,6 +48,8 @@ copy = dict(zip(
      "primary", "outline", "disabledReason", "loadingLabel", "scaleNote"],
     required_copy,
 ))
+# Phase 1 review supersedes the stale 56dp-default sentence in the extracted CTA board.
+copy["intro"] = "16 sp labels. 48 dp default; 56 dp Large. Controls grow with text."
 copy["foundationHeadline"] = "Calm, clear and considered."
 assert any(item["Copy"] == copy["foundationHeadline"] for item in foundation["Text"])
 (SITE / "lib/figma-copy.json").write_text(json.dumps(copy, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")

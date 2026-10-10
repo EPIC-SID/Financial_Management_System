@@ -13,11 +13,24 @@ test("CTA states, keyboard access, font and asset loading, AA accessibility", as
   await page.goto("/");
   await page.evaluate(() => document.fonts.ready);
   await expect(page.getByRole("heading", { level: 1 })).toHaveText(copy.headline);
-  await expect(page.getByRole("button")).toHaveCount(10);
+  await expect(page.getByRole("button")).toHaveCount(13);
 
   const first = page.getByRole("group", { name: copy.default, exact: true }).getByRole("button", { name: copy.primary });
   await expect(first).toHaveCSS("background-color", "rgb(82, 161, 69)");
   await expect(first).toHaveCSS("color", "rgb(16, 16, 16)");
+  await expect(first).toHaveCSS("min-height", "48px");
+  await expect(page.getByRole("button", { name: "Compact · 40" })).toHaveCSS("min-height", "40px");
+  await expect(page.getByRole("button", { name: "Large · 56" })).toHaveCSS("min-height", "56px");
+  await expect(page.locator(".amount-specimen")).toHaveCSS("font-family", /inter/i);
+  await expect(page.locator(".amount-specimen")).toHaveCSS("font-feature-settings", /tnum/);
+  await expect(page.locator(".art-specimen")).toHaveCSS("border-radius", "20px");
+  expect(await page.locator("h1, .serif-specimen").allTextContents()).not.toEqual(expect.arrayContaining([expect.stringMatching(/[₹\d]/)]));
+  const compactTarget = await page.getByRole("button", { name: "Compact · 40" }).evaluate((button) => {
+    const bounds = button.getBoundingClientRect();
+    const target = getComputedStyle(button, "::after");
+    return bounds.height + Math.abs(Number.parseFloat(target.top)) + Math.abs(Number.parseFloat(target.bottom));
+  });
+  expect(compactTarget).toBeGreaterThanOrEqual(48);
   await page.keyboard.press("Tab");
   await expect(first).toBeFocused();
   await expect(first).toHaveCSS("outline-width", "2px");
@@ -64,7 +77,7 @@ for (const width of [320, 768, 1024, 1440]) {
           const bounds = button.getBoundingClientRect();
           const text = button.querySelector("span:last-child")!.getBoundingClientRect();
           return {
-            touchTarget: bounds.height >= 56,
+            touchTarget: bounds.height >= Number.parseFloat(getComputedStyle(button).minHeight),
             textContained: text.left >= bounds.left && text.right <= bounds.right + .5 && text.top >= bounds.top && text.bottom <= bounds.bottom + .5,
           };
         }),

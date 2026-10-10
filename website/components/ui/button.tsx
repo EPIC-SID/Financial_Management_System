@@ -8,15 +8,20 @@ import { cn } from "@/lib/utils";
 
 // shadcn/ui's native Button/CVA pattern, overridden by RupAI CTA v2.
 const buttonVariants = cva(
-  "rupai-cta inline-flex w-full min-w-0 items-center justify-center gap-[var(--space-xs)] rounded-[var(--radius-button)] px-[var(--space-lg)] py-[var(--space-md)] text-base font-medium leading-normal disabled:cursor-not-allowed",
+  "rupai-cta inline-flex w-full min-w-0 items-center justify-center gap-[var(--space-xs)] rounded-[var(--radius-button)] px-[var(--space-lg)] font-medium leading-normal disabled:cursor-not-allowed",
   {
     variants: {
       variant: {
         default: "bg-primary text-primary-foreground",
         outline: "bg-background text-foreground",
       },
+      size: {
+        compact: "min-h-[var(--size-button-compact)] py-[var(--space-xs)] text-sm",
+        default: "min-h-[var(--size-button-default)] py-[var(--space-sm)] text-base",
+        large: "min-h-[var(--size-button-large)] py-[var(--space-md)] text-base",
+      },
     },
-    defaultVariants: { variant: "default" },
+    defaultVariants: { variant: "default", size: "default" },
   },
 );
 
@@ -28,7 +33,7 @@ type ButtonProps = ComponentProps<"button"> & VariantProps<typeof buttonVariants
 };
 
 export function Button({
-  className, variant = "default", state = "default", disabled = false,
+  className, variant = "default", size = "default", state = "default", disabled = false,
   disabledReason, loadingLabel = "Saving…", children, type = "button", ...props
 }: ButtonProps) {
   const reasonId = useId();
@@ -44,8 +49,9 @@ export function Button({
         type={type}
         data-slot="button"
         data-variant={variant}
+        data-size={size}
         data-state={unavailable ? "disabled" : state}
-        className={cn(buttonVariants({ variant, className }))}
+        className={cn(buttonVariants({ variant, size, className }))}
         disabled={unavailable || loading}
         aria-busy={loading || undefined}
         aria-describedby={cn(props["aria-describedby"], unavailable && reasonId) || undefined}

@@ -19,7 +19,7 @@ This phase reads design tokens and copy only from the existing [figma-source.jso
 | Green fill | Explicit user override `#52A145`; the JSON is not a shape-fill binding export. | Exact override, not approximated. |
 | H1 size | v4 Foundations: “H1 / Libre Baskerville 32–40 / Sitka when available”. | Exact range. Android exposes 32, 36 and 40sp roles; W1 uses 32px mobile / 40px desktop at default text size. Selecting roles within the range is an implementation mapping, not an extracted single H1 size. |
 | Card radius | v4 Foundations: “Radius / small 8, input 12, button 16, card 20, sheet 24 dp.” | Exact 20dp Android / 20px web. |
-| CTA height | v4 CTA v2: “16 sp labels. 56 dp default height. Controls grow with text.” | Exact 56dp Android / 56px web minimum; height grows with text. |
+| CTA height | The extracted v4 CTA v2 board says “56 dp default”; Phase 1 review supersedes it. | 48dp/px default, 56dp/px Large, and 40dp/px compact visual size with a 48dp/px touch target; controls grow with text. This is an explicit review override. |
 | Screen margin | No screen-margin specification or inner screen bounds in the JSON. | Unverified; no screen-margin token is defined. W1 specimen outer padding is authored 16px mobile / 32px desktop, with 1320px maximum width. Prior 24dp assumptions must not be presented as extracted. |
 
 ### Implemented overrides and remaining fidelity gaps
@@ -33,13 +33,13 @@ This phase reads design tokens and copy only from the existing [figma-source.jso
 | Yellow | Dedicated `#FFC200` guidance token with ink foreground. Not mapped to generic secondary actions, statuses or text. No yellow status is implemented. |
 | Watch | Orange foreground `#9A4200` on pale orange `#FFE4CC`. User required orange but did not specify hexes; these are authored choices, not Figma-extracted values. |
 | Status copy | Safe / Watch / Risk labels are preserved from the existing groundwork and requested status terminology. The extracted JSON does not independently establish all three status labels or icon shapes. Material outlined icons preserve icon-plus-label communication. |
-| Statement types | `✓ Observed`, `≈ Predicted`, `→ Suggested`, matching v4 States and ranges. Ink replaces prior green foreground on Observed. |
-| Radius and spacing | 8/12/16/20/24dp radii and 4/8/12/16/20/24/32/48dp spacing match written Foundations specs. Status badges use small 8dp radius; exact status silhouette is absent from JSON. Card internal padding 16dp, badge padding 8×4dp and CTA padding 20×16dp are implementation mappings, not extracted panel geometry. |
+| Statement types | `✓ Observed`, `≈ Predicted`, `→ Recommended`. The extracted v4 board still says “Suggested”; Phase 1 review supersedes that stale copy. Ink replaces prior green foreground on Observed. |
+| Radius and spacing | 8/12/16/20/24dp radii and 4/8/12/16/20/24/32/48dp spacing match written Foundations specs. Inputs are 12dp, buttons remain 16dp because the current JSON explicitly says 16 and contains no CTA shape geometry proving 12, and cards are 20dp—not 16. Status badges use small 8dp radius; exact status silhouette is absent from JSON. Card internal padding 16dp, badge padding 8×4dp and size-dependent CTA padding are implementation mappings, not extracted panel geometry. |
 | Outline | Ink used for borders. Previous `#7A8275` outline binding is not present in JSON, so it is not treated as verified in this phase. |
 | Contrast boundary | Fixed `#52A145` on neutral `#F6F7F5` measures 2.99:1, below 3:1 for essential thin UI/chart lines. That pairing is not approved; future charts should use ink. The prior chart-line assertion was removed from this component-phase test because no chart component is implemented. Green CTA on white measures 3.21:1; ink CTA labels on green measure 5.93:1. |
-| Typography | Libre Baskerville headlines; Inter UI. H2 24sp Medium, H3 20sp Regular, body 16sp, compact 14sp, caption 12sp, glyph 16sp. All provided typography is at least 12sp. Existing line-height choices and Material role weights beyond explicit H1/H2/H3/body specs are retained; exact leading is not established by JSON. Inter regular/medium/semibold contain `₹` and `tnum`. Both the Android Libre Baskerville file and Google's full upstream font lack `₹`; W1 uses an explicit Inter currency fallback rather than inventing a serif glyph. Monetary values use Inter. W1 follows the Foundations H1 range instead of copying the CTA board's 42px title; its section headings use H2 24px rather than the board's 20px label. |
+| Typography | Libre Baskerville is restricted to word-only headlines; every monetary string uses Inter with tabular figures, including future hero amounts. H2 24sp Medium, H3 20sp Regular, body 16sp, compact 14sp, caption 12sp, glyph 16sp. All provided typography is at least 12sp. Existing line-height choices and Material role weights beyond explicit H1/H2/H3/body specs are retained; exact leading is not established by JSON. Both the Android Libre Baskerville file and Google's full upstream font lack `₹`, but money no longer relies on a mid-line serif fallback. W1 follows the Foundations H1 range instead of copying the CTA board's 42px title; its section headings use H2 24px rather than the board's 20px label. |
 | Numbers | Existing IndianFormat helpers retained with their unit tests. `tnum, lnum` applied to Material typography, with tabular numeric styles. No locale-dependent western grouping or predicted `=` glyph introduced. |
-| Targets and scaling | CTA minimum 56dp exceeds 48dp touch requirement; no fixed maximum height, truncation or ellipsis. Passive tags/status pills are not touch controls. 100%, 130% and 200% component previews provided. |
+| Targets and scaling | Buttons are 48dp default and 56dp Large. Compact has a 40dp visual height inside the platform's 48dp minimum interactive target. There is no fixed maximum height, truncation or ellipsis. Passive tags/status pills are not touch controls. 100%, 130% and 200% state previews plus size previews are provided. |
 | Theme and effects | Light-only theme; all elevation tokens zero. New cards and buttons have no rendered elevation, offset shadow, gradients or blur. Existing screens are outside this phase's migration. |
 | Illustrations | All 14 supplied PNGs copied as lossless WebP at original dimensions with alpha and every RGBA pixel preserved. Descriptive screen-role resource names are recorded in [illustration-assets.json](illustration-assets.json). Names are preparation for later placement; exact screen-to-art assignments and tinted rounded panels await the screen phase. No artwork redrawn. |
 | Preview copy | Invented sample prose removed. Component previews now use v4 Home, States and ranges, Illustration slots and CTA v2 copy. Metric combinations are review fixtures, not implemented financial decisions or screens. |
@@ -53,7 +53,7 @@ Verified on 11 October 2026:
 - Requested command on Windows, `gradlew.bat test --tests "*IndianFormatTest" --offline`, is rejected because Android's aggregate `test` task does not support `--tests`.
 - Equivalent filtered variant task, `gradlew.bat :app:testDebugUnitTest --tests "*IndianFormatTest" --tests "*ThemeContrastTest" --offline`, **passed**: 11 IndianFormat tests and one contrast test, zero failures/errors. Reports: `android_app/app/build/reports/tests/testDebugUnitTest/index.html`.
 - An initial generated Room Java class-lookup failure was resolved by `:app:clean` and rebuilding. No Room source or Gradle configuration was changed for this phase. Non-fatal existing SDK XML version and unused-variable warnings remain.
-- `:app:compileDebugKotlin` and unit-test compilation passed, including all preview functions and providers. Tags/statuses enumerate all three variants; CTA previews enumerate all five states for both primary and outline at 100%, 130% and 200%. Metric gallery covers observed, predicted, suggested and missing-value fixtures, delta and status options, plus all tags/statuses at those scales.
+- `:app:compileDebugKotlin` and unit-test compilation passed, including all preview functions and providers. Tags/statuses enumerate all three variants; CTA previews enumerate all five states for both primary and outline at 100%, 130% and 200%. Metric gallery covers observed, predicted, recommended and missing-value fixtures, delta and status options, plus all tags/statuses at those scales.
 - 14 WebP resources verified against their PNG originals: original dimensions, alpha and decoded RGBA bytes identical. Asset manifest includes hashes. Total WebP bytes: 5,427,168.
 - Inter regular/medium/semibold cmap and GSUB tables verified for `₹` and `tnum`. Libre Baskerville's missing rupee glyph is recorded above.
 - Scoped `git diff --check` passed. Existing unrelated working-tree changes were preserved. The subsequent Android delivery commit is `d5c7666`.
@@ -161,7 +161,7 @@ Illustration source directory: `C:\Users\udays\Documents\rupai\Financial_Managem
 
 Implemented Next.js App Router, TypeScript, static export, Tailwind/shadcn CSS variables and native Button/CVA pattern, lazy Motion features, local subset fonts, the CTA v2 override and lossless WebP density variants in `website/`. The root route is a foundation specimen, with one decorative art panel; it is not a product screen or install landing page. No database, Android source or architecture changes were made for W1.
 
-Font subsets retain source outlines, include licenses and use distinct internal family names. Inter supplies `₹` and tabular numerals; Libre Baskerville's missing rupee glyph uses Inter fallback. This is a documented font-source limitation, not a claim that the serif subset contains `₹`.
+Font subsets retain source outlines, include licenses and use distinct internal family names. Inter supplies `₹` and tabular numerals. Libre Baskerville remains word-only; all monetary strings use explicit Inter styles, so the missing serif rupee glyph is never used as part of a monetary line.
 
 Verification command, from `website/`: `npm run verify`. It generates Next route types, checks TypeScript, builds the static export and runs browser checks against that export using Python and installed Chrome. Asset preparation performs assertions on font coverage and decoded RGBA equality. Mobile and desktop screenshots were reviewed at default and enlarged text sizes; this does not verify native Compose rendering.
 
@@ -169,13 +169,17 @@ Verification command, from `website/`: `npm run verify`. It generates Next route
 
 Open these files in Android Studio's Design/Split view under `android_app/app/src/main/java/com/example/financeapp/ui/components/`:
 
-- `RupAiButton.kt` → `RupAiButtonPreview`: “CTA · every state”, “CTA · every state · 130%”, “CTA · every state · 200%”. The parameter provider enumerates Default, Pressed, Focused, Disabled and Loading, each showing primary and outline.
-- `TypeTag.kt` → `TypeTagPreview`: “Statement tags · every type” and “Statement tags · 200%”. Each enumerates Observed, Predicted and Suggested.
+- `RupAiButton.kt` → `RupAiButtonPreview`: “CTA · every state”, “CTA · every state · 130%”, “CTA · every state · 200%”. The parameter provider enumerates Default, Pressed, Focused, Disabled and Loading, each showing primary and outline. Also open `RupAiButtonSizesPreview`: “CTA · every size” and “CTA · every size · 200%” for compact 40dp, default 48dp and Large 56dp.
+- `TypeTag.kt` → `TypeTagPreview`: “Statement tags · every type” and “Statement tags · 200%”. Each enumerates Observed, Predicted and Recommended.
 - `StatusPill.kt` → `StatusPillPreview`: “Status pills · every status” and “Status pills · 200%”. Each enumerates Safe, Watch and Risk.
-- `MetricCard.kt` → `Phase1CPreview`: “Metric cards · 100%”, “Metric cards · 130%”, “Metric cards · 200%”. The gallery includes observed, range, suggested and unavailable fixtures, plus all tags/statuses (including at 130%).
+- `MetricCard.kt` → `Phase1CPreview`: “Metric cards · 100%”, “Metric cards · 130%”, “Metric cards · 200%”. The gallery includes observed, range, recommended and unavailable fixtures, plus all tags/statuses (including at 130%).
 
 ### Computed W1 verification results
 
 - Browser report: 14 passed, 0 failed, 0 skipped, 0 flaky; 0 runner errors. TypeScript and static export also passed.
 - Asset manifest: 4 local font subsets, 14 supplied illustrations, 28 WebP variants; 7327072 total WebP bytes. All asset roundtrip and Inter rupee/tabular assertions passed.
 - Browser checks include WCAG AA, keyboard focus, visible disabled reasons, loading semantics, light-only output under a dark system preference, reduced motion, local resource loading and reflow at the widths/scales encoded in the test matrix.
+
+### Screen finish gate for later phases
+
+After each future screen is built, open it at 360dp and 412dp widths at 100% and 200% font scale. Record every clipped, truncated or overlapping element here before reporting that screen complete. Phase 1 contains no product screens, so there is no screen-level clipping result yet.

@@ -25,15 +25,14 @@ import com.example.financeapp.ui.theme.Spacing
 import com.example.financeapp.ui.theme.SummaryGreen
 import com.example.financeapp.ui.theme.SurfaceNeutral
 
-enum class StatementType { FACT, PREDICTION, RECOMMENDATION }
+enum class StatementType(val glyph: String, val label: String) {
+    FACT("✓", "Observed"),
+    PREDICTION("≈", "Predicted"),
+    RECOMMENDATION("→", "Recommended")
+}
 
 @Composable
 fun TypeTag(type: StatementType, modifier: Modifier = Modifier) {
-    val (glyph, label) = when (type) {
-        StatementType.FACT -> "✓" to "Observed"
-        StatementType.PREDICTION -> "≈" to "Predicted"
-        StatementType.RECOMMENDATION -> "→" to "Suggested"
-    }
     Surface(
         modifier = modifier.semantics(mergeDescendants = true) {},
         shape = RoundedCornerShape(Radius.tag),
@@ -45,8 +44,8 @@ fun TypeTag(type: StatementType, modifier: Modifier = Modifier) {
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(Spacing.xxs)
         ) {
-            Text(glyph, modifier = Modifier.clearAndSetSemantics {}, style = MaterialTheme.typography.labelMedium, fontSize = 16.sp)
-            Text(label, style = MaterialTheme.typography.labelSmall)
+            Text(type.glyph, modifier = Modifier.clearAndSetSemantics {}, style = MaterialTheme.typography.labelMedium, fontSize = 16.sp)
+            Text(type.label, style = MaterialTheme.typography.labelSmall)
         }
     }
 }

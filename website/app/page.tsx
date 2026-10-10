@@ -30,6 +30,11 @@ export default function Foundations() {
           ))}
         </div>
         <p className="supporting-copy scale-note">{copy.scaleNote}</p>
+        <div className="button-sizes" aria-label="CTA sizes">
+          <Button size="compact">Compact · 40</Button>
+          <Button>Default · 48</Button>
+          <Button size="large">Large · 56</Button>
+        </div>
       </section>
 
       <div className="foundations-grid">
@@ -50,7 +55,7 @@ export default function Foundations() {
           <h2 id="type-heading">Typography / Latin</h2>
           <p className="serif-specimen">{copy.foundationHeadline}</p>
           <p className="supporting-copy">Body / Inter Regular 16; compact body 14 minimum</p>
-          <p className="amount-specimen">₹18K–₹26K</p>
+          <p className="amount-specimen money">₹18K–₹26K</p>
           <p className="caption">Caption / 12 minimum; legend glyph 16</p>
           <p className="token-note">Radius / small 8, input 12, button 16, card 20, sheet 24 dp.</p>
         </section>

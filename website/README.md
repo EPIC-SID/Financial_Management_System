@@ -22,7 +22,7 @@ Tokens and CTA copy come from `../docs/figma-source.json`, with the user's green
 
 The shadcn CSS variable scheme and native Button/CVA pattern are configured in `components.json`, `app/globals.css` and `components/ui/button.tsx`. The Button override exposes primary/outline and default/pressed/focused/disabled/loading states. Every disabled button requires a visible reason; loading is non-interactive and announced. Focus/press emphasis uses a flat inset outline.
 
-Inter regular/medium/semibold and Libre Baskerville regular are locally hosted, subset WOFF2s. Both source licenses are included. Inter subsets retain `₹` and `tnum`; the upstream Libre Baskerville font has no rupee glyph, so serif text has an explicit Inter currency fallback. Font subset metadata uses distinct family names; the source outlines are preserved.
+Inter regular/medium/semibold and Libre Baskerville regular are locally hosted, subset WOFF2s. Both source licenses are included. Inter subsets retain `₹` and `tnum`. Libre Baskerville is used only for word-only headlines; every monetary string uses Inter, so currency never depends on a mid-line serif fallback. Font subset metadata uses distinct family names; the source outlines are preserved.
 
 All supplied illustrations are converted to lossless WebP with alpha. Native resolution is used for 2x and half-size rounded up for 1x; no new detail is fabricated. `public/asset-manifest.json` records dimensions, hashes and font coverage. The one art panel on the specimen demonstrates the asset pipeline, not a screen assignment.
 
