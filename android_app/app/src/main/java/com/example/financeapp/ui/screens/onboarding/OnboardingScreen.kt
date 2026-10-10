@@ -1,9 +1,7 @@
 package com.example.financeapp.ui.screens.onboarding
 
-import androidx.annotation.DrawableRes
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -44,8 +42,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -55,7 +51,6 @@ import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.datasource.CollectionPreviewParameterProvider
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.financeapp.R
 import com.example.financeapp.ui.components.RupAiButton
 import com.example.financeapp.ui.components.RupAiButtonSize
 import com.example.financeapp.ui.components.RupAiButtonState
@@ -122,10 +117,12 @@ fun OnboardingScreen(
     onAgeRangeSelected: (String) -> Unit = {},
     onCushionChanged: (String) -> Unit = {},
     onGoalNameChanged: (String) -> Unit = {},
-    onGoalAmountChanged: (String) -> Unit = {}
+    onGoalAmountChanged: (String) -> Unit = {},
+    showSmsOption: Boolean = true
 ) {
     val primaryEnabled = when (state.page) {
-        OnboardingPage.DATA_SOURCE -> state.selectedSource != null
+        OnboardingPage.DATA_SOURCE -> state.selectedSource != null &&
+            (showSmsOption || state.selectedSource != OnboardingDataSource.SMS)
         OnboardingPage.BUILDING -> state.completeness != null
         else -> true
     }
@@ -147,7 +144,7 @@ fun OnboardingScreen(
             verticalArrangement = Arrangement.spacedBy(Spacing.md)
         ) {
             item { SegmentedProgress(state.page) }
-            item { OnboardingIllustration(illustrationFor(state), illustrationTint(state)) }
+            item { OnboardingIllustration(state) }
             item {
                 Text(
                     headlineFor(state),
@@ -158,8 +155,8 @@ fun OnboardingScreen(
             item {
                 when (state.page) {
                     OnboardingPage.WELCOME -> WelcomeContent()
-                    OnboardingPage.DATA_SOURCE -> DataSourceContent(state, onSourceSelected)
-                    OnboardingPage.SMS_CONSENT -> SmsConsentContent(state.permissionState)
+                    OnboardingPage.DATA_SOURCE -> DataSourceContent(state, onSourceSelected, showSmsOption)
+                    OnboardingPage.SMS_CONSENT -> SmsConsentContent(state.permissionState, onAlternativeSelected)
                     OnboardingPage.ABOUT_MONEY -> AboutMoneyContent(
                         state, onMoneyArrivalSelected, onObligationToggled, onAgeRangeSelected
                     )
@@ -241,22 +238,6 @@ private fun SegmentedProgress(page: OnboardingPage) {
 }
 
 @Composable
-private fun OnboardingIllustration(@DrawableRes resource: Int, tint: Color) {
-    Surface(
-        Modifier.fillMaxWidth().height(280.dp),
-        shape = RoundedCornerShape(Radius.card),
-        color = tint
-    ) {
-        Image(
-            painter = painterResource(resource),
-            contentDescription = null,
-            contentScale = ContentScale.Fit,
-            modifier = Modifier.fillMaxSize().padding(Spacing.sm)
-        )
-    }
-}
-
-@Composable
 private fun WelcomeContent() {
     Column(verticalArrangement = Arrangement.spacedBy(Spacing.sm)) {
         Text("Bring your balances, dues and plans into one clear picture.", style = MaterialTheme.typography.bodyLarge)
@@ -270,9 +251,13 @@ private fun WelcomeContent() {
 }
 
 @Composable
-private fun DataSourceContent(state: OnboardingUiState, onSelected: (OnboardingDataSource) -> Unit) {
+private fun DataSourceContent(
+    state: OnboardingUiState,
+    onSelected: (OnboardingDataSource) -> Unit,
+    showSmsOption: Boolean
+) {
     Column(verticalArrangement = Arrangement.spacedBy(Spacing.sm)) {
-        OnboardingDataSource.entries.forEach { source ->
+        OnboardingDataSource.entries.filter { showSmsOption || it != OnboardingDataSource.SMS }.forEach { source ->
             SelectableCard(source, selected = state.selectedSource == source, onClick = { onSelected(source) })
         }
         if (state.selectedSource == OnboardingDataSource.SAMPLE) {
@@ -311,7 +296,10 @@ private fun SelectableCard(source: OnboardingDataSource, selected: Boolean, onCl
 }
 
 @Composable
-private fun SmsConsentContent(permissionState: SmsPermissionState) {
+private fun SmsConsentContent(
+    permissionState: SmsPermissionState,
+    onAlternativeSelected: (OnboardingDataSource) -> Unit
+) {
     Column(verticalArrangement = Arrangement.spacedBy(Spacing.md)) {
         if (permissionState != SmsPermissionState.EXPLAINER) {
             Notice(
@@ -322,6 +310,9 @@ private fun SmsConsentContent(permissionState: SmsPermissionState) {
         }
         ReadList("What we read", listOf("Supported bank alerts", "Amount, date and merchant"), SummaryGreen)
         ReadList("What we never read", listOf("Personal chats", "OTPs", "Contacts"), SurfaceNeutral)
+        if (permissionState != SmsPermissionState.EXPLAINER) {
+            PermissionRecoveryActions(onAlternativeSelected)
+        }
         Text("RupAI filters bank alerts in the app. AI categorization may send merchant details and message snippets to our backend.", style = MaterialTheme.typography.bodySmall, color = MutedInk)
     }
 }
@@ -501,22 +492,6 @@ private fun headlineFor(state: OnboardingUiState): String = when (state.page) {
     OnboardingPage.ABOUT_MONEY -> "Tell us what shapes your month."
     OnboardingPage.SAFETY_NET -> "What keeps you comfortable?"
     OnboardingPage.BUILDING -> if (state.ingestFailed) "Let’s try another way." else "Building your picture"
-}
-
-@DrawableRes
-private fun illustrationFor(state: OnboardingUiState): Int = when (state.page) {
-    OnboardingPage.WELCOME -> R.drawable.welcome
-    OnboardingPage.DATA_SOURCE -> R.drawable.onboarding_choices
-    OnboardingPage.SMS_CONSENT -> R.drawable.privacy_control
-    OnboardingPage.ABOUT_MONEY -> R.drawable.onboarding_first_step
-    OnboardingPage.SAFETY_NET -> R.drawable.plan_commitments
-    OnboardingPage.BUILDING -> if (state.ingestFailed) R.drawable.error_recovery else R.drawable.ledger_organizer
-}
-
-private fun illustrationTint(state: OnboardingUiState): Color = when {
-    state.ingestFailed -> ErrorPink
-    state.page == OnboardingPage.SAFETY_NET -> GuidanceYellow.copy(alpha = .22f)
-    else -> SummaryGreen
 }
 
 private class OnboardingPreviewProvider : CollectionPreviewParameterProvider<OnboardingUiState>(OnboardingFixtures.previews)
