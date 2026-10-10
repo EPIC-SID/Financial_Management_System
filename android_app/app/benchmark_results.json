@@ -1,6 +1,6 @@
 {
   "benchmark": "HACKMATRIX 5.0 FIN-02 EVALUATION",
-  "generatedAt": "2026-10-10T17:30:23.232190900Z",
+  "generatedAt": "2026-10-10T20:02:46.887452800Z",
   "protocol": {
     "trainWindow": "Month -6 to Month -2",
     "validationWindow": "Month -1",
