@@ -217,3 +217,13 @@ No Plan or conflict-resolution frame exists in the supplied Figma source. The fi
 - Normal, computing, thin-history and infeasible fixtures are covered by `PlanPreviewProvider` at 360dp and 412dp, at both 100% and 200% font scale. `ConflictPreview` covers the M4 screen at the same sizes and scales.
 - 200% clipping safeguards: PlanCard metrics stack vertically, CTA and segmented controls grow rather than truncate, long notes wrap, and the seven-column period table scrolls horizontally. No fixed-width text is used outside the scrollable table.
 - Native rendered clipping remains unverified because the Pixel 6 AVD is still unavailable to ADB. Preview compilation and the source-level reflow safeguards above are verified; no rendered clipping defect is currently known.
+
+## Phase 3C — Copilot and voice input
+
+There is no Copilot frame in the supplied Figma source. The fixture-only implementation follows `02-pages.md` M5 and `07-ui-ux-flow.md` J3, reusing the current light tokens and outlined card patterns. The What-if sheet is not implemented here; “Simulate this” exposes only its launch callback.
+
+- `CopilotStatePreview` covers empty, answer, thinking, offline/on-device and error states at 360dp and 412dp with 200% font scale.
+- `VoiceStatePreview` covers idle, permission, listening with partial text, no-speech, no-network and language-not-installed states at both widths and 200% font scale. `LanguageDropdownPreview` covers the expanded ten-language menu in the same matrix.
+- 200% clipping safeguards: suggestions and the language menu scroll, chat content is a lazy list, input text grows to four lines, answer actions wrap vertically within growing 48dp-minimum buttons, and the keyboard-safe input bar remains outside the message list. No fixed text height is used.
+- No rendered clipping defect is currently known, but native rendering remains unverified: ADB could not start its local server, so neither preview screenshots nor the required real-phone speech-service pass could be completed in this environment.
+- Voice transcripts remain editable and are never auto-sent. The Android speech service is released with the route, the language and privacy choices persist locally, and the first-use disclosure is shown when the microphone is first used.
