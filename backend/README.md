@@ -30,13 +30,16 @@ Responses use the observed/predicted/recommended schema. The model supplies sect
 text only; ranges and impact metadata come from trusted inputs. Android verifies every
 narrated number and substitutes `LocalAdvisor` on verification or transport failure.
 
-Both routes require Supabase HS256 JWTs with a valid expiry, UUID subject,
+All `/api/v1/` routes require Supabase HS256 JWTs with a valid expiry, UUID subject,
 `authenticated` audience, and issuer `${SUPABASE_URL}/auth/v1`. Missing auth configuration
 fails closed. Asymmetric Supabase signing keys require a JWKS verifier before use.
 Requests are capped at 32 KB, including chunked bodies, and 30 calls/user/minute across
-both routes. The limiter is process-local: deploy one worker or enforce a shared gateway
+all authenticated routes. The limiter is process-local: deploy one worker or enforce a shared gateway
 limit before scaling. Copilot request bodies are not stored, cached, or logged.
-Existing endpoints retain their current behavior, including their development auth helper.
+Missing or invalid tokens are rejected; there is no development-user bypass.
+Categorization accepts only a bounded merchant label and an optional empty
+`sms_snippet` for Android compatibility. Nonempty snippets and unknown fields are
+rejected, with generic validation errors that do not echo submitted data.
 
 Set `GEMINI_API_KEY`, `SUPABASE_URL`, and `SUPABASE_JWT_SECRET` on the server.
 `COPILOT_GEMINI_MODEL` defaults to the requested `gemini-1.5-flash`, which Google shut
@@ -92,7 +95,7 @@ curl http://localhost:8000/health
 curl -X POST http://localhost:8000/api/v1/categorize \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_SUPABASE_JWT" \
-  -d '{"merchant": "Zomato", "sms_snippet": "Rs 250 debited at Zomato"}'
+  -d '{"merchant": "Zomato", "sms_snippet": ""}'
 ```
 
 ## Deployment on Railway (Free)

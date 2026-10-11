@@ -77,7 +77,7 @@ class TransactionViewModel(application: Application) : AndroidViewModel(applicat
                 val context = getApplication<Application>()
 
                 // Read SMS inbox
-                val rawSmsList = SmsReader.read(context, startTimeMs)
+                val rawSmsList = SmsReader.read(context, startTimeMs, filterByBankSenders = true)
 
                 // Get existing smsIds for dedup check
                 val existingIds = dao.getAllSmsIds().toHashSet()
@@ -119,8 +119,8 @@ class TransactionViewModel(application: Application) : AndroidViewModel(applicat
                 }
 
             } catch (e: Exception) {
-                Log.e("TransactionViewModel", "Sync failed", e)
-                _syncMessage.value = "Sync failed: ${e.localizedMessage}"
+                Log.e("TransactionViewModel", "SMS sync unavailable")
+                _syncMessage.value = "Could not sync SMS. Check SMS permission and try again."
             } finally {
                 _isSyncing.value = false
             }

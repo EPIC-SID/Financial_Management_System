@@ -6,6 +6,34 @@ import org.junit.Test
 class SmsParserTest {
 
     @Test
+    fun parse_securityCodesWithPaymentAmounts_areRejected() {
+        listOf("OTP 492011 for payment of INR 8000 to Amazon",
+            "One-time password 492011 for payment of Rs 8000",
+            "Verification code 492011 for payment of Rs 8000",
+            "UPI PIN 492011 for payment of Rs 8000").forEach { sms ->
+            assertNull(SmsParser.parse(sms, "security-probe", 1700000000000L))
+        }
+    }
+
+    @Test
+    fun parse_doesNotRetainSmsDescription() {
+        val txn = SmsParser.parse("Paid Rs 500 to Amazon using account 1234 5678 9012",
+            "private-description", 1700000000000L)!!
+        assertEquals("", txn.description)
+        assertEquals(-500.0, txn.amount, 0.001)
+    }
+
+    @Test
+    fun bankSender_requiresExactSupportedHeader() {
+        listOf("HDFCBK", "VM-HDFCBK", "VM-HDFCBK-S", "AX-ICICIB-T").forEach {
+            assertTrue(SmsReader.isBankSender(it))
+        }
+        listOf("+919999999999", "MYBANK", "FAKEUPI", "NOTHDFCBK", "VM-HDFCBK-EVIL").forEach {
+            assertFalse(SmsReader.isBankSender(it))
+        }
+    }
+
+    @Test
     fun parse_hdfcDebitSms_extractsDetailsCorrectly() {
         val sms = "Dear UPI user, A/C **1234 debited by 450.00 on 10-Oct-26 to Swiggy UPI:swiggy@icici Ref 123456789. Avl Bal Rs 25,000.00"
         val txn = SmsParser.parse(sms, "sms-101", 1700000000000L)

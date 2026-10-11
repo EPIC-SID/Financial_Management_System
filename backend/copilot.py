@@ -1,13 +1,9 @@
 """Stateless, aggregates-only Copilot proxy. No request content is logged or retained."""
 import asyncio
 import os
-import time
-from collections import deque
 from enum import Enum
 from typing import Annotated, Literal
-from uuid import UUID
 
-import jwt
 from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.exception_handlers import request_validation_exception_handler
 from fastapi.exceptions import RequestValidationError
@@ -16,6 +12,7 @@ from google import genai
 from google.genai import types
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 from llm import call_llm
+from auth import require_user, _requests
 
 
 class StrictModel(BaseModel):
@@ -120,39 +117,6 @@ class NarrateResponse(StrictModel):
     languageCode: Literal["en", "hi-Latn", "hi-Deva", "mr-Deva"] = "en"
 
 
-# shortcut: limiter is process-local; use a shared gateway/store before deploying multiple workers.
-_requests: dict[str, deque[float]] = {}
-
-
-def require_user(request: Request) -> str:
-    secret = os.getenv("SUPABASE_JWT_SECRET", "")
-    issuer = os.getenv("SUPABASE_URL", "").rstrip("/")
-    if not secret or not issuer:
-        raise HTTPException(503, "Authentication unavailable")
-    header = request.headers.get("authorization", "")
-    if not header.startswith("Bearer "):
-        raise HTTPException(401, "Authentication required", headers={"WWW-Authenticate": "Bearer"})
-    try:
-        payload = jwt.decode(header[7:], secret, algorithms=["HS256"], audience="authenticated",
-                             issuer=issuer + "/auth/v1", options={"require": ["exp", "sub", "aud", "iss"]})
-        user = str(UUID(payload["sub"]))
-    except (jwt.InvalidTokenError, ValueError, TypeError, AttributeError):
-        raise HTTPException(401, "Invalid access token", headers={"WWW-Authenticate": "Bearer"}) from None
-    now = time.monotonic()
-    for key in list(_requests):
-        if not _requests[key] or _requests[key][-1] <= now - 60:
-            del _requests[key]
-    if user not in _requests and len(_requests) >= 10000:
-        raise HTTPException(503, "Proxy busy")
-    recent = _requests.setdefault(user, deque())
-    while recent and recent[0] <= now - 60:
-        recent.popleft()
-    if len(recent) >= 30:
-        raise HTTPException(429, "Request limit exceeded", headers={"Retry-After": "60"})
-    recent.append(now)
-    return user
-
-
 async def generate(payload: StrictModel, schema: type[StrictModel], instruction: str):
     try:
         return await asyncio.wait_for(_generate(payload, schema, instruction), timeout=4.5)
@@ -233,13 +197,13 @@ async def narrate(body: NarrateRequest):
     )
 
 
-class CopilotBodyLimit:
+class ApiBodyLimit:
     """Bound streamed requests, including chunked bodies with no Content-Length."""
     def __init__(self, app):
         self.app = app
 
     async def __call__(self, scope, receive, send):
-        if scope["type"] != "http" or not scope["path"].startswith("/api/v1/copilot/"):
+        if scope["type"] != "http" or not scope["path"].startswith("/api/v1/"):
             return await self.app(scope, receive, send)
         body = bytearray()
         while True:
@@ -265,10 +229,12 @@ class CopilotBodyLimit:
 
 def install_copilot(app):
     app.include_router(router)
-    app.add_middleware(CopilotBodyLimit)
+    app.add_middleware(ApiBodyLimit)
 
     @app.exception_handler(RequestValidationError)
     async def safe_validation_error(request, exc):
         if request.url.path.startswith("/api/v1/copilot/"):
             return JSONResponse({"detail": "Invalid copilot request"}, status_code=422)
+        if request.url.path.startswith("/api/v1/"):
+            return JSONResponse({"detail": "Invalid API request"}, status_code=422)
         return await request_validation_exception_handler(request, exc)

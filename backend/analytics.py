@@ -135,7 +135,7 @@ Rules:
             summary=parsed.get("summary", f"Found {len(recurring_items)} recurring payments."),
         )
     except Exception as e:
-        logger.error(f"Recurring payment detection failed: {e}")
+        logger.error("Recurring payment detection unavailable")
         return RecurringDetectionResponse(
             recurring=[],
             total_monthly_commitments=0.0,

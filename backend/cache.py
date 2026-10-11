@@ -85,7 +85,7 @@ def get_from_cache(merchant: str) -> Optional[str]:
         if result.data:
             cat = result.data[0]["category"]
             if not is_cachable_category(cat):
-                logger.info(f"Ignoring uncertain/invalid cache hit '{cat}' for merchant '{merchant}'")
+                logger.info("Ignoring uncertain category cache entry")
                 return None
 
             # Increment call_count in background (fire-and-forget, don't block)
@@ -98,7 +98,7 @@ def get_from_cache(merchant: str) -> Optional[str]:
             return cat
         return None
     except Exception as e:
-        logger.warning(f"Cache lookup failed for '{merchant}': {e}")
+        logger.warning("Category cache lookup unavailable")
         return None
 
 
@@ -109,7 +109,7 @@ def save_to_cache(merchant: str, category: str, source: str) -> None:
     Uses upsert so duplicate merchants are handled gracefully.
     """
     if not is_cachable_category(category):
-        logger.info(f"Refusing to cache uncertain/transient category '{category}' for merchant '{merchant}'")
+        logger.info("Refusing to cache uncertain category")
         return
 
     key = _normalize_key(merchant)
@@ -124,9 +124,9 @@ def save_to_cache(merchant: str, category: str, source: str) -> None:
             },
             on_conflict="merchant_key",
         ).execute()
-        logger.debug(f"Cached '{merchant}' → {category} (source: {source})")
+        logger.debug("Category cached")
     except Exception as e:
-        logger.warning(f"Failed to save cache for '{merchant}': {e}")
+        logger.warning("Category cache write unavailable")
 
 
 def get_batch_from_cache(merchants: list[str]) -> dict[str, str]:
@@ -152,5 +152,5 @@ def get_batch_from_cache(merchants: list[str]) -> dict[str, str]:
             if is_cachable_category(row.get("category"))
         }
     except Exception as e:
-        logger.warning(f"Batch cache lookup failed: {e}")
+        logger.warning("Batch category cache unavailable")
         return {}

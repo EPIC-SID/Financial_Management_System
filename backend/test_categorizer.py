@@ -93,10 +93,10 @@ class TestCategorizer(unittest.IsolatedAsyncioTestCase):
         mock_llm.side_effect = lambda m, s: ("ENTERTAINMENT", "GROQ") if "steam" in m.lower() else (None, "GROQ")
 
         items = [
-            BatchCategorizeItem(merchant="Swiggy", sms_snippet="paid to Swiggy"),
-            BatchCategorizeItem(merchant="Apollo Pharmacy", sms_snippet="medicines"),
-            BatchCategorizeItem(merchant="Steam Games", sms_snippet="gaming"),
-            BatchCategorizeItem(merchant="Random Vendor", sms_snippet="misc spend"),
+            BatchCategorizeItem(merchant="Swiggy"),
+            BatchCategorizeItem(merchant="Apollo Pharmacy"),
+            BatchCategorizeItem(merchant="Steam Games"),
+            BatchCategorizeItem(merchant="Random Vendor"),
         ]
 
         results, cache_hits, api_calls = await categorize_batch(items)

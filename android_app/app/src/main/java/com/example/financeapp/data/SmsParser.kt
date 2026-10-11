@@ -7,6 +7,7 @@ import java.util.Locale
 import java.util.TimeZone
 
 object SmsParser {
+    private val securityMessage = Regex("(?i)\\b(?:otp|one[\\s-]*time[\\s-]*(?:password|code|passcode)|verification\\s+code|security\\s+code|passcode|pin|cvv)\\b")
     // Pattern 1: Action verb + optional preposition + optional currency + amount
     private val actionAmountRegex = Regex("(?i)(?:debited|credited|spent|paid|sent|transferred|deducted|withdrawn|deposited|payment of)\\s*(?:by|for|of|with|in)?\\s*(?:Rs\\.?|INR|₹)?\\s*([\\d]+(?:\\.\\d{1,2})?)")
     
@@ -119,6 +120,7 @@ object SmsParser {
     }
 
     fun parse(smsBody: String, smsId: String, timestamp: Long): TransactionData? {
+        if (securityMessage.containsMatchIn(smsBody)) return null
         val body = smsBody.replace(",", "") // remove commas to make regex match simpler
         
         // 1. Find Amount
@@ -148,7 +150,8 @@ object SmsParser {
             merchant = merchant,
             amount = finalAmount,
             category = category,
-            description = sanitizeDescription(smsBody.take(150)),
+            // Keep structured transaction fields, never a copy of the SMS body.
+            description = "",
             transactionDate = dateStr,
             smsId = smsId
         )
@@ -179,7 +182,7 @@ object SmsParser {
         val aiCategory = GeminiCategorizer.categorize(
             context = context,
             merchantName = transaction.merchant,
-            smsSnippet = smsBody
+            smsSnippet = ""
         )
         return transaction.copy(category = aiCategory)
     }
@@ -196,12 +199,4 @@ object SmsParser {
         )
     }
 
-    private fun sanitizeDescription(text: String): String {
-        var sanitized = text
-        sanitized = sanitized.replace(Regex("\\b\\d{8,}\\b"), "****")
-        sanitized = sanitized.replace(Regex("[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+"), "***@***")
-        sanitized = sanitized.replace(Regex("\\b(?:\\d{4}[\\s-]?){3}\\d{4}\\b"), "****-****-****-****")
-        sanitized = sanitized.replace(Regex("(?i)(?:XX|xx)\\d{4,}"), "XX****")
-        return sanitized
-    }
 }

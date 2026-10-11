@@ -125,7 +125,7 @@ Rules:
             category_breakdown=stats["category_totals"],
         )
     except Exception as e:
-        logger.error(f"Spending analysis failed: {e}")
+        logger.error("Spending analysis unavailable")
         return SpendingAnalysisResponse(
             summary=f"You spent ₹{stats['total_spent']:.0f} this period across {len(stats['category_totals'])} categories.",
             insights=[f"Your top spending category is {stats['top_category']}."],
@@ -199,7 +199,7 @@ Respond in this EXACT JSON format (no markdown, just JSON):
             follow_up_suggestions=parsed.get("follow_up_suggestions", [])
         )
     except Exception as e:
-        logger.error(f"Advisor response failed: {e}")
+        logger.error("Advisor response unavailable")
         return AdvisorResponse(
             answer="I encountered an issue analyzing your data. Please try again.",
             follow_up_suggestions=["How much did I spend this month?", "What is my biggest expense category?"]

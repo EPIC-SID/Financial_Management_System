@@ -94,7 +94,7 @@ async def _call_places_api(merchant: str) -> Optional[str]:
                 },
             )
             if response.status_code != 200:
-                logger.warning(f"Places API HTTP {response.status_code} for '{merchant}'")
+                logger.warning("Places API returned HTTP %d", response.status_code)
                 return None
 
             data = response.json()
@@ -109,7 +109,7 @@ async def _call_places_api(merchant: str) -> Optional[str]:
                     return category
             return None
     except Exception as e:
-        logger.warning(f"Places API failed for '{merchant}': {e}")
+        logger.warning("Places API unavailable")
         return None
 
 
@@ -168,14 +168,14 @@ async def categorize_merchant(merchant: str, sms_snippet: str = "") -> Categoriz
     # Layer 1: Supabase shared global cache
     cached = get_from_cache(merchant)
     if cached and is_cachable_category(cached):
-        logger.info(f"Global cache HIT: '{merchant}' → {cached}")
+        logger.info("Category cache hit")
         return CategorizeResponse(merchant=merchant, category=cached, source="GLOBAL_CACHE")
 
     # Layer 2: Google Places API
     places_cat = await _call_places_api(merchant)
     if places_cat and is_cachable_category(places_cat):
         save_to_cache(merchant, places_cat, "PLACES")
-        logger.info(f"Places resolved: '{merchant}' → {places_cat}")
+        logger.info("Category resolved by Places")
         return CategorizeResponse(merchant=merchant, category=places_cat, source="PLACES")
 
     # Layer 3: Groq LLM
@@ -183,11 +183,11 @@ async def categorize_merchant(merchant: str, sms_snippet: str = "") -> Categoriz
     if llm_cat and is_cachable_category(llm_cat):
         source_name = provider if provider != "NONE" else "GROQ"
         save_to_cache(merchant, llm_cat, source_name)
-        logger.info(f"{source_name} resolved: '{merchant}' → {llm_cat}")
+        logger.info("Category resolved by LLM")
         return CategorizeResponse(merchant=merchant, category=llm_cat, source=source_name)
 
     # Fallback (never saved to cache)
-    logger.warning(f"All layers failed or uncertain for '{merchant}' — returning transient MISCELLANEOUS")
+    logger.warning("Category uncertain; using transient fallback")
     return CategorizeResponse(merchant=merchant, category="MISCELLANEOUS", source="FALLBACK")
 
 

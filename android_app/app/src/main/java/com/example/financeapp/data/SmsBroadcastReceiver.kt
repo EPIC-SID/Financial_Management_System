@@ -48,11 +48,11 @@ class SmsBroadcastReceiver : BroadcastReceiver() {
 
             // Only process SMS from known bank senders — ignore personal/spam SMS
             if (!SmsReader.isBankSender(sender)) {
-                Log.v(TAG, "Ignoring non-bank SMS from: $sender")
+                Log.v(TAG, "Ignoring unsupported SMS sender")
                 continue
             }
 
-            Log.d(TAG, "Incoming bank SMS from $sender — processing")
+            Log.d(TAG, "Processing supported bank alert")
 
             // Use goAsync() to safely run coroutine work while receiver is active
             val pendingResult = goAsync()
@@ -61,7 +61,7 @@ class SmsBroadcastReceiver : BroadcastReceiver() {
                 try {
                     processSms(context, body, smsMessage.indexOnIcc.toString(), date)
                 } catch (e: Exception) {
-                    Log.e(TAG, "Failed to process incoming SMS: ${e.message}")
+                    Log.e(TAG, "Could not process incoming bank alert")
                 } finally {
                     pendingResult.finish()
                 }
@@ -90,7 +90,7 @@ class SmsBroadcastReceiver : BroadcastReceiver() {
 
         // Insert to Room (IGNORE if smsId already exists — no-op for duplicates)
         dao.insertAll(listOf(finalEntity))
-        Log.d(TAG, "Inserted real-time transaction: ${finalEntity.merchant} ${finalEntity.amount}")
+        Log.d(TAG, "Processed bank transaction")
 
         // If MISCELLANEOUS, enqueue background AI worker (layers 3+4)
         if (finalEntity.category == "MISCELLANEOUS") {

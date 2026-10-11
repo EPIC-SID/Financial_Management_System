@@ -95,13 +95,13 @@ async def _call_groq(
                     return choices[0].get("message", {}).get("content", "").strip()
                 return None
             else:
-                logger.error(f"Groq API returned HTTP {resp.status_code}: {resp.text}")
+                logger.error("Groq API returned HTTP %d", resp.status_code)
                 return None
     except httpx.TimeoutException:
         logger.warning(f"Groq API call timed out after {timeout}s")
         return None
     except Exception as e:
-        logger.error(f"Groq API request failed: {e}")
+        logger.error("Groq API request unavailable")
         return None
 
 
@@ -126,6 +126,6 @@ async def _call_gemini_fallback(
         )
         return (response.text or "").strip()
     except Exception as e:
-        logger.error(f"Gemini fallback failed: {e}")
+        logger.error("Gemini fallback unavailable")
         return None
 
