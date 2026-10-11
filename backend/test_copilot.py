@@ -15,7 +15,7 @@ class CopilotProxyTest(unittest.TestCase):
     def setUp(self):
         self.env = patch.dict("os.environ", {
             "SUPABASE_JWT_SECRET": "test-only-jwt-secret-at-least-32-characters",
-            "SUPABASE_URL": "https://test.supabase.co", "GEMINI_API_KEY": "test-only-key",
+            "SUPABASE_URL": "https://test.supabase.co", "GEMINI_API_KEY": "test-only-key", "GROQ_API_KEY": "",
         })
         self.env.start()
         self.addCleanup(self.env.stop)
@@ -183,6 +183,25 @@ class CopilotProxyTest(unittest.TestCase):
                 self.assertIn(path, paths)
             self.assertEqual(401, client.post("/api/v1/copilot/interpret",
                                              json={"intent": "ACCOUNT_OVERVIEW"}).status_code)
+
+    def test_groq_primary_uses_schema_and_no_raw_question(self):
+        output = '{"intent":"ACCOUNT_OVERVIEW"}'
+        with patch.dict("os.environ", {"GROQ_API_KEY": "test-only-groq"}), \
+                patch.object(copilot, "call_llm", AsyncMock(return_value=(output, "GROQ"))) as provider, \
+                patch.object(copilot.genai, "Client") as gemini:
+            response = self.post("interpret", {"intent": "ACCOUNT_OVERVIEW"})
+            self.assertEqual(200, response.status_code)
+            self.assertEqual("ACCOUNT_OVERVIEW", response.json()["intent"])
+            self.assertIn("schema", provider.call_args.kwargs["system_prompt"])
+            self.assertEqual('{"intent":"ACCOUNT_OVERVIEW"}', provider.call_args.kwargs["prompt"])
+            gemini.assert_not_called()
+
+    def test_invalid_groq_output_without_fallback_returns_generic_error(self):
+        with patch.dict("os.environ", {"GROQ_API_KEY": "test-only-groq", "GEMINI_API_KEY": ""}), \
+                patch.object(copilot, "call_llm", AsyncMock(return_value=("private invalid output", "GROQ"))):
+            response = self.post("interpret", {"intent": "ACCOUNT_OVERVIEW"})
+            self.assertEqual(503, response.status_code)
+            self.assertNotIn("private", response.text)
 
 
 if __name__ == "__main__":

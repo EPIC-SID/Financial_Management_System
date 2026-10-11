@@ -13,8 +13,12 @@ import logging
 import os
 from contextlib import asynccontextmanager
 
+from pathlib import Path
 from dotenv import load_dotenv
-load_dotenv()  # Load .env file before any os.getenv() calls
+
+# Load .env file from the current directory regardless of execution CWD
+_ENV_FILE = Path(__file__).resolve().parent / ".env"
+load_dotenv(_ENV_FILE)
 
 from fastapi import Depends, FastAPI, HTTPException, Request, status
 from fastapi.middleware.cors import CORSMiddleware

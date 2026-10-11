@@ -15,6 +15,7 @@ from fastapi.responses import JSONResponse
 from google import genai
 from google.genai import types
 from pydantic import BaseModel, ConfigDict, Field, model_validator
+from llm import call_llm
 
 
 class StrictModel(BaseModel):
@@ -153,6 +154,23 @@ def require_user(request: Request) -> str:
 
 
 async def generate(payload: StrictModel, schema: type[StrictModel], instruction: str):
+    try:
+        return await asyncio.wait_for(_generate(payload, schema, instruction), timeout=4.5)
+    except (asyncio.TimeoutError, TimeoutError):
+        raise HTTPException(504, "Narration timed out") from None
+
+
+async def _generate(payload: StrictModel, schema: type[StrictModel], instruction: str):
+    if os.getenv("GROQ_API_KEY", "").strip():
+        try:
+            text, _ = await asyncio.wait_for(call_llm(
+                prompt=payload.model_dump_json(),
+                system_prompt=instruction + " Return only JSON matching this schema: " + str(schema.model_json_schema()),
+                temperature=0, max_tokens=1024, timeout=2.0), timeout=2.0)
+            if text and len(text) <= 32768:
+                return schema.model_validate_json(text)
+        except (asyncio.TimeoutError, TimeoutError, ValueError):
+            pass
     key = os.getenv("GEMINI_API_KEY", "")
     if not key:
         raise HTTPException(503, "Narration unavailable")
