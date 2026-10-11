@@ -51,6 +51,15 @@ fun formatPercent(ratio: Double): String =
     decimal(ratio).movePointRight(2).setScale(0, RoundingMode.HALF_UP)
         .toPlainString().replace("-", MINUS) + "%"
 
+/** Preserve nonzero simulation risks instead of rounding them to a reassuring zero. */
+fun formatRiskPercent(ratio: Double): String {
+    require(ratio.isFinite() && ratio in 0.0..1.0)
+    if (ratio == 0.0) return "0%"
+    if (ratio < 0.001) return "<0.1%"
+    return decimal(ratio).movePointRight(2).setScale(1, RoundingMode.HALF_UP)
+        .stripTrailingZeros().toPlainString() + "%"
+}
+
 fun formatDate(date: LocalDate, today: LocalDate = LocalDate.now()): String =
     date.format(DateTimeFormatter.ofPattern(if (date.year == today.year) "d MMM" else "d MMM yyyy", Locale.ENGLISH))
 

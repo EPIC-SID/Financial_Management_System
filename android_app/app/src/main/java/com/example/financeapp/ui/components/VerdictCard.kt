@@ -36,11 +36,12 @@ fun VerdictCard(
     confidence: String,
     onConfidenceClick: () -> Unit,
     onSeePlan: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    heading: String = "Month-end cushion"
 ) {
     Surface(modifier, shape = RoundedCornerShape(Radius.card), color = ActionGreen, contentColor = Ink) {
         Column(Modifier.padding(Spacing.lg), verticalArrangement = Arrangement.spacedBy(Spacing.md)) {
-            Text("Month-end cushion", style = MaterialTheme.typography.labelMedium)
+            Text(heading, style = MaterialTheme.typography.labelMedium)
             Text(verdict, style = NumberXL)
             Text(reading, style = MaterialTheme.typography.bodyMedium)
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(Spacing.xs)) {
@@ -57,7 +58,7 @@ fun VerdictCard(
 
 @Composable
 private fun ForecastBand(p10: Double, p50: Double, p90: Double) {
-    val fraction = ((p50 - p10) / (p90 - p10)).toFloat().coerceIn(0f, 1f)
+    val fraction = if (p90 > p10) ((p50 - p10) / (p90 - p10)).toFloat().coerceIn(0f, 1f) else .5f
     Canvas(
         Modifier.fillMaxWidth().height(44.dp).semantics {
             contentDescription = "Forecast range, tenth percentile $p10, median $p50, ninetieth percentile $p90"

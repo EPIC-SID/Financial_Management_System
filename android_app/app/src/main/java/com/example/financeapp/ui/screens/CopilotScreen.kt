@@ -63,6 +63,11 @@ import com.example.financeapp.ui.viewmodel.CopilotFixtures
 import com.example.financeapp.ui.viewmodel.CopilotMessageUi
 import com.example.financeapp.ui.viewmodel.CopilotUiState
 import com.example.financeapp.ui.viewmodel.CopilotViewModel
+import com.example.financeapp.domain.ai.localization.NarrationLanguage
+import androidx.compose.material3.FilterChip
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.layout.Row
 import com.example.financeapp.ui.voice.AndroidVoiceInputController
 import com.example.financeapp.ui.voice.SupportedVoiceLanguages
 import com.example.financeapp.ui.voice.VoiceError
@@ -77,6 +82,7 @@ const val VOICE_INPUT_ENABLED = "voice_input_enabled"
 fun CopilotRoute(
     viewModel: CopilotViewModel = viewModel(),
     onLaunchWhatIf: () -> Unit = {},
+    onOpenPlan: () -> Unit = {},
     onKeyboardVisibilityChanged: (Boolean) -> Unit = {}
 ) {
     val context = LocalContext.current
@@ -123,14 +129,18 @@ fun CopilotRoute(
             preferences.edit().putString(VOICE_LANGUAGE, it.tag).apply()
         },
         onMic = {
-            if (!disclosureSeen) showDisclosure = true
-            controller.start(language.tag)
-            if (ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+            if (!disclosureSeen) {
+                showDisclosure = true
+            } else if (ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) {
+                controller.start(language.tag)
+            } else {
                 permissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
             }
         },
         onStop = controller::stop,
         onLaunchWhatIf = onLaunchWhatIf,
+        onAddToPlan = onOpenPlan,
+        onNarrationLanguageSelected = viewModel::selectLanguage,
         onKeyboardVisibilityChanged = onKeyboardVisibilityChanged
     )
 }
@@ -153,7 +163,8 @@ fun CopilotScreen(
     onStop: () -> Unit = {},
     onLaunchWhatIf: () -> Unit = {},
     onAddToPlan: () -> Unit = {},
-    onKeyboardVisibilityChanged: (Boolean) -> Unit = {}
+    onKeyboardVisibilityChanged: (Boolean) -> Unit = {},
+    onNarrationLanguageSelected: (String) -> Unit = {}
 ) {
     val keyboardVisible = WindowInsets.ime.getBottom(LocalDensity.current) > 0
     LaunchedEffect(keyboardVisible) { onKeyboardVisibilityChanged(keyboardVisible) }
@@ -181,7 +192,16 @@ fun CopilotScreen(
             contentPadding = PaddingValues(Spacing.md),
             verticalArrangement = Arrangement.spacedBy(Spacing.md)
         ) {
-            item { SuggestionChips(CopilotFixtures.suggestions, onSuggestion) }
+            item {
+                Text("Synthetic planning demo. SMS transactions are not used here. Enter amounts in What-if to calculate their effect.", style = MaterialTheme.typography.bodySmall)
+                Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(Spacing.xs)) {
+                    NarrationLanguage.entries.forEach { mode ->
+                        FilterChip(selected = state.languageCode == mode.code,
+                            onClick = { onNarrationLanguageSelected(mode.code) }, label = { Text(mode.label) })
+                    }
+                }
+            }
+            item { SuggestionChips(listOf("Explain my cash balance", "Explain my shortfall risk", "Compare my plans"), onSuggestion) }
             when (state.contentState) {
                 CopilotContentState.EMPTY -> item { EmptyCopilot(onSuggestion) }
                 CopilotContentState.THINKING -> {
@@ -190,7 +210,7 @@ fun CopilotScreen(
                 }
                 CopilotContentState.ERROR -> {
                     items(state.messages) { Message(it, onLaunchWhatIf, onAddToPlan) }
-                    item { ErrorCard(onRetry) }
+                    item { ErrorCard(onRetry, state.error) }
                 }
                 CopilotContentState.ANSWER, CopilotContentState.OFFLINE -> {
                     if (state.contentState == CopilotContentState.OFFLINE) item { OfflineNotice() }
@@ -216,7 +236,7 @@ private fun Message(message: CopilotMessageUi, onSimulate: () -> Unit, onAddToPl
 private fun EmptyCopilot(onSuggestion: (String) -> Unit) {
     Column(verticalArrangement = Arrangement.spacedBy(Spacing.sm)) {
         Text("Ask what a decision could do to your cash, debt or upcoming commitments.", style = MaterialTheme.typography.bodyLarge)
-        TextButton(onClick = { onSuggestion(CopilotFixtures.starter) }) { Text(CopilotFixtures.starter) }
+        TextButton(onClick = { onSuggestion("Explain my shortfall risk") }) { Text("Explain my shortfall risk") }
     }
 }
 
@@ -233,15 +253,15 @@ private fun ThinkingCard() {
 @Composable
 private fun OfflineNotice() {
     Surface(Modifier.fillMaxWidth(), color = SurfaceNeutral, border = BorderStroke(1.dp, Ink)) {
-        Text("Gemini is unavailable. Showing on-device advice.", Modifier.padding(Spacing.sm), style = MaterialTheme.typography.bodyMedium)
+        Text("Showing verified local advice. Remote narration may be unavailable or blocked pending plan review.", Modifier.padding(Spacing.sm), style = MaterialTheme.typography.bodyMedium)
     }
 }
 
 @Composable
-private fun ErrorCard(onRetry: () -> Unit) {
+private fun ErrorCard(onRetry: () -> Unit, reason: String? = null) {
     Surface(Modifier.fillMaxWidth(), color = ErrorPink) {
         Column(Modifier.padding(Spacing.md), verticalArrangement = Arrangement.spacedBy(Spacing.sm)) {
-            Text("The answer could not be calculated.", style = MaterialTheme.typography.bodyLarge)
+            Text(reason ?: "The answer could not be calculated.", style = MaterialTheme.typography.bodyLarge)
             RupAiButton("Retry", onRetry)
         }
     }

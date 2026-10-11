@@ -20,6 +20,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.financeapp.ui.components.RupAiButton
 import com.example.financeapp.ui.components.RupAiButtonVariant
+import com.example.financeapp.ui.components.RupAiButtonState
 import com.example.financeapp.ui.theme.ErrorInk
 import com.example.financeapp.ui.theme.ErrorPink
 import com.example.financeapp.ui.theme.FinanceAppTheme
@@ -47,11 +48,14 @@ fun ConflictScreen(conflict: ConflictUi, onApply: (ConflictOptionUi) -> Unit = {
             }
             items(conflict.options.size) { index ->
                 val option = conflict.options[index]
-                ConflictOptionCard(option, { onApply(option) })
+                ConflictOptionCard(option, { if (option.feasible) onApply(option) })
             }
             item {
                 Column(verticalArrangement = Arrangement.spacedBy(Spacing.sm)) {
-                    RupAiButton("Apply proposed relaxation", { onApply(conflict.options.first()) })
+                    val feasible = conflict.options.firstOrNull { it.feasible }
+                    RupAiButton("Apply proposed relaxation", { feasible?.let(onApply) },
+                        state = if (feasible != null) RupAiButtonState.DEFAULT else RupAiButtonState.DISABLED,
+                        disabledReason = if (feasible == null) "No proposed option is feasible in this horizon." else null)
                     RupAiButton("Keep my target and show what breaks", onKeepTarget, variant = RupAiButtonVariant.OUTLINE)
                 }
             }
@@ -70,6 +74,7 @@ private fun ConflictOptionCard(option: ConflictOptionUi, onClick: () -> Unit) {
                 }
             }
             Text(option.detail, style = MaterialTheme.typography.bodyMedium)
+            if (!option.feasible) Text("Not feasible within this forecast", style = MaterialTheme.typography.labelLarge)
             Text("Shortfall risk after · ${formatPercent(option.shortfallRiskAfter)}", style = MaterialTheme.typography.labelLarge)
         }
     }

@@ -102,10 +102,12 @@ fun CockpitScreen(
                         Text(state.dataSource, Modifier.padding(horizontal = Spacing.xs, vertical = Spacing.xxs), style = MaterialTheme.typography.labelSmall)
                     }
                     Box {
-                        IconButton(onClick = { menuOpen = true }) { Icon(Icons.Outlined.MoreVert, "Open fixture scenarios") }
+                        IconButton(onClick = { menuOpen = true }) { Icon(Icons.Outlined.MoreVert, "Choose synthetic scenario") }
                         DropdownMenu(menuOpen, { menuOpen = false }) {
-                            DropdownMenuItem({ Text("Steady fixture") }, onClick = { menuOpen = false; onScenarioSelected("steady") })
-                            DropdownMenuItem({ Text("Pressure fixture") }, onClick = { menuOpen = false; onScenarioSelected("pressure") })
+                            com.example.financeapp.data.ingest.Scenario.entries.forEach { scenario ->
+                                DropdownMenuItem({ Text(scenario.label) }, onClick = { menuOpen = false; onScenarioSelected(scenario.name) })
+                            }
+                            DropdownMenuItem({ Text("Freelancer demo") }, onClick = { menuOpen = false; onScenarioSelected("freelancer") })
                         }
                     }
                 }
@@ -126,7 +128,7 @@ fun CockpitScreen(
                     }
                 }
                 item { VerdictCard(state.verdict, state.verdictReading, state.p10, state.p50, state.p90, state.confidence.label,
-                    { sheet = "confidence" }, { onAction("plan") }) }
+                    { sheet = "confidence" }, { onAction("plan") }, heading = "Forecast bank cash") }
                 item {
                     Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(Spacing.xs)) {
                         CockpitQuickActions.forEach { action -> QuickActionTile(action, { if (action.label == "Accounts") sheet = "accounts" else onAction(action.label) }) }
@@ -153,7 +155,7 @@ fun CockpitScreen(
         }
     }
     when (sheet) {
-        "accounts" -> AccountsSheet(state.accountDetails, "₹30,900", { sheet = null }, { onAction("edit accounts") })
+        "accounts" -> AccountsSheet(state.accountDetails, state.cashAfterCardBills, { sheet = null }, { onAction("edit accounts") })
         "score" -> ScoreExplainerSheet(state.healthComponents) { sheet = null }
         "confidence" -> ConfidenceExplainerSheet(state.confidence) { sheet = null }
     }

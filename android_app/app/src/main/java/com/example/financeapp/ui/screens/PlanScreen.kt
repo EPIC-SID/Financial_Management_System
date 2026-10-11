@@ -25,7 +25,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -41,6 +40,7 @@ import com.example.financeapp.ui.components.PlanCard
 import com.example.financeapp.ui.components.PlanSwitch
 import com.example.financeapp.ui.components.RupAiButton
 import com.example.financeapp.ui.components.RupAiButtonVariant
+import com.example.financeapp.ui.components.RupAiButtonState
 import com.example.financeapp.ui.components.StatementType
 import com.example.financeapp.ui.components.TypeTag
 import com.example.financeapp.ui.theme.FinanceAppTheme
@@ -54,7 +54,6 @@ import com.example.financeapp.ui.viewmodel.PlanKind
 import com.example.financeapp.ui.viewmodel.PlanPeriod
 import com.example.financeapp.ui.viewmodel.PlanUiState
 import com.example.financeapp.ui.viewmodel.PlanViewModel
-import kotlinx.coroutines.launch
 
 @Composable
 fun PlanRoute(viewModel: PlanViewModel = viewModel(), onTryWhatIf: () -> Unit = {}, onResolveConflict: () -> Unit = {}) {
@@ -70,11 +69,11 @@ fun PlanScreen(
     onPlanSelected: (PlanKind) -> Unit = {},
     onCompareChanged: (Boolean) -> Unit = {},
     onTryWhatIf: () -> Unit = {},
-    onResolveConflict: () -> Unit = {}
+    onResolveConflict: () -> Unit = {},
+    onApplyPlan: () -> Unit = {}
 ) {
     var showTable by remember { mutableStateOf(false) }
     val snackbar = remember { SnackbarHostState() }
-    val scope = rememberCoroutineScope()
     Scaffold(topBar = { TopAppBar(title = { Text("Plan") }) }, snackbarHost = { SnackbarHost(snackbar) }) { inner ->
         if (state.contentState == PlanContentState.COMPUTING) {
             PlanSkeleton(Modifier.padding(inner))
@@ -87,7 +86,7 @@ fun PlanScreen(
                 item {
                     Column(verticalArrangement = Arrangement.spacedBy(Spacing.xs)) {
                         Text("Period", style = MaterialTheme.typography.labelLarge)
-                        PlanSwitch(PlanPeriod.entries, state.period, PlanPeriod::label, onPeriodSelected)
+                        PlanSwitch(state.availablePeriods, state.period, PlanPeriod::label, onPeriodSelected)
                     }
                 }
                 item {
@@ -111,14 +110,15 @@ fun PlanScreen(
                     }
                 }
                 if (state.compareMode) {
-                    item { PlanCard(PlanKind.PLAN_A, PlanFixtures.state(state.period, PlanKind.PLAN_A).summary) }
-                    item { PlanCard(PlanKind.PLAN_B, PlanFixtures.state(state.period, PlanKind.PLAN_B).summary) }
+                    state.comparisons.forEach { (kind, summary) -> item { PlanCard(kind, summary) } }
                 } else item { PlanCard(state.plan, state.summary) }
                 item { WhyThisPlan(state.summary.why) }
                 state.conflict?.let { conflict -> item { ConflictBanner(conflict.statement, onResolveConflict) } }
                 item {
                     Column(verticalArrangement = Arrangement.spacedBy(Spacing.sm)) {
-                        RupAiButton("Apply plan", { scope.launch { snackbar.showSnackbar("Plan applied") } })
+                        RupAiButton("Use demo plan", onApplyPlan,
+                            state = if (state.canApply) RupAiButtonState.DEFAULT else RupAiButtonState.DISABLED,
+                            disabledReason = if (state.canApply) null else "Review the goal conflict or reserve/risk limits first.")
                         RupAiButton("Try what-if", onTryWhatIf, variant = RupAiButtonVariant.OUTLINE)
                     }
                 }

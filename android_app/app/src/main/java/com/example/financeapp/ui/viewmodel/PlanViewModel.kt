@@ -25,7 +25,8 @@ data class PeriodRowUi(
     val debt: Double,
     val sip: Double,
     val discretionary: Double,
-    val endingBalance: Double
+    val endingBalance: Double,
+    val forecast: ForecastPointUi? = null
 )
 
 data class PlanSummaryUi(
@@ -33,14 +34,17 @@ data class PlanSummaryUi(
     val interestSaved: Double,
     val shortfallRisk: Double,
     val tradeOff: String,
-    val why: String
+    val why: String,
+    val pathsEvaluated: Int = 0,
+    val breachedPaths: Int = 0
 )
 
 data class ConflictOptionUi(
     val title: String,
     val detail: String,
     val shortfallRiskAfter: Double,
-    val notRecommended: Boolean = false
+    val notRecommended: Boolean = false,
+    val feasible: Boolean = true
 )
 
 data class ConflictUi(
@@ -57,7 +61,10 @@ data class PlanUiState(
     val rows: List<PeriodRowUi>,
     val summary: PlanSummaryUi,
     val confidenceNote: String? = null,
-    val conflict: ConflictUi? = null
+    val conflict: ConflictUi? = null,
+    val comparisons: Map<PlanKind, PlanSummaryUi> = emptyMap(),
+    val availablePeriods: List<PlanPeriod> = PlanPeriod.entries,
+    val canApply: Boolean = true
 )
 
 private data class PlanFixture(

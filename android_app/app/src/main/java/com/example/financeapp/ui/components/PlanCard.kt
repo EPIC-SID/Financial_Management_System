@@ -26,7 +26,7 @@ import com.example.financeapp.ui.theme.Radius
 import com.example.financeapp.ui.theme.Spacing
 import com.example.financeapp.ui.theme.SurfaceNeutral
 import com.example.financeapp.ui.util.formatInr
-import com.example.financeapp.ui.util.formatPercent
+import com.example.financeapp.ui.util.formatRiskPercent
 import com.example.financeapp.ui.viewmodel.PlanKind
 import com.example.financeapp.ui.viewmodel.PlanSummaryUi
 
@@ -51,15 +51,18 @@ fun PlanCard(plan: PlanKind, summary: PlanSummaryUi, modifier: Modifier = Modifi
                 Column(verticalArrangement = Arrangement.spacedBy(Spacing.sm)) {
                     PlanMetric("Ending reserve", formatInr(summary.endingReserve))
                     PlanMetric("Interest saved", formatInr(summary.interestSaved))
-                    PlanMetric("Shortfall risk", formatPercent(summary.shortfallRisk))
+                    PlanMetric("Shortfall risk", formatRiskPercent(summary.shortfallRisk))
                 }
             } else {
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                     PlanMetric("Ending reserve", formatInr(summary.endingReserve))
                     PlanMetric("Interest saved", formatInr(summary.interestSaved))
-                    PlanMetric("Shortfall risk", formatPercent(summary.shortfallRisk))
+                    PlanMetric("Shortfall risk", formatRiskPercent(summary.shortfallRisk))
                 }
             }
+            if (summary.pathsEvaluated > 0) Text(
+                "${summary.breachedPaths}/${summary.pathsEvaluated} simulated paths breached the reserve at least once in six months.",
+                style = MaterialTheme.typography.bodySmall)
             Text(summary.tradeOff, style = MaterialTheme.typography.bodyMedium)
         }
     }

@@ -45,7 +45,8 @@ data class FreelancerPlanAssessment(
     val periodShortfallRisk: List<Double>,
     val expectedWorstShortfall: Double,
     val terminalCash: ForecastBand,
-    val pathsEvaluated: Int
+    val pathsEvaluated: Int,
+    val cashBands: List<ForecastBand> = emptyList()
 )
 
 data class FreelancerDecision(
@@ -68,12 +69,13 @@ class FreelancerDecisionAdapter {
         val assessments = ids.map { id ->
             val point = pointRuns.getValue(id)
             val samples = inputs.sampledPaths.map { run(inputs, it, id, false) }
+            val bands = inputs.periods.indices.map { i -> empiricalBand(samples.map { it.endings[i] }) }
             require((point.ending - point.debt).isFinite()) { "Unsupported financial magnitude" }
             FreelancerPlanAssessment(id, point.periods, point.ending - point.debt,
                 baselineInterest - point.interest, inputs.periods.sumOf { it.sip }, !point.breached,
                 samples.count { it.breached }.toDouble() / samples.size,
                 inputs.periods.indices.map { i -> samples.count { it.periodBreaches[i] }.toDouble() / samples.size },
-                samples.sumOf { it.worstShortfall / samples.size }, empiricalBand(samples.map { it.ending }), samples.size)
+                samples.sumOf { it.worstShortfall / samples.size }, bands.last(), samples.size, bands)
         }
         // Status quo is the reference; the two action policies compete for recommendation.
         val candidates = assessments.take(2)
@@ -92,7 +94,7 @@ class FreelancerDecisionAdapter {
     private data class Run(
         val periods: List<FreelancerPlanPeriod>, val ending: Double, val debt: Double,
         val interest: Double, val breached: Boolean, val periodBreaches: BooleanArray,
-        val worstShortfall: Double
+        val worstShortfall: Double, val endings: DoubleArray
     )
 
     private fun run(inputs: SimulationInputs, path: List<CashFlowPeriod>, id: FreelancerPlanId, table: Boolean): Run {
@@ -106,6 +108,7 @@ class FreelancerDecisionAdapter {
         var breached = cash < inputs.minReserve
         var shortfall = (inputs.minReserve - cash).coerceAtLeast(0.0)
         val periodBreaches = BooleanArray(path.size)
+        val endings = DoubleArray(path.size)
         val periods = if (table) ArrayList<FreelancerPlanPeriod>(path.size) else null
         path.forEachIndexed { index, period ->
             val opening = cash
@@ -131,6 +134,7 @@ class FreelancerDecisionAdapter {
                 remaining -= payment
             }
             cash -= prepay
+            endings[index] = cash
             require(cash.isFinite() && interest.isFinite() && principal.sum().isFinite()) {
                 "Unsupported financial magnitude"
             }
@@ -141,6 +145,6 @@ class FreelancerDecisionAdapter {
             periods?.add(FreelancerPlanPeriod(index + 1, opening, period.income, period.essentials,
                 debtService, discretionary, period.sip, prepay, accruedTotal, cash, principal.sum(), principal.toList()))
         }
-        return Run(periods ?: emptyList(), cash, principal.sum(), interest, breached, periodBreaches, shortfall)
+        return Run(periods ?: emptyList(), cash, principal.sum(), interest, breached, periodBreaches, shortfall, endings)
     }
 }

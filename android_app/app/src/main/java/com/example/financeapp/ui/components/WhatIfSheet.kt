@@ -51,7 +51,8 @@ fun WhatIfSheet(
     onDismissRequest: () -> Unit,
     onApplyToPlan: (WhatIfChange) -> Unit,
     initialChange: WhatIfChange = WhatIfChange(),
-    baselineInterestSaved: Double = 0.0
+    baselineInterestSaved: Double = 0.0,
+    applyLabel: String = "Apply to Plan"
 ) {
     require(baselineShortfallRisk.isFinite() && baselineShortfallRisk in 0.0..1.0)
     require(baselineInterestSaved.isFinite())
@@ -143,7 +144,9 @@ fun WhatIfSheet(
                         }, Modifier.fillMaxWidth().padding(vertical = 16.dp), color = colors.onSurfaceVariant)
                     }
                     Divider(color = colors.outline)
-                    AmountSlider("Discretionary spend cut", cut, 10000.0, 500.0, ::inr,
+                    val maximumCut = minOf(10000.0, discretionary * 0.6)
+                    AmountSlider("Bank-paid discretionary cut", cut, maximumCut,
+                        if (maximumCut < 500.0) 0.0 else 500.0, ::inr,
                         enabled = discretionary > 0.0, onChange = { cut = it })
                     if (cutError) FieldError("Maximum cut: ${inr(minOf(10000.0, discretionary * 0.6))} (60% of discretionary spend).")
                     AmountSlider("Extra debt prepayment", prepayment, 15000.0, 1000.0, ::inr,
@@ -182,7 +185,7 @@ fun WhatIfSheet(
                     shape = RoundedCornerShape(12.dp)) {
                     Icon(Icons.Default.ArrowForward, null, Modifier.size(20.dp))
                     Spacer(Modifier.width(8.dp))
-                    Text("Apply to Plan", letterSpacing = 0.sp)
+                    Text(applyLabel, letterSpacing = 0.sp)
                 }
                 TextButton(onClick = {
                     cut = 0.0; prepayment = 0.0; income = 0.0; sipReduction = 0.0
@@ -230,7 +233,7 @@ private fun AmountSlider(label: String, value: Double, maximum: Double, step: Do
             val snapped = if (step > 0) minimum + ((raw - minimum) / step).roundToInt() * step else raw.toDouble()
             onChange(snapped.coerceIn(minimum, maximum))
         }, valueRange = minimum.toFloat()..maximum.toFloat(),
-            steps = if (step > 0) ((maximum - minimum) / step).roundToInt() - 1 else 0,
+            steps = if (step > 0) (((maximum - minimum) / step).roundToInt() - 1).coerceAtLeast(0) else 0,
             enabled = enabled, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)
                 .semantics { contentDescription = label })
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
