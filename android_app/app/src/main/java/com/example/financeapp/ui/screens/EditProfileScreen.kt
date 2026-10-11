@@ -34,6 +34,7 @@ fun EditProfileScreen(
 ) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
+    val profileOwner = remember { SupabaseClient.auth.currentUserOrNull()?.id }
 
     var isLoadingProfile by remember { mutableStateOf(true) }
     var isSaving by remember { mutableStateOf(false) }
@@ -141,7 +142,7 @@ fun EditProfileScreen(
                 OutlinedTextField(
                     value = fullName,
                     onValueChange = {
-                        fullName = it
+                        fullName = it.take(100)
                         if (fullNameError != null) fullNameError = null
                     },
                     label = { Text("Full Name") },
@@ -190,7 +191,7 @@ fun EditProfileScreen(
                 // TODO: Add phone number format validation (e.g., ^\+?[0-9]{7,15}$)
                 OutlinedTextField(
                     value = phoneNumber,
-                    onValueChange = { phoneNumber = it },
+                    onValueChange = { phoneNumber = it.take(16) },
                     label = { Text("Phone Number") },
                     placeholder = { Text("+91 XXXXX XXXXX", color = TextGray.copy(alpha = 0.5f)) },
                     modifier = Modifier.fillMaxWidth(),
@@ -219,7 +220,7 @@ fun EditProfileScreen(
                 OutlinedTextField(
                     value = monthlyIncome,
                     onValueChange = { newValue ->
-                        if (newValue.isEmpty() || newValue.matches(Regex("^\\d*\\.?\\d*$"))) {
+                        if (newValue.length <= 12 && (newValue.isEmpty() || newValue.matches(Regex("^\\d*\\.?\\d*$")))) {
                             monthlyIncome = newValue
                         }
                     },
@@ -247,12 +248,20 @@ fun EditProfileScreen(
                 // ── Save Button ─────────────────────
                 Button(
                     onClick = {
+                        if (profileOwner == null || SupabaseClient.auth.currentUserOrNull()?.id != profileOwner) {
+                            Toast.makeText(context, "Your account changed. Reopen your profile before editing.", Toast.LENGTH_SHORT).show()
+                            return@Button
+                        }
                         // Validate
                         if (fullName.isBlank()) {
                             fullNameError = "Name cannot be empty"
                             return@Button
                         }
 
+                        if (monthlyIncome.isNotBlank() && monthlyIncome.toDoubleOrNull() == null) {
+                            Toast.makeText(context, "Enter a valid income or leave it empty", Toast.LENGTH_SHORT).show()
+                            return@Button
+                        }
                         isSaving = true
                         coroutineScope.launch {
                             try {
@@ -269,7 +278,8 @@ fun EditProfileScreen(
                                     Toast.makeText(context, result.message, Toast.LENGTH_LONG).show()
                                 }
                             } catch (e: Exception) {
-                                Toast.makeText(context, "Failed to update: ${e.message}", Toast.LENGTH_LONG).show()
+                                if (e is kotlinx.coroutines.CancellationException) throw e
+                                Toast.makeText(context, "Could not save your profile. Please retry.", Toast.LENGTH_LONG).show()
                             } finally {
                                 isSaving = false
                             }

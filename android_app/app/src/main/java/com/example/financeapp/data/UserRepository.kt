@@ -1,11 +1,11 @@
 package com.example.financeapp.data
 
-import android.util.Log
 import io.github.jan.supabase.gotrue.providers.builtin.Email
 import io.github.jan.supabase.postgrest.postgrest
-import io.github.jan.supabase.postgrest.query.Columns
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.withTimeout
 
 /**
  * Repository that encapsulates all user authentication and profile operations.
@@ -13,7 +13,6 @@ import kotlinx.serialization.json.put
  */
 object UserRepository {
 
-    private const val TAG = "UserRepository"
 
     // ──────────────────────────────────────────────
     //  Authentication
@@ -31,6 +30,8 @@ object UserRepository {
         phoneNumber: String? = null,
         monthlyIncome: Double? = null
     ) {
+        require(UserProfileUpdate(fullName = fullName, phoneNumber = phoneNumber,
+            monthlyIncome = monthlyIncome).validationError() == null) { "Please check your profile details." }
         // 1. Create the auth user
         SupabaseClient.auth.signUpWith(Email) {
             this.email = email
@@ -98,35 +99,49 @@ object UserRepository {
         val userId = SupabaseClient.auth.currentUserOrNull()?.id
             ?: return Resource.Error("User not authenticated")
         return try {
-            val profile = SupabaseClient.client.postgrest["user_profiles"]
+            val profile = withTimeout(15_000) { SupabaseClient.client.postgrest["user_profiles"]
                 .select {
                     filter { eq("id", userId) }
                 }
-                .decodeSingleOrNull<UserProfile>()
-            Resource.Success(profile)
+                .decodeSingleOrNull<UserProfile>() }
+            if (SupabaseClient.auth.currentUserOrNull()?.id != userId) Resource.Error("Your account changed. Please retry.")
+            else Resource.Success(profile)
+        } catch (e: kotlinx.coroutines.TimeoutCancellationException) {
+            Resource.Error("Profile request timed out. Please retry.")
+        } catch (e: CancellationException) { throw e
         } catch (e: Exception) {
-            Log.e(TAG, "Failed to fetch profile", e)
-            Resource.Error("Failed to load profile: ${e.localizedMessage}", e)
+            Resource.Error("Could not load your profile. Please retry.")
         }
     }
 
     /**
      * Update the current user's profile with the given fields.
-     * Only non-null fields in [update] will be sent to Supabase.
+     * Empty phone/income fields explicitly clear the previously saved values.
      * Returns [Resource.Success] on success, or [Resource.Error] on failure.
      */
     suspend fun updateProfile(update: UserProfileUpdate): Resource<Unit> {
+        update.validationError()?.let { return Resource.Error(it) }
         val userId = SupabaseClient.auth.currentUserOrNull()?.id
             ?: return Resource.Error("User not authenticated")
         return try {
-            SupabaseClient.client.postgrest["user_profiles"]
-                .update(update) {
+            val rows = withTimeout(15_000) { SupabaseClient.client.postgrest["user_profiles"]
+                .update(buildJsonObject {
+                    update.fullName?.let { put("full_name", it) }
+                    put("phone_number", update.phoneNumber?.let { kotlinx.serialization.json.JsonPrimitive(it) } ?: kotlinx.serialization.json.JsonNull)
+                    put("monthly_income", update.monthlyIncome?.let { kotlinx.serialization.json.JsonPrimitive(it) } ?: kotlinx.serialization.json.JsonNull)
+                    update.currency?.let { put("currency", it) }
+                }) {
+                    select()
                     filter { eq("id", userId) }
-                }
-            Resource.Success(Unit)
+                }.decodeList<UserProfile>() }
+            if (rows.singleOrNull()?.id != userId || SupabaseClient.auth.currentUserOrNull()?.id != userId)
+                Resource.Error("Profile was not saved. Please retry after signing in.")
+            else Resource.Success(Unit)
+        } catch (e: kotlinx.coroutines.TimeoutCancellationException) {
+            Resource.Error("Profile request timed out. Please retry.")
+        } catch (e: CancellationException) { throw e
         } catch (e: Exception) {
-            Log.e(TAG, "Failed to update profile", e)
-            Resource.Error("Failed to update profile: ${e.localizedMessage}", e)
+            Resource.Error("Could not save your profile. Please retry.")
         }
     }
 }

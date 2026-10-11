@@ -2,6 +2,24 @@ package com.example.financeapp.ui.navigation
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.Icon
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.ui.unit.dp
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -10,58 +28,159 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.key
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.financeapp.data.SupabaseClient
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.compose.ui.platform.LocalContext
+import com.example.financeapp.ui.screens.onboarding.OnboardingRoute
 import com.example.financeapp.ui.screens.*
-import com.example.financeapp.ui.theme.ActionGreen
-import com.example.financeapp.ui.viewmodel.PlanFixtures
-import io.github.jan.supabase.gotrue.SessionStatus
+import com.example.financeapp.ui.viewmodel.*
+import com.example.financeapp.data.ingest.Persona
+import com.example.financeapp.data.ingest.Scenario
+import com.example.financeapp.ui.components.WhatIfSheet
+import com.example.financeapp.ui.components.PlanSwitch
+import com.example.financeapp.domain.freelancer.FreelancerPlanId
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FinanceAppNavGraph() {
     val navController = rememberNavController()
+    val hybrid: HybridViewModel = viewModel()
+    val state by hybrid.state.collectAsState()
+    val copilot: CopilotViewModel = viewModel(factory = remember(hybrid) {
+        object : ViewModelProvider.Factory {
+            @Suppress("UNCHECKED_CAST")
+            override fun <T : ViewModel> create(modelClass: Class<T>): T =
+                CopilotViewModel(snapshotProvider = { hybrid.state.value.result }) as T
+        }
+    })
+    var showWhatIf by remember { mutableStateOf(false) }
+    var mode by rememberSaveable { mutableStateOf(AppDataMode.DEMO) }
+    var scenarioMenuOpen by remember { mutableStateOf(false) }
+    LaunchedEffect(state.result) { copilot.invalidate(); showWhatIf = false }
+    fun navigate(route: String) {
+        val destination = if (mode == AppDataMode.LIVE && route in listOf(Screen.Cockpit.route, Screen.Plan.route,
+            Screen.Copilot.route, Screen.Conflict.route, Screen.Home.route)) Screen.Transactions.route else route
+        navController.navigate(destination) { launchSingleTop = true }
+    }
+    fun selectMode(next: AppDataMode) {
+        if (next == mode) return
+        copilot.invalidate()
+        hybrid.clearSessionSelections()
+        showWhatIf = false
+        scenarioMenuOpen = false
+        mode = next
+        navController.navigate(if (next == AppDataMode.LIVE) Screen.Transactions.route else Screen.Cockpit.route) {
+            popUpTo(navController.graph.id)
+            launchSingleTop = true
+        }
+    }
 
-    // Default start destination directly to Cockpit for Hackathon demonstration
-    val startDestination = Screen.Cockpit.route
+    val context = LocalContext.current
+    val setupPrefs = remember { context.getSharedPreferences("app_setup", android.content.Context.MODE_PRIVATE) }
+    val startDestination = remember { if (setupPrefs.getBoolean("onboarding_complete_v1", false)) Screen.Cockpit.route else Screen.Onboarding.route }
+    val entry by navController.currentBackStackEntryAsState()
+    val setupOrAuth = entry?.destination?.route in listOf(Screen.Onboarding.route, Screen.Login.route, Screen.SignUp.route)
 
-    NavHost(navController = navController, startDestination = startDestination) {
+    Column(Modifier.fillMaxSize()) {
+        if (!setupOrAuth) {
+        PlanSwitch(AppDataMode.entries, mode, AppDataMode::label, ::selectMode,
+            Modifier.padding(horizontal = 12.dp, vertical = 4.dp))
+        if (mode == AppDataMode.DEMO && entry?.destination?.route !in listOf(Screen.Profile.route, Screen.EditProfile.route)) Box {
+            TextButton(onClick = { scenarioMenuOpen = true }, enabled = !state.loading) {
+                Text("Scenario: ${if (state.persona == Persona.A) "Freelancer" else state.scenario.label}")
+                Icon(Icons.Default.ArrowDropDown, "Choose synthetic scenario")
+            }
+            DropdownMenu(scenarioMenuOpen, { scenarioMenuOpen = false }) {
+                Scenario.entries.forEach { scenario ->
+                    DropdownMenuItem(text = { Text(scenario.label) }, onClick = {
+                        scenarioMenuOpen = false
+                        hybrid.selectScenario(scenario)
+                    })
+                }
+                DropdownMenuItem(text = { Text("Freelancer") }, onClick = {
+                    scenarioMenuOpen = false
+                    hybrid.selectScenario(Scenario.STABLE_INCOME, Persona.A)
+                })
+            }
+        }
+        Row(Modifier.horizontalScroll(rememberScrollState())) {
+            (if (mode == AppDataMode.DEMO) listOf("Overview" to Screen.Cockpit.route, "Plan" to Screen.Plan.route,
+                "Copilot" to Screen.Copilot.route, "Activity" to Screen.Transactions.route, "Profile" to Screen.Profile.route)
+            else listOf("Activity" to Screen.Transactions.route, "Profile" to Screen.Profile.route,
+                "Sign in" to Screen.Login.route)).forEach { (label, route) ->
+                TextButton(onClick = { navigate(route) }) { Text(label) }
+            }
+        }
+        }
+    NavHost(navController = navController, startDestination = startDestination, modifier = Modifier.weight(1f)) {
+        composable(Screen.Onboarding.route) {
+            OnboardingRoute(onExistingAccount = { navigate(Screen.Login.route) }, onComplete = { source ->
+                setupPrefs.edit().putBoolean("onboarding_complete_v1", true).apply()
+                copilot.invalidate()
+                hybrid.clearSessionSelections()
+                mode = if (source == OnboardingDataSource.SMS) AppDataMode.LIVE else AppDataMode.DEMO
+                navController.navigate(if (mode == AppDataMode.LIVE) Screen.Transactions.route else Screen.Cockpit.route) {
+                    popUpTo(navController.graph.id)
+                    launchSingleTop = true
+                }
+            })
+        }
         // Core Hackathon Stages 3A–3C Screens
         composable(Screen.Cockpit.route) {
-            CockpitRoute(
+            val result = state.result
+            if (mode == AppDataMode.LIVE) { LaunchedEffect(Unit) { navigate(Screen.Transactions.route) } }
+            else if (result == null) IntegrationStatus(state.loading, state.error, hybrid::retry)
+            else CockpitScreen(
+                state = result.cockpitUi(),
+                onScenarioSelected = { id ->
+                    if (id == "freelancer") hybrid.selectScenario(Scenario.STABLE_INCOME, Persona.A)
+                    else Scenario.entries.firstOrNull { it.name == id }?.let { hybrid.selectScenario(it) }
+                },
                 onAction = { action ->
                     when (action) {
                         "cockpit" -> { /* Already on cockpit */ }
-                        "plan" -> navController.navigate(Screen.Plan.route)
-                        "copilot" -> navController.navigate(Screen.Copilot.route)
-                        "activity" -> navController.navigate(Screen.Transactions.route)
+                        "plan", "Plan", "What-if" -> { navigate(Screen.Plan.route); if (action == "What-if") showWhatIf = true }
+                        "copilot", "Ask Copilot" -> navigate(Screen.Copilot.route)
+                        "activity", "Add entry" -> navigate(Screen.Transactions.route)
                         "profile" -> navController.navigate(Screen.Profile.route)
+                        "add data", "edit accounts" -> navigate(Screen.Transactions.route)
                     }
                 }
             )
         }
 
         composable(Screen.Plan.route) {
-            PlanRoute(
-                onResolveConflict = {
-                    navController.navigate(Screen.Conflict.route)
-                }
-            )
+            val result = state.result
+            if (mode == AppDataMode.LIVE) { LaunchedEffect(Unit) { navigate(Screen.Transactions.route) } }
+            else if (result == null) IntegrationStatus(state.loading, state.error, hybrid::retry)
+            else PlanScreen(result.planUi(state.plan, state.compare, state.appliedPlan, state.savedSimulation != null),
+                onPlanSelected = hybrid::selectPlan, onCompareChanged = hybrid::compare,
+                onTryWhatIf = { showWhatIf = true }, onApplyPlan = hybrid::applyPlan,
+                onResolveConflict = { navigate(Screen.Conflict.route) })
         }
 
         composable(Screen.Copilot.route) {
-            CopilotRoute()
+            if (mode == AppDataMode.LIVE) { LaunchedEffect(Unit) { navigate(Screen.Transactions.route) } }
+            else CopilotRoute(viewModel = copilot, onLaunchWhatIf = { showWhatIf = true },
+                onOpenPlan = { navigate(Screen.Plan.route) })
         }
 
         composable(Screen.Conflict.route) {
-            val conflict = PlanFixtures.infeasible().conflict ?: error("No conflict")
-            ConflictScreen(
+            val conflict = state.result?.planUi(state.plan, state.compare)?.conflict
+            if (conflict == null) IntegrationStatus(false, "No unresolved demo goal conflict.") { navController.popBackStack() }
+            else ConflictScreen(
                 conflict = conflict,
                 onKeepTarget = { navController.popBackStack() },
-                onApply = { navController.popBackStack() }
+                onApply = { option ->
+                    val index = conflict.options.indexOf(option)
+                    if (option.feasible && index >= 0) { hybrid.applyRelaxation(index); navController.popBackStack() }
+                }
             )
         }
 
@@ -69,7 +188,7 @@ fun FinanceAppNavGraph() {
         composable(Screen.Login.route) {
             LoginScreen(
                 onNavigateToHome = {
-                    navController.navigate(Screen.Cockpit.route) {
+                    navController.navigate(Screen.Onboarding.route) {
                         popUpTo(Screen.Login.route) { inclusive = true }
                     }
                 },
@@ -82,7 +201,7 @@ fun FinanceAppNavGraph() {
         composable(Screen.SignUp.route) {
             SignUpScreen(
                 onNavigateToHome = {
-                    navController.navigate(Screen.Cockpit.route) {
+                    navController.navigate(Screen.Onboarding.route) {
                         popUpTo(Screen.Login.route) { inclusive = true }
                     }
                 },
@@ -107,22 +226,13 @@ fun FinanceAppNavGraph() {
         }
 
         composable(Screen.Transactions.route) {
-            TransactionsScreen(
-                onNavigateBack = {
-                    navController.popBackStack()
-                },
-                onNavigateToProfile = {
-                    navController.navigate(Screen.Profile.route)
-                }
-            )
+            key(mode) { UnifiedActivityRoute(mode, if (mode == AppDataMode.DEMO) state.result?.dataset else null) }
         }
 
         composable(Screen.Profile.route) {
             ProfileScreen(
                 onNavigateToHome = {
-                    navController.navigate(Screen.Cockpit.route) {
-                        popUpTo(Screen.Cockpit.route) { inclusive = false }
-                    }
+                    navigate(if (mode == AppDataMode.LIVE) Screen.Transactions.route else Screen.Cockpit.route)
                 },
                 onNavigateToTransactions = {
                     navController.navigate(Screen.Transactions.route)
@@ -134,7 +244,8 @@ fun FinanceAppNavGraph() {
                 },
                 onNavigateToEditProfile = {
                     navController.navigate(Screen.EditProfile.route)
-                }
+                },
+                onEditSetup = { navigate(Screen.Onboarding.route) }
             )
         }
 
@@ -160,6 +271,26 @@ fun FinanceAppNavGraph() {
                     navController.popBackStack()
                 }
             )
+        }
+    }
+    }
+    val result = state.result
+    if (mode == AppDataMode.DEMO && showWhatIf && result != null) {
+        WhatIfSheet(inputs = result.inputs,
+            baselineShortfallRisk = result.decision.plans.single { it.id == FreelancerPlanId.STATUS_QUO }.shortfallRisk,
+            onDismissRequest = { showWhatIf = false }, initialChange = state.savedSimulation ?: com.example.financeapp.domain.engine.WhatIfChange(),
+            applyLabel = "Save simulation (demo only)",
+            onApplyToPlan = { change -> hybrid.saveSimulation(change); showWhatIf = false; navigate(Screen.Plan.route) })
+    }
+}
+
+@Composable
+private fun IntegrationStatus(loading: Boolean, message: String?, onRetry: () -> Unit) {
+    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            if (loading) CircularProgressIndicator()
+            Text(message ?: "Calculating synthetic demo...", Modifier.padding(16.dp))
+            if (!loading) TextButton(onClick = onRetry) { Text("Retry / return") }
         }
     }
 }
