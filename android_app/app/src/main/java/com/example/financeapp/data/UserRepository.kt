@@ -30,6 +30,7 @@ object UserRepository {
         phoneNumber: String? = null,
         monthlyIncome: Double? = null
     ) {
+        requireSecureAuth(AuthAction.SIGN_UP, AuthInput(email, password, fullName))
         require(UserProfileUpdate(fullName = fullName, phoneNumber = phoneNumber,
             monthlyIncome = monthlyIncome).validationError() == null) { "Please check your profile details." }
         // 1. Create the auth user
@@ -59,6 +60,7 @@ object UserRepository {
      * Sign in with email/password.
      */
     suspend fun signIn(email: String, password: String) {
+        requireSecureAuth(AuthAction.SIGN_IN, AuthInput(email, password))
         SupabaseClient.auth.signInWith(Email) {
             this.email = email
             this.password = password
@@ -76,7 +78,13 @@ object UserRepository {
      * Send a password reset email to the given address.
      */
     suspend fun resetPassword(email: String) {
+        requireSecureAuth(AuthAction.RESET_PASSWORD, AuthInput(email))
         SupabaseClient.auth.resetPasswordForEmail(email)
+    }
+
+    private fun requireSecureAuth(action: AuthAction, input: AuthInput) {
+        require(com.example.financeapp.BuildConfig.SUPABASE_URL.startsWith("https://")) { "Secure sign-in is unavailable." }
+        require(input.validationError(action) == null) { "Please check your account details." }
     }
 
     /**
