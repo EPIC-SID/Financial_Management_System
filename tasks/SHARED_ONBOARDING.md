@@ -65,3 +65,51 @@ Profile screen opened in Demo and My Transactions; no SMS sync or reset was
 triggered. After the operator applied the migration, anonymous REST reads of
 both `account_setup` and `user_profiles` returned HTTP 401 / PostgreSQL 42501.
 Signed-in save/reload/delete and two-account isolation remain acceptance checks.
+
+## Updated Account Entry
+
+Welcome now offers Create account, Sign in, or Continue without an account.
+Authenticated users see Continue setup instead. Both account forms use the current
+RupAI components; signup asks only for name, email and password. No phone or income
+is required to register. Only an actual authenticated Supabase session continues
+to shared onboarding. With email confirmation enabled, signup instead shows a
+confirmation reminder and leaves the user on the form.
+
+Passwords stay in temporary Compose memory, never saved instance state or logs.
+Requests have a 15-second deadline, bounded inputs and generic errors. Reset
+responses do not disclose whether an account exists. Local cooldowns are UX only;
+Supabase must enforce server-side rate limits. Password-reset completion depends
+on the project's configured recovery URL; no new deep-link handler is added here.
+Email delivery and recovery completion require live acceptance testing.
+
+Legacy Home, Transactions, Insights and Review screen implementations are removed.
+Saved legacy routes redirect to current screens without leaving a back-stack loop.
+The profile editor uses current tokens and keeps owner checks and explicit optional
+field clearing. No database migration, transaction reset or planner change is needed.
+
+Account smoke checks: open Profile -> Sign in -> Create account, submit empty fields
+and confirm local validation, test keyboard scrolling and password visibility,
+switch forms and use Back, then open Review setup to check all three welcome choices.
+Use disposable accounts for real signup, confirmation, login and recovery checks.
+
+Verified account-entry refresh 2026-10-11: 273 JVM tests passed (14 auth-focused),
+debug APK built and installed with existing data preserved. Phone screenshots
+confirmed login/signup layout and welcome choices. Empty signup was blocked
+locally; keyboard scrolling kept Create account reachable. System Back returned
+to onboarding, and recovery opened/returned without sending email. No real
+credentials, SMS import, cloud writes or reset were used. Authenticated login,
+signup confirmation, recovery completion and profile editing remain live checks.
+
+## Shared Navigation And Plain English
+
+The main screens now share one header and a navigation drawer, with no bottom
+navigation. The drawer contains destinations, the sample/SMS data choice and
+sample situations. Live mode still excludes sample planning screens. Screen
+labels explain cash risk without presenting it as goal-success probability.
+Financial calculations, SMS permissions and cloud consent behavior are unchanged.
+
+Verified 2026-10-11: 277 JVM tests passed with no failures or skipped tests,
+including four navigation-choice tests. Debug APK built and installed without
+clearing data. Overview, Plans, Ask AI and drawer layouts were checked on the
+connected phone. No credentials, cloud writes, SMS import or database reset were
+used; other screen sizes and complete live cloud flows were not checked.
