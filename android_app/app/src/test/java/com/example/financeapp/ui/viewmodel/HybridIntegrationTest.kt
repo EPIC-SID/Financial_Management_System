@@ -16,7 +16,8 @@ class HybridIntegrationTest {
     @Test fun screensMapComputedValuesAndNeverUsePreviewBalances() {
         val cockpit = result.cockpitUi()
         val plan = result.planUi(PlanKind.PLAN_A, true)
-        assertEquals("Synthetic planning", cockpit.dataSource)
+        assertEquals("Sample data", cockpit.dataSource)
+        assertTrue(cockpit.metrics.last().subtitle!!.contains("Not the chance of reaching your goal"))
         assertTrue(cockpit.accounts.first().amount!!.contains("45,200"))
         assertEquals(6, plan.forecast.size)
         assertEquals(listOf(PlanPeriod.SIX_MONTHS), plan.availablePeriods)

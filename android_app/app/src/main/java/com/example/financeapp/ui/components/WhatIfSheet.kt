@@ -118,7 +118,7 @@ fun WhatIfSheet(
             Column(Modifier.fillMaxWidth().heightIn(max = (LocalConfiguration.current.screenHeightDp * 0.8f).dp)
                 .imePadding().padding(horizontal = 16.dp)) {
                 Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                    Text("What-if simulation", Modifier.weight(1f).semantics { heading() },
+                    Text("Try a change", Modifier.weight(1f).semantics { heading() },
                         style = MaterialTheme.typography.titleLarge, letterSpacing = 0.sp)
                     IconButton(onClick = onDismissRequest) { Icon(Icons.Default.Close, "Close simulation") }
                 }
@@ -128,9 +128,9 @@ fun WhatIfSheet(
                         style = MaterialTheme.typography.labelMedium, letterSpacing = 0.sp)
                     if (result?.impact != null) {
                         val impact = result.impact
-                        MetricComparison("Liquid runway", months(result.beforeRunway), months(result.afterRunway),
+                        MetricComparison("How long cash lasts", months(result.beforeRunway), months(result.afterRunway),
                             "${signed(impact.runwayDeltaMonths)} mo", impact.runwayDeltaMonths, higherIsBetter = true)
-                        MetricComparison("Shortfall risk", percent(baselineShortfallRisk),
+                        MetricComparison("Risk of low cash", percent(baselineShortfallRisk),
                             percent((baselineShortfallRisk + impact.shortfallRiskDelta).coerceIn(0.0, 1.0)),
                             "${signed(impact.shortfallRiskDelta * 100)} pp", impact.shortfallRiskDelta, higherIsBetter = false)
                         MetricComparison("Projected interest saved", inr(baselineInterestSaved),
@@ -145,7 +145,7 @@ fun WhatIfSheet(
                     }
                     Divider(color = colors.outline)
                     val maximumCut = minOf(10000.0, discretionary * 0.6)
-                    AmountSlider("Bank-paid discretionary cut", cut, maximumCut,
+                    AmountSlider("Spend less from your bank", cut, maximumCut,
                         if (maximumCut < 500.0) 0.0 else 500.0, ::inr,
                         enabled = discretionary > 0.0, onChange = { cut = it })
                     if (cutError) FieldError("Maximum cut: ${inr(minOf(10000.0, discretionary * 0.6))} (60% of discretionary spend).")

@@ -25,18 +25,18 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 
 @Composable
-fun OnboardingRoute(onExistingAccount: () -> Unit, onComplete: (OnboardingDataSource) -> Unit) {
+fun OnboardingRoute(onExistingAccount: () -> Unit, onCreateAccount: () -> Unit, onComplete: (OnboardingDataSource) -> Unit) {
     val status by SupabaseClient.auth.sessionStatus.collectAsState()
     if (status is SessionStatus.LoadingFromStorage) {
         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { CircularProgressIndicator() }
         return
     }
     val owner = SupabaseClient.auth.currentUserOrNull()?.id
-    key(owner) { AccountOnboarding(owner, onExistingAccount, onComplete) }
+    key(owner) { AccountOnboarding(owner, onExistingAccount, onCreateAccount, onComplete) }
 }
 
 @Composable
-private fun AccountOnboarding(owner: String?, onExistingAccount: () -> Unit, onComplete: (OnboardingDataSource) -> Unit) {
+private fun AccountOnboarding(owner: String?, onExistingAccount: () -> Unit, onCreateAccount: () -> Unit, onComplete: (OnboardingDataSource) -> Unit) {
     val vm: OnboardingViewModel = viewModel(key = "onboarding-${owner ?: "guest"}")
     val state by vm.uiState.collectAsState()
     val context = LocalContext.current
@@ -81,6 +81,7 @@ private fun AccountOnboarding(owner: String?, onExistingAccount: () -> Unit, onC
             else -> vm.next()
         }
     }, onBack = vm::back, onExistingAccount = onExistingAccount,
+        onCreateAccount = onCreateAccount, showAccountActions = owner == null,
         onSourceSelected = vm::selectSource, onAlternativeSelected = vm::chooseAlternative,
         onMoneyArrivalSelected = vm::setMoneyArrival, onObligationToggled = vm::toggleObligation,
         onAgeRangeSelected = vm::setAgeRange, onCushionChanged = vm::setCushion,

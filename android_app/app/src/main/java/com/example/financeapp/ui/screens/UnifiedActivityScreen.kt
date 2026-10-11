@@ -34,7 +34,7 @@ import com.example.financeapp.ui.viewmodel.*
 import java.time.*
 
 @Composable
-fun UnifiedActivityRoute(mode: AppDataMode, dataset: SyntheticDataset?) {
+fun UnifiedActivityRoute(mode: AppDataMode, dataset: SyntheticDataset?, showHeader: Boolean = true) {
     val context = LocalContext.current
     val live: TransactionViewModel? = if (mode == AppDataMode.LIVE) viewModel() else null
     val rows = live?.transactions?.collectAsState()?.value.orEmpty()
@@ -60,7 +60,7 @@ fun UnifiedActivityRoute(mode: AppDataMode, dataset: SyntheticDataset?) {
     }
     UnifiedActivityScreen(mode, entries, today, syncing, message,
         onSync = ::requestSync, onSettings = { settings = true },
-        onCorrect = { merchant, category -> live?.updateCategoryForMerchant(merchant, category) })
+        onCorrect = { merchant, category -> live?.updateCategoryForMerchant(merchant, category) }, showHeader = showHeader)
 
     if (permissionNotice) AlertDialog(onDismissRequest = { permissionNotice = false },
         title = { Text("Read bank transaction SMS?") },
@@ -101,7 +101,7 @@ fun UnifiedActivityRoute(mode: AppDataMode, dataset: SyntheticDataset?) {
 @Composable
 fun UnifiedActivityScreen(mode: AppDataMode, entries: List<ActivityEntry>, today: LocalDate,
     syncing: Boolean = false, message: String? = null, onSync: () -> Unit = {},
-    onSettings: () -> Unit = {}, onCorrect: (String, String) -> Unit = { _, _ -> }) {
+    onSettings: () -> Unit = {}, onCorrect: (String, String) -> Unit = { _, _ -> }, showHeader: Boolean = true) {
     var period by remember { mutableStateOf(ActivityPeriod.MONTH) }
     var category by remember { mutableStateOf("All") }
     var periodMenu by remember { mutableStateOf(false) }
@@ -113,7 +113,8 @@ fun UnifiedActivityScreen(mode: AppDataMode, entries: List<ActivityEntry>, today
     val categories = remember(window) { window.map { it.category }.distinct().sorted() }
     LaunchedEffect(categories) { if (category != "All" && category !in categories) category = "All" }
     val filtered = remember(window, category) { window.filter { category == "All" || it.category == category } }
-    Scaffold(topBar = { TopAppBar(title = { Text("Activity") }, actions = {
+    Scaffold(contentWindowInsets = if (showHeader) ScaffoldDefaults.contentWindowInsets else WindowInsets(0, 0, 0, 0),
+        topBar = { if (showHeader) TopAppBar(title = { Text("Transactions") }, actions = {
         if (mode == AppDataMode.LIVE) {
             IconButton(onClick = onSync, enabled = !syncing) {
                 if (syncing) CircularProgressIndicator(Modifier.size(20.dp), strokeWidth = 2.dp)
@@ -125,7 +126,16 @@ fun UnifiedActivityScreen(mode: AppDataMode, entries: List<ActivityEntry>, today
         LazyColumn(Modifier.fillMaxSize().padding(padding), contentPadding = PaddingValues(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)) {
             item {
-                Text(if (mode == AppDataMode.DEMO) "Synthetic transactions through $today" else "SMS transactions stored on this phone", style = MaterialTheme.typography.bodySmall)
+                Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                    Text(if (mode == AppDataMode.DEMO) "Sample transactions through $today" else "SMS transactions saved on this phone", Modifier.weight(1f), style = MaterialTheme.typography.bodySmall)
+                    if (!showHeader && mode == AppDataMode.LIVE) {
+                        IconButton(onClick = onSync, enabled = !syncing) {
+                            if (syncing) CircularProgressIndicator(Modifier.size(20.dp), strokeWidth = 2.dp)
+                            else Icon(Icons.Default.Refresh, "Import bank SMS")
+                        }
+                        IconButton(onClick = onSettings) { Icon(Icons.Default.Settings, "Transaction settings") }
+                    }
+                }
                 Box {
                     TextButton(onClick = { periodMenu = true }) { Text(if (period == ActivityPeriod.MONTH) today.month.name.lowercase().replaceFirstChar { it.uppercase() } + " ${today.year}" else period.label) }
                     DropdownMenu(periodMenu, { periodMenu = false }) {
@@ -133,13 +143,13 @@ fun UnifiedActivityScreen(mode: AppDataMode, entries: List<ActivityEntry>, today
                     }
                 }
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                    Column(Modifier.weight(1f)) { Text("Credits", style = MaterialTheme.typography.labelMedium); Text(formatInr(summary.credits), style = MaterialTheme.typography.titleLarge) }
-                    Column(Modifier.weight(1f)) { Text("Debits", style = MaterialTheme.typography.labelMedium); Text(formatInr(summary.debits), style = MaterialTheme.typography.titleLarge) }
+                    Column(Modifier.weight(1f)) { Text("Money in", style = MaterialTheme.typography.labelMedium); Text(formatInr(summary.credits), style = MaterialTheme.typography.titleLarge) }
+                    Column(Modifier.weight(1f)) { Text("Money out", style = MaterialTheme.typography.labelMedium); Text(formatInr(summary.debits), style = MaterialTheme.typography.titleLarge) }
                 }
-                Text("Includes transfers, refunds and settlements; not a verified spending ledger.", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text("These totals include transfers, refunds and card bill payments. Money out is not the same as total spending.", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
             if (summary.categories.isNotEmpty()) item {
-                Text("Debit categories", style = MaterialTheme.typography.titleMedium)
+                Text("Money out by category", style = MaterialTheme.typography.titleMedium)
                 val ranked = summary.categories.entries.sortedByDescending { it.value }
                 (if (allCategories) ranked else ranked.take(3)).forEach { (label, amount) ->
                     Row(Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
@@ -150,7 +160,7 @@ fun UnifiedActivityScreen(mode: AppDataMode, entries: List<ActivityEntry>, today
                 if (ranked.size > 3) TextButton(onClick = { allCategories = !allCategories }) {
                     Text(if (allCategories) "Fewer categories" else "All categories")
                 }
-                if (summary.unclassified > 0) Text("${summary.unclassified} unclassified debits", color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
+                if (summary.unclassified > 0) Text("${summary.unclassified} payments need a category", color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
             }
             message?.let { item { Text(it, style = MaterialTheme.typography.bodySmall) } }
             item { Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {

@@ -22,7 +22,7 @@ import kotlinx.coroutines.withContext
 
 @Composable
 fun ProfileScreen(onNavigateToHome: () -> Unit, onNavigateToTransactions: () -> Unit,
-    onNavigateToLogin: () -> Unit, onNavigateToEditProfile: () -> Unit, onEditSetup: () -> Unit = {}) {
+    onNavigateToLogin: () -> Unit, onNavigateToEditProfile: () -> Unit, onEditSetup: () -> Unit = {}, showHeader: Boolean = true) {
     val status by SupabaseClient.auth.sessionStatus.collectAsState()
     if (status is SessionStatus.LoadingFromStorage) {
         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { CircularProgressIndicator() }
@@ -30,13 +30,13 @@ fun ProfileScreen(onNavigateToHome: () -> Unit, onNavigateToTransactions: () -> 
     }
     val owner = SupabaseClient.auth.currentUserOrNull()?.id
     key(owner) { SharedProfile(owner, onNavigateToHome, onNavigateToTransactions,
-        onNavigateToLogin, onNavigateToEditProfile, onEditSetup) }
+        onNavigateToLogin, onNavigateToEditProfile, onEditSetup, showHeader) }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun SharedProfile(owner: String?, onBack: () -> Unit, onActivity: () -> Unit,
-    onLogin: () -> Unit, onEdit: () -> Unit, onSetup: () -> Unit) {
+    onLogin: () -> Unit, onEdit: () -> Unit, onSetup: () -> Unit, showHeader: Boolean) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     var profile by remember { mutableStateOf<UserProfile?>(null) }
@@ -63,36 +63,40 @@ private fun SharedProfile(owner: String?, onBack: () -> Unit, onActivity: () -> 
             loading = false
         }
     }
-    Scaffold(topBar = { TopAppBar(title = { Text("Profile") }, navigationIcon = {
+    Scaffold(contentWindowInsets = if (showHeader) ScaffoldDefaults.contentWindowInsets else WindowInsets(0, 0, 0, 0),
+        topBar = { if (showHeader) TopAppBar(title = { Text("Profile") }, navigationIcon = {
         IconButton(onClick = onBack) { Icon(Icons.Default.ArrowBack, "Back") }
     }, actions = {
         if (owner != null) IconButton(onClick = onEdit, enabled = !busy) { Icon(Icons.Default.Edit, "Edit profile") }
     }) }) { padding ->
         Column(Modifier.fillMaxSize().padding(padding).verticalScroll(rememberScrollState()).padding(20.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            Text("One account across Demo and My Transactions", style = MaterialTheme.typography.titleMedium)
+            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                Text("Your account", Modifier.weight(1f), style = MaterialTheme.typography.titleLarge)
+                if (!showHeader && owner != null) IconButton(onClick = onEdit, enabled = !busy) { Icon(Icons.Default.Edit, "Edit profile") }
+            }
             if (loading) LinearProgressIndicator(Modifier.fillMaxWidth())
             message?.let {
                 Text(it)
                 TextButton(onClick = { retry++ }, enabled = !loading && !busy) { Text("Retry") }
             }
             if (owner == null) {
-                Text("You are using RupAI without an account. SMS activity stays on this phone. Sign in to save your profile and optional financial setup.")
+                Text("You are not signed in. Your SMS transactions stay on this phone. Sign in to save your profile and, if you choose, your financial setup.")
                 Button(onClick = onLogin) { Text("Sign in") }
                 OutlinedButton(onClick = onSetup) { Text("Review setup") }
             } else {
                 ProfileField("Name", profile?.fullName ?: "Not available")
                 ProfileField("Email", profile?.email ?: SupabaseClient.auth.currentUserOrNull()?.email.orEmpty())
                 ProfileField("Phone", profile?.phoneNumber ?: "Not provided")
-                ProfileField("Declared monthly income", profile?.monthlyIncome?.let(::formatInr) ?: "Not set")
+                ProfileField("Monthly income you entered", profile?.monthlyIncome?.let(::formatInr) ?: "Not set")
                 Divider()
                 Text("Financial setup", style = MaterialTheme.typography.titleMedium)
                 ProfileField("Income pattern", setup?.incomePattern ?: "Not set")
-                ProfileField("Fixed payment types", setup?.obligations?.joinToString()?.ifEmpty { "None declared" } ?: "Not set")
-                ProfileField("Minimum cash cushion", setup?.minimumReserve?.toDouble()?.let(::formatInr) ?: "Not set")
+                ProfileField("Regular payments", setup?.obligations?.joinToString()?.ifEmpty { "None entered" } ?: "Not set")
+                ProfileField("Safety balance", setup?.minimumReserve?.toDouble()?.let(::formatInr) ?: "Not set")
                 ProfileField("Goal", setup?.goalName ?: "Not set")
                 setup?.goalAmount?.let { ProfileField("Goal amount", formatInr(it.toDouble())) }
-                Text("Demo plans use sample assumptions. Saved setup is not a verified balance or a live financial plan.", style = MaterialTheme.typography.bodySmall)
+                Text("Plans currently use sample data. The details saved here do not verify your bank balance or create a plan from your SMS.", style = MaterialTheme.typography.bodySmall)
                 OutlinedButton(onClick = onSetup, enabled = !loading && !busy) { Text("Edit financial setup") }
                 if (setup != null) TextButton(onClick = { confirmation = "setup" }, enabled = !busy) { Text("Delete saved financial setup") }
                 TextButton(onClick = {

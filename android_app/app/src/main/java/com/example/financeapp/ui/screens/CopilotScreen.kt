@@ -83,7 +83,8 @@ fun CopilotRoute(
     viewModel: CopilotViewModel = viewModel(),
     onLaunchWhatIf: () -> Unit = {},
     onOpenPlan: () -> Unit = {},
-    onKeyboardVisibilityChanged: (Boolean) -> Unit = {}
+    onKeyboardVisibilityChanged: (Boolean) -> Unit = {},
+    showHeader: Boolean = true
 ) {
     val context = LocalContext.current
     val preferences = remember { context.getSharedPreferences(COPILOT_PREFS, Context.MODE_PRIVATE) }
@@ -141,7 +142,8 @@ fun CopilotRoute(
         onLaunchWhatIf = onLaunchWhatIf,
         onAddToPlan = onOpenPlan,
         onNarrationLanguageSelected = viewModel::selectLanguage,
-        onKeyboardVisibilityChanged = onKeyboardVisibilityChanged
+        onKeyboardVisibilityChanged = onKeyboardVisibilityChanged,
+        showHeader = showHeader
     )
 }
 
@@ -164,12 +166,14 @@ fun CopilotScreen(
     onLaunchWhatIf: () -> Unit = {},
     onAddToPlan: () -> Unit = {},
     onKeyboardVisibilityChanged: (Boolean) -> Unit = {},
-    onNarrationLanguageSelected: (String) -> Unit = {}
+    onNarrationLanguageSelected: (String) -> Unit = {},
+    showHeader: Boolean = true
 ) {
     val keyboardVisible = WindowInsets.ime.getBottom(LocalDensity.current) > 0
     LaunchedEffect(keyboardVisible) { onKeyboardVisibilityChanged(keyboardVisible) }
     Scaffold(
-        topBar = { TopAppBar(title = { Text("Copilot") }) },
+        topBar = { if (showHeader) TopAppBar(title = { Text("Ask AI") }) },
+        contentWindowInsets = if (showHeader) androidx.compose.material3.ScaffoldDefaults.contentWindowInsets else androidx.compose.foundation.layout.WindowInsets(0, 0, 0, 0),
         bottomBar = {
             Column(Modifier.imePadding()) {
                 if (showVoiceDisclosure) VoiceDisclosure(onDismissDisclosure)
@@ -193,7 +197,7 @@ fun CopilotScreen(
             verticalArrangement = Arrangement.spacedBy(Spacing.md)
         ) {
             item {
-                Text("Synthetic planning demo. SMS transactions are not used here. Enter amounts in What-if to calculate their effect.", style = MaterialTheme.typography.bodySmall)
+                Text("Answers use sample data, not your SMS transactions. Use Try a change to test a different amount.", style = MaterialTheme.typography.bodySmall)
                 Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(Spacing.xs)) {
                     NarrationLanguage.entries.forEach { mode ->
                         FilterChip(selected = state.languageCode == mode.code,
@@ -253,7 +257,7 @@ private fun ThinkingCard() {
 @Composable
 private fun OfflineNotice() {
     Surface(Modifier.fillMaxWidth(), color = SurfaceNeutral, border = BorderStroke(1.dp, Ink)) {
-        Text("Showing verified local advice. Remote narration may be unavailable or blocked pending plan review.", Modifier.padding(Spacing.sm), style = MaterialTheme.typography.bodyMedium)
+        Text("Showing a checked answer from this phone. An online AI answer is unavailable, or the plan needs review first.", Modifier.padding(Spacing.sm), style = MaterialTheme.typography.bodyMedium)
     }
 }
 

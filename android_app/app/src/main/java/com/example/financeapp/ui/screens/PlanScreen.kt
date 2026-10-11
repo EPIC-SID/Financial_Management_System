@@ -70,11 +70,14 @@ fun PlanScreen(
     onCompareChanged: (Boolean) -> Unit = {},
     onTryWhatIf: () -> Unit = {},
     onResolveConflict: () -> Unit = {},
-    onApplyPlan: () -> Unit = {}
+    onApplyPlan: () -> Unit = {},
+    showHeader: Boolean = true
 ) {
     var showTable by remember { mutableStateOf(false) }
     val snackbar = remember { SnackbarHostState() }
-    Scaffold(topBar = { TopAppBar(title = { Text("Plan") }) }, snackbarHost = { SnackbarHost(snackbar) }) { inner ->
+    Scaffold(topBar = { if (showHeader) TopAppBar(title = { Text("Plans") }) },
+        contentWindowInsets = if (showHeader) androidx.compose.material3.ScaffoldDefaults.contentWindowInsets else androidx.compose.foundation.layout.WindowInsets(0, 0, 0, 0),
+        snackbarHost = { SnackbarHost(snackbar) }) { inner ->
         if (state.contentState == PlanContentState.COMPUTING) {
             PlanSkeleton(Modifier.padding(inner))
         } else {
@@ -85,27 +88,27 @@ fun PlanScreen(
             ) {
                 item {
                     Column(verticalArrangement = Arrangement.spacedBy(Spacing.xs)) {
-                        Text("Period", style = MaterialTheme.typography.labelLarge)
+                        Text("Planning ahead", style = MaterialTheme.typography.labelLarge)
                         PlanSwitch(state.availablePeriods, state.period, PlanPeriod::label, onPeriodSelected)
                     }
                 }
                 item {
                     Column(verticalArrangement = Arrangement.spacedBy(Spacing.xs)) {
-                        Text("Approach", style = MaterialTheme.typography.labelLarge)
+                        Text("Choose a plan", style = MaterialTheme.typography.labelLarge)
                         PlanSwitch(PlanKind.entries, state.plan, PlanKind::label, onPlanSelected)
                     }
                 }
-                state.confidenceNote?.let { note -> item { LowConfidenceNote(note) } }
+                item { Text("Sample data only. Risk of low cash means falling below your safety balance, not the chance of reaching your goal.", style = MaterialTheme.typography.bodySmall) }
                 item { ForecastFanChart(state.forecast, showTable, { showTable = it }) }
                 item {
                     Column(verticalArrangement = Arrangement.spacedBy(Spacing.xs)) {
-                        TextButton(onClick = { showTable = !showTable }) { Text(if (showTable) "Hide period details" else "Show period details") }
+                        TextButton(onClick = { showTable = !showTable }) { Text(if (showTable) "Hide monthly details" else "Show monthly details") }
                         if (showTable) PeriodTable(state.rows)
                     }
                 }
                 item {
                     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
-                        Text("Compare mode", style = MaterialTheme.typography.titleMedium)
+                        Text("Compare all plans", style = MaterialTheme.typography.titleMedium)
                         Switch(checked = state.compareMode, onCheckedChange = onCompareChanged)
                     }
                 }
@@ -118,10 +121,11 @@ fun PlanScreen(
                     Column(verticalArrangement = Arrangement.spacedBy(Spacing.sm)) {
                         RupAiButton("Use demo plan", onApplyPlan,
                             state = if (state.canApply) RupAiButtonState.DEFAULT else RupAiButtonState.DISABLED,
-                            disabledReason = if (state.canApply) null else "Review the goal conflict or reserve/risk limits first.")
-                        RupAiButton("Try what-if", onTryWhatIf, variant = RupAiButtonVariant.OUTLINE)
+                            disabledReason = if (state.canApply) null else "This plan needs a safer cash balance or a change to your goal.")
+                        RupAiButton("Try a change", onTryWhatIf, variant = RupAiButtonVariant.OUTLINE)
                     }
                 }
+                state.confidenceNote?.let { note -> item { LowConfidenceNote(note) } }
             }
         }
     }
@@ -140,8 +144,9 @@ private fun WhyThisPlan(text: String) {
 
 @Composable
 private fun LowConfidenceNote(text: String) {
-    Surface(shape = MaterialTheme.shapes.large, color = SurfaceNeutral, border = BorderStroke(1.dp, Ink)) {
-        Text(text, Modifier.padding(Spacing.md), style = MaterialTheme.typography.bodyMedium)
+    Column(verticalArrangement = Arrangement.spacedBy(Spacing.xs)) {
+        Text("About this estimate", style = MaterialTheme.typography.titleMedium)
+        Text(text, style = MaterialTheme.typography.bodyMedium)
     }
 }
 

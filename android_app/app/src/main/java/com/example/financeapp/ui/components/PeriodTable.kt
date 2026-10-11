@@ -20,7 +20,7 @@ import com.example.financeapp.ui.util.formatInr
 import com.example.financeapp.ui.util.formatRiskPercent
 import com.example.financeapp.ui.viewmodel.PeriodRowUi
 
-private val tableHeaders = listOf("Period", "Income", "Essentials", "Debt", "SIP", "Discretionary", "Point ending", "P10", "Median", "P90", "Period risk")
+private val tableHeaders = listOf("Month", "Income", "Essential costs", "Debt payments", "Monthly investing", "Other spending", "Planned balance", "Low estimate", "Typical estimate", "High estimate", "Risk of low cash")
 
 @Composable
 fun PeriodTable(rows: List<PeriodRowUi>, modifier: Modifier = Modifier) {

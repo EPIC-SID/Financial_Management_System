@@ -43,7 +43,7 @@ import com.example.financeapp.ui.viewmodel.*
 import com.example.financeapp.data.ingest.Persona
 import com.example.financeapp.data.ingest.Scenario
 import com.example.financeapp.ui.components.WhatIfSheet
-import com.example.financeapp.ui.components.PlanSwitch
+import com.example.financeapp.ui.components.AppNavigationShell
 import com.example.financeapp.domain.freelancer.FreelancerPlanId
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -61,11 +61,9 @@ fun FinanceAppNavGraph() {
     })
     var showWhatIf by remember { mutableStateOf(false) }
     var mode by rememberSaveable { mutableStateOf(AppDataMode.DEMO) }
-    var scenarioMenuOpen by remember { mutableStateOf(false) }
     LaunchedEffect(state.result) { copilot.invalidate(); showWhatIf = false }
     fun navigate(route: String) {
-        val destination = if (mode == AppDataMode.LIVE && route in listOf(Screen.Cockpit.route, Screen.Plan.route,
-            Screen.Copilot.route, Screen.Conflict.route, Screen.Home.route)) Screen.Transactions.route else route
+        val destination = destinationFor(mode, route)
         navController.navigate(destination) { launchSingleTop = true }
     }
     fun selectMode(next: AppDataMode) {
@@ -73,7 +71,6 @@ fun FinanceAppNavGraph() {
         copilot.invalidate()
         hybrid.clearSessionSelections()
         showWhatIf = false
-        scenarioMenuOpen = false
         mode = next
         navController.navigate(if (next == AppDataMode.LIVE) Screen.Transactions.route else Screen.Cockpit.route) {
             popUpTo(navController.graph.id)
@@ -81,46 +78,32 @@ fun FinanceAppNavGraph() {
         }
     }
 
+    fun replaceLegacy(route: String, target: String) {
+        val destination = if (mode == AppDataMode.LIVE && target == Screen.Copilot.route ||
+            mode == AppDataMode.LIVE && target == Screen.Cockpit.route) Screen.Transactions.route else target
+        navController.navigate(destination) {
+            popUpTo(route) { inclusive = true }
+            launchSingleTop = true
+        }
+    }
+
     val context = LocalContext.current
+    val authSession by com.example.financeapp.data.SupabaseClient.auth.sessionStatus.collectAsState()
+    val accountOwner = remember(authSession) { com.example.financeapp.data.SupabaseClient.auth.currentUserOrNull()?.id }
     val setupPrefs = remember { context.getSharedPreferences("app_setup", android.content.Context.MODE_PRIVATE) }
     val startDestination = remember { if (setupPrefs.getBoolean("onboarding_complete_v1", false)) Screen.Cockpit.route else Screen.Onboarding.route }
     val entry by navController.currentBackStackEntryAsState()
     val setupOrAuth = entry?.destination?.route in listOf(Screen.Onboarding.route, Screen.Login.route, Screen.SignUp.route)
 
-    Column(Modifier.fillMaxSize()) {
-        if (!setupOrAuth) {
-        PlanSwitch(AppDataMode.entries, mode, AppDataMode::label, ::selectMode,
-            Modifier.padding(horizontal = 12.dp, vertical = 4.dp))
-        if (mode == AppDataMode.DEMO && entry?.destination?.route !in listOf(Screen.Profile.route, Screen.EditProfile.route)) Box {
-            TextButton(onClick = { scenarioMenuOpen = true }, enabled = !state.loading) {
-                Text("Scenario: ${if (state.persona == Persona.A) "Freelancer" else state.scenario.label}")
-                Icon(Icons.Default.ArrowDropDown, "Choose synthetic scenario")
-            }
-            DropdownMenu(scenarioMenuOpen, { scenarioMenuOpen = false }) {
-                Scenario.entries.forEach { scenario ->
-                    DropdownMenuItem(text = { Text(scenario.label) }, onClick = {
-                        scenarioMenuOpen = false
-                        hybrid.selectScenario(scenario)
-                    })
-                }
-                DropdownMenuItem(text = { Text("Freelancer") }, onClick = {
-                    scenarioMenuOpen = false
-                    hybrid.selectScenario(Scenario.STABLE_INCOME, Persona.A)
-                })
-            }
-        }
-        Row(Modifier.horizontalScroll(rememberScrollState())) {
-            (if (mode == AppDataMode.DEMO) listOf("Overview" to Screen.Cockpit.route, "Plan" to Screen.Plan.route,
-                "Copilot" to Screen.Copilot.route, "Activity" to Screen.Transactions.route, "Profile" to Screen.Profile.route)
-            else listOf("Activity" to Screen.Transactions.route, "Profile" to Screen.Profile.route,
-                "Sign in" to Screen.Login.route)).forEach { (label, route) ->
-                TextButton(onClick = { navigate(route) }) { Text(label) }
-            }
-        }
-        }
-    NavHost(navController = navController, startDestination = startDestination, modifier = Modifier.weight(1f)) {
+    AppNavigationShell(visible = !setupOrAuth, mode = mode, route = entry?.destination?.route,
+        scenario = state.scenario, freelancer = state.persona == Persona.A, loading = state.loading,
+        onNavigate = ::navigate, onMode = ::selectMode,
+        onScenario = { scenario, freelancer -> hybrid.selectScenario(scenario, if (freelancer) Persona.A else Persona.B) },
+        onBack = { navController.popBackStack() }) { shellPadding ->
+    NavHost(navController = navController, startDestination = startDestination, modifier = Modifier.fillMaxSize().padding(shellPadding)) {
         composable(Screen.Onboarding.route) {
-            OnboardingRoute(onExistingAccount = { navigate(Screen.Login.route) }, onComplete = { source ->
+            OnboardingRoute(onExistingAccount = { navigate(Screen.Login.route) },
+                onCreateAccount = { navigate(Screen.SignUp.route) }, onComplete = { source ->
                 setupPrefs.edit().putBoolean("onboarding_complete_v1", true).apply()
                 copilot.invalidate()
                 hybrid.clearSessionSelections()
@@ -138,6 +121,7 @@ fun FinanceAppNavGraph() {
             else if (result == null) IntegrationStatus(state.loading, state.error, hybrid::retry)
             else CockpitScreen(
                 state = result.cockpitUi(),
+                showHeader = false,
                 onScenarioSelected = { id ->
                     if (id == "freelancer") hybrid.selectScenario(Scenario.STABLE_INCOME, Persona.A)
                     else Scenario.entries.firstOrNull { it.name == id }?.let { hybrid.selectScenario(it) }
@@ -145,9 +129,9 @@ fun FinanceAppNavGraph() {
                 onAction = { action ->
                     when (action) {
                         "cockpit" -> { /* Already on cockpit */ }
-                        "plan", "Plan", "What-if" -> { navigate(Screen.Plan.route); if (action == "What-if") showWhatIf = true }
-                        "copilot", "Ask Copilot" -> navigate(Screen.Copilot.route)
-                        "activity", "Add entry" -> navigate(Screen.Transactions.route)
+                        "plan", "Plan", "What-if", "Try a change" -> { navigate(Screen.Plan.route); if (action in listOf("What-if", "Try a change")) showWhatIf = true }
+                        "copilot", "Ask Copilot", "Ask AI" -> navigate(Screen.Copilot.route)
+                        "activity", "Add entry", "Transactions" -> navigate(Screen.Transactions.route)
                         "profile" -> navController.navigate(Screen.Profile.route)
                         "add data", "edit accounts" -> navigate(Screen.Transactions.route)
                     }
@@ -162,13 +146,13 @@ fun FinanceAppNavGraph() {
             else PlanScreen(result.planUi(state.plan, state.compare, state.appliedPlan, state.savedSimulation != null),
                 onPlanSelected = hybrid::selectPlan, onCompareChanged = hybrid::compare,
                 onTryWhatIf = { showWhatIf = true }, onApplyPlan = hybrid::applyPlan,
-                onResolveConflict = { navigate(Screen.Conflict.route) })
+                onResolveConflict = { navigate(Screen.Conflict.route) }, showHeader = false)
         }
 
         composable(Screen.Copilot.route) {
             if (mode == AppDataMode.LIVE) { LaunchedEffect(Unit) { navigate(Screen.Transactions.route) } }
             else CopilotRoute(viewModel = copilot, onLaunchWhatIf = { showWhatIf = true },
-                onOpenPlan = { navigate(Screen.Plan.route) })
+                onOpenPlan = { navigate(Screen.Plan.route) }, showHeader = false)
         }
 
         composable(Screen.Conflict.route) {
@@ -176,6 +160,7 @@ fun FinanceAppNavGraph() {
             if (conflict == null) IntegrationStatus(false, "No unresolved demo goal conflict.") { navController.popBackStack() }
             else ConflictScreen(
                 conflict = conflict,
+                showHeader = false,
                 onKeepTarget = { navController.popBackStack() },
                 onApply = { option ->
                     val index = conflict.options.indexOf(option)
@@ -189,12 +174,14 @@ fun FinanceAppNavGraph() {
             LoginScreen(
                 onNavigateToHome = {
                     navController.navigate(Screen.Onboarding.route) {
-                        popUpTo(Screen.Login.route) { inclusive = true }
+                        popUpTo(navController.graph.id)
+                        launchSingleTop = true
                     }
                 },
                 onNavigateToSignUp = {
-                    navController.navigate(Screen.SignUp.route)
-                }
+                    navController.navigate(Screen.SignUp.route) { popUpTo(Screen.Login.route) { inclusive = true } }
+                },
+                onBack = { if (!navController.popBackStack()) navigate(Screen.Onboarding.route) }
             )
         }
 
@@ -202,31 +189,23 @@ fun FinanceAppNavGraph() {
             SignUpScreen(
                 onNavigateToHome = {
                     navController.navigate(Screen.Onboarding.route) {
-                        popUpTo(Screen.Login.route) { inclusive = true }
+                        popUpTo(navController.graph.id)
+                        launchSingleTop = true
                     }
                 },
                 onNavigateBackToLogin = {
-                    navController.popBackStack()
-                }
+                    navController.navigate(Screen.Login.route) { popUpTo(Screen.SignUp.route) { inclusive = true } }
+                },
+                onBack = { if (!navController.popBackStack()) navigate(Screen.Onboarding.route) }
             )
         }
 
         composable(Screen.Home.route) {
-            HomeScreen(
-                onNavigateToTransactions = {
-                    navController.navigate(Screen.Transactions.route)
-                },
-                onNavigateToProfile = {
-                    navController.navigate(Screen.Profile.route)
-                },
-                onNavigateToAiInsights = {
-                    navController.navigate(Screen.AiInsights.route)
-                }
-            )
+            LaunchedEffect(Unit) { replaceLegacy(Screen.Home.route, Screen.Cockpit.route) }
         }
 
         composable(Screen.Transactions.route) {
-            key(mode) { UnifiedActivityRoute(mode, if (mode == AppDataMode.DEMO) state.result?.dataset else null) }
+            key(mode) { UnifiedActivityRoute(mode, if (mode == AppDataMode.DEMO) state.result?.dataset else null, showHeader = false) }
         }
 
         composable(Screen.Profile.route) {
@@ -245,32 +224,24 @@ fun FinanceAppNavGraph() {
                 onNavigateToEditProfile = {
                     navController.navigate(Screen.EditProfile.route)
                 },
-                onEditSetup = { navigate(Screen.Onboarding.route) }
+                onEditSetup = { navigate(Screen.Onboarding.route) }, showHeader = false
             )
         }
 
         composable(Screen.EditProfile.route) {
-            EditProfileScreen(
-                onNavigateBack = {
+            key(accountOwner) { EditProfileScreen(
+                showHeader = false, onNavigateBack = {
                     navController.popBackStack()
                 }
-            )
+            ) }
         }
 
         composable(Screen.AiReview.route) {
-            AiReviewScreen(
-                onDismiss = {
-                    navController.popBackStack()
-                }
-            )
+            LaunchedEffect(Unit) { replaceLegacy(Screen.AiReview.route, Screen.Transactions.route) }
         }
 
         composable(Screen.AiInsights.route) {
-            AiInsightsScreen(
-                onNavigateBack = {
-                    navController.popBackStack()
-                }
-            )
+            LaunchedEffect(Unit) { replaceLegacy(Screen.AiInsights.route, Screen.Copilot.route) }
         }
     }
     }

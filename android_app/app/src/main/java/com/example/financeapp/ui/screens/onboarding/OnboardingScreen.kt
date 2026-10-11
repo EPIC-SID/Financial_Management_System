@@ -82,6 +82,8 @@ fun OnboardingScreen(
     onPrimary: () -> Unit = {},
     onBack: () -> Unit = {},
     onExistingAccount: () -> Unit = {},
+    onCreateAccount: () -> Unit = {},
+    showAccountActions: Boolean = true,
     onSourceSelected: (OnboardingDataSource) -> Unit = {},
     onAlternativeSelected: (OnboardingDataSource) -> Unit = {},
     onMoneyArrivalSelected: (String) -> Unit = {},
@@ -107,7 +109,9 @@ fun OnboardingScreen(
                 primaryEnabled = primaryEnabled,
                 onPrimary = onPrimary,
                 onBack = onBack,
-                onExistingAccount = onExistingAccount
+                onExistingAccount = onExistingAccount,
+                onCreateAccount = onCreateAccount,
+                showAccountActions = showAccountActions
             )
         }
     ) { innerPadding ->
@@ -151,10 +155,12 @@ private fun OnboardingActions(
     primaryEnabled: Boolean,
     onPrimary: () -> Unit,
     onBack: () -> Unit,
-    onExistingAccount: () -> Unit
+    onExistingAccount: () -> Unit,
+    onCreateAccount: () -> Unit,
+    showAccountActions: Boolean
 ) {
     val label = when (state.page) {
-        OnboardingPage.WELCOME -> "Get started"
+        OnboardingPage.WELCOME -> if (showAccountActions) "Continue without an account" else "Continue setup"
         OnboardingPage.DATA_SOURCE -> "Continue"
         OnboardingPage.SMS_CONSENT -> when (state.permissionState) {
             SmsPermissionState.EXPLAINER -> "Allow SMS access"
@@ -182,7 +188,10 @@ private fun OnboardingActions(
                 }
             )
             when (state.page) {
-                OnboardingPage.WELCOME -> TextButton(onClick = onExistingAccount) { Text("I already have an account") }
+                OnboardingPage.WELCOME -> if (showAccountActions) {
+                    TextButton(onClick = onCreateAccount, enabled = !state.busy) { Text("Create account", color = Ink) }
+                    TextButton(onClick = onExistingAccount, enabled = !state.busy) { Text("Already registered? Sign in", color = Ink) }
+                }
                 OnboardingPage.SMS_CONSENT -> TextButton(onClick = onBack) { Text("Not now") }
                 OnboardingPage.ABOUT_MONEY, OnboardingPage.SAFETY_NET -> TextButton(onClick = onBack, enabled = !state.busy) { Text("Back") }
                 else -> Unit

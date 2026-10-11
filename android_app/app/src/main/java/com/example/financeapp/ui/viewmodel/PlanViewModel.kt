@@ -6,7 +6,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 enum class PlanPeriod(val label: String) { SIX_MONTHS("6 months"), EIGHT_WEEKS("8 weeks") }
-enum class PlanKind(val label: String) { PLAN_A("Plan A"), PLAN_B("Plan B"), STATUS_QUO("Status quo") }
+enum class PlanKind(val label: String) { PLAN_A("Plan A"), PLAN_B("Plan B"), STATUS_QUO("No changes") }
 enum class PlanContentState { NORMAL, COMPUTING, THIN_HISTORY, INFEASIBLE }
 
 data class ForecastPointUi(
