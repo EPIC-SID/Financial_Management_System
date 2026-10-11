@@ -23,14 +23,11 @@ import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Check
-import androidx.compose.material.icons.outlined.CheckCircle
-import androidx.compose.material.icons.outlined.ErrorOutline
-import androidx.compose.material.icons.outlined.HourglassTop
+import com.example.financeapp.ui.icons.Icons
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -43,6 +40,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.Role
@@ -59,6 +57,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.financeapp.ui.components.RupAiButton
 import com.example.financeapp.ui.components.RupAiButtonSize
 import com.example.financeapp.ui.components.RupAiButtonState
+import com.example.financeapp.ui.components.BrandImageBackground
 import com.example.financeapp.ui.theme.ActionGreen
 import com.example.financeapp.ui.theme.CanvasWhite
 import com.example.financeapp.ui.theme.ErrorInk
@@ -97,15 +96,20 @@ fun OnboardingScreen(
     showSmsOption: Boolean = true,
     privacyContent: @Composable () -> Unit = {}
 ) {
-    val primaryEnabled = state.page != OnboardingPage.BUILDING || state.completeness != null
+    val primaryEnabled = when (state.page) {
+        OnboardingPage.ABOUT_MONEY -> if (state.moneyStep == 0) state.moneyArrival != null else state.obligations.isNotEmpty()
+        OnboardingPage.SAFETY_NET -> state.cushionSelected
+        OnboardingPage.BUILDING -> state.completeness != null
+        else -> true
+    }
+    BrandImageBackground(R.drawable.bg_white, Modifier.fillMaxSize()) {
     Scaffold(
-        containerColor = CanvasWhite,
+        containerColor = Color.Transparent,
         bottomBar = {
             OnboardingActions(
                 state = state,
                 primaryEnabled = primaryEnabled,
                 onPrimary = onPrimary,
-                onBack = onBack,
                 onCreateAccount = onCreateAccount,
                 showAccountActions = showAccountActions
             )
@@ -118,8 +122,10 @@ fun OnboardingScreen(
         ) {
             item {
                 OnboardingHeader(
+                    page = state.page,
                     showSignIn = state.page == OnboardingPage.WELCOME,
-                    onSignIn = onExistingAccount
+                    onSignIn = onExistingAccount,
+                    onBack = onBack
                 )
             }
             item { SegmentedProgress(state.page, Modifier.padding(horizontal = Spacing.md)) }
@@ -155,6 +161,7 @@ fun OnboardingScreen(
             }
         }
     }
+    }
 }
 
 @Composable
@@ -162,13 +169,10 @@ private fun OnboardingActions(
     state: OnboardingUiState,
     primaryEnabled: Boolean,
     onPrimary: () -> Unit,
-    onBack: () -> Unit,
     onCreateAccount: () -> Unit,
     showAccountActions: Boolean
 ) {
-    if (state.page == OnboardingPage.DATA_SOURCE || state.page == OnboardingPage.SAFETY_NET ||
-        (state.page == OnboardingPage.ABOUT_MONEY && state.moneyStep == 0)
-    ) return
+    if (state.page == OnboardingPage.DATA_SOURCE) return
     val label = when (state.page) {
         OnboardingPage.WELCOME -> if (showAccountActions) "Explore RupAI" else "Start setup"
         OnboardingPage.DATA_SOURCE -> error("Handled above")
@@ -177,8 +181,8 @@ private fun OnboardingActions(
             SmsPermissionState.DENIED -> "Try again"
             SmsPermissionState.PERMANENTLY_DENIED -> "Open Android settings"
         }
-        OnboardingPage.ABOUT_MONEY -> "That’s everything"
-        OnboardingPage.SAFETY_NET -> error("Handled above")
+        OnboardingPage.ABOUT_MONEY -> if (state.moneyStep == 0) "Continue" else "Confirm answers"
+        OnboardingPage.SAFETY_NET -> "Confirm safety net"
         OnboardingPage.BUILDING -> "Open RupAI"
     }
     Surface(shadowElevation = 3.dp, color = CanvasWhite) {
@@ -200,8 +204,6 @@ private fun OnboardingActions(
                 OnboardingPage.BUILDING -> if (showAccountActions && state.completeness != null) {
                     TextButton(onClick = onCreateAccount, enabled = !state.busy) { Text("Create account", color = Ink) }
                 }
-                OnboardingPage.SMS_CONSENT -> TextButton(onClick = onBack) { Text("Not now") }
-                OnboardingPage.ABOUT_MONEY, OnboardingPage.SAFETY_NET -> TextButton(onClick = onBack, enabled = !state.busy) { Text("Back") }
                 else -> Unit
             }
         }
@@ -209,20 +211,34 @@ private fun OnboardingActions(
 }
 
 @Composable
-private fun OnboardingHeader(showSignIn: Boolean, onSignIn: () -> Unit) {
+private fun OnboardingHeader(page: OnboardingPage, showSignIn: Boolean, onSignIn: () -> Unit, onBack: () -> Unit) {
     Row(
         Modifier.fillMaxWidth().padding(horizontal = Spacing.md),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Image(
-            painter = painterResource(R.drawable.rupai_logo_color),
-            contentDescription = "RupAI",
-            modifier = Modifier.size(36.dp)
-        )
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(Spacing.xs)) {
+            if (page != OnboardingPage.WELCOME && page != OnboardingPage.BUILDING) {
+                IconButton(onClick = onBack) { Icon(Icons.Outlined.ArrowBack, "Back") }
+            }
+            Image(
+                painter = painterResource(R.drawable.rupai_logo_mono),
+                contentDescription = "RupAI",
+                colorFilter = ColorFilter.tint(Ink),
+                modifier = Modifier.size(36.dp)
+            )
+        }
         if (showSignIn) {
-            TextButton(onClick = onSignIn) {
-                Text("Sign in", style = MaterialTheme.typography.labelMedium, color = Ink)
+            Surface(
+                onClick = onSignIn,
+                modifier = Modifier.heightIn(min = Spacing.minimumTouchTarget),
+                shape = RoundedCornerShape(Radius.button),
+                border = BorderStroke(1.dp, Ink),
+                color = CanvasWhite
+            ) {
+                Box(Modifier.padding(horizontal = Spacing.md), contentAlignment = Alignment.Center) {
+                    Text("Sign in", style = MaterialTheme.typography.labelMedium, color = Ink, maxLines = 1)
+                }
             }
         }
     }
@@ -358,7 +374,7 @@ private fun AboutMoneyContent(
     onObligation: (String) -> Unit
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(Spacing.sm)) {
-        Text("Optional, ${state.moneyStep + 1} of 2", style = MaterialTheme.typography.labelLarge, color = MutedInk)
+        Text("Step ${state.moneyStep + 1} of 2", style = MaterialTheme.typography.labelLarge, color = MutedInk)
         when (state.moneyStep) {
             0 -> ChoiceChips("Choose one", listOf("Fixed salary", "Varies month to month", "A mix"), setOfNotNull(state.moneyArrival), onArrival)
             else -> {
@@ -409,7 +425,7 @@ private fun SafetyNetContent(
     val selected = when (state.cushionDigits) {
         "30000" -> setOf("₹30,000")
         "60000" -> setOf("₹60,000")
-        else -> emptySet()
+        else -> if (state.cushionSelected) setOf("Decide later") else emptySet()
     }
     Column(verticalArrangement = Arrangement.spacedBy(Spacing.sm)) {
         Text("Choose one. You can change it later from Profile.", style = MaterialTheme.typography.bodyMedium, color = MutedInk)
