@@ -45,7 +45,7 @@ object CategorizationPolicy {
         val explicitCategory = if (isKnownPerson) {
             null
         } else {
-            resolveExplicitCategory(m)
+            knownMerchantCategory(m)
         }
 
         if (explicitCategory != null) {
@@ -60,8 +60,11 @@ object CategorizationPolicy {
         return "MISCELLANEOUS"
     }
 
+    fun knownMerchantCategory(merchant: String): String? = resolveExplicitCategory(merchant.lowercase().trim())
+
     private fun resolveExplicitCategory(m: String): String? {
         return when {
+            Regex("\\bblink\\s+commerce\\b").containsMatchIn(m) -> "FOOD"
             // --- HEALTH (Takes precedence over generic retail/store keywords) ---
             m.contains("pharmacy") || m.contains("medical") || m.contains("hospital") ||
             m.contains("clinic") || m.contains("doctor") || m.contains("apollo") ||

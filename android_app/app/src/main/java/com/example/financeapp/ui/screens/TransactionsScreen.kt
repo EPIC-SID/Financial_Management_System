@@ -33,6 +33,7 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.financeapp.data.TransactionEntity
 import com.example.financeapp.data.TransactionViewModel
+import com.example.financeapp.data.RemoteCategorizationPolicy
 import com.example.financeapp.data.formatTransactionDate
 import com.example.financeapp.data.formatTransactionMonth
 import com.example.financeapp.data.formatTransactionTime
@@ -53,6 +54,20 @@ fun TransactionsScreen(
     transactionViewModel: TransactionViewModel = viewModel()
 ) {
     val context = LocalContext.current
+    val remotePrefs = remember { context.getSharedPreferences(RemoteCategorizationPolicy.PREFS, android.content.Context.MODE_PRIVATE) }
+    var remoteEnabled by remember { mutableStateOf(remotePrefs.getBoolean(RemoteCategorizationPolicy.ENABLED, false)) }
+    var showRemoteConsent by remember { mutableStateOf(false) }
+    if (showRemoteConsent) {
+        AlertDialog(onDismissRequest = { showRemoteConsent = false },
+            title = { Text("Enable remote categorization?") },
+            text = { Text("Merchant labels will be shared with the authenticated backend and its AI provider. Raw SMS, transaction amounts and account numbers are not included. Local categorization remains available without this.") },
+            confirmButton = { TextButton(onClick = {
+                remotePrefs.edit().putBoolean(RemoteCategorizationPolicy.ENABLED, true).apply()
+                remoteEnabled = true; showRemoteConsent = false
+                transactionViewModel.retryPendingCategorization()
+            }) { Text("Enable") } },
+            dismissButton = { TextButton(onClick = { showRemoteConsent = false }) { Text("Keep local") } })
+    }
 
     // Observe live data from ViewModel (backed by Room DB)
     val transactions by transactionViewModel.transactions.collectAsState()
@@ -262,6 +277,14 @@ fun TransactionsScreen(
         ) {
             // Header
             Column(modifier = Modifier.padding(24.dp)) {
+                Text("Live SMS activity. Demo loans, SIPs and scenarios are not included.", style = MaterialTheme.typography.bodySmall)
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text("Remote categorization", Modifier.weight(1f))
+                    Switch(checked = remoteEnabled, onCheckedChange = { enabled ->
+                        if (enabled) showRemoteConsent = true
+                        else { remoteEnabled = false; remotePrefs.edit().putBoolean(RemoteCategorizationPolicy.ENABLED, false).apply() }
+                    })
+                }
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,

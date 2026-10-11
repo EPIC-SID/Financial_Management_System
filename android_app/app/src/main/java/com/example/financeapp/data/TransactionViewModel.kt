@@ -6,6 +6,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.financeapp.data.SmsParser.toEntity
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
@@ -155,14 +156,31 @@ class TransactionViewModel(application: Application) : AndroidViewModel(applicat
      * and updates all existing transactions in Room DB matching this merchant.
      */
     fun updateCategoryForMerchant(merchant: String, newCategory: String) {
+        require(CategorizationPolicy.VALID_CATEGORIES.contains(newCategory))
         viewModelScope.launch(Dispatchers.IO) {
             val context = getApplication<Application>()
-            // 1. Save to local cache so future SMS syncs inherit this category
-            BackendCategorizerClient.saveToCache(context, merchant, newCategory)
+            try {
+                dao.updateCategoryForMerchant(merchant, newCategory)
+                BackendCategorizerClient.saveToCache(context, merchant, newCategory)
+                _syncMessage.value = "Merchant category saved on this phone."
+            } catch (cancelled: CancellationException) { throw cancelled }
+            catch (_: Exception) { _syncMessage.value = "Could not save the category. Try again." }
+        }
+    }
 
-            // 2. Update all existing transactions for this merchant in local Room DB
-            dao.updateCategoryForMerchant(merchant, newCategory)
-            Log.d("TransactionViewModel", "Updated merchant '$merchant' -> '$newCategory' in cache and Room DB")
+    fun recheckLocalCategories() {
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                var resolved = 0
+                dao.getUnclassifiedDebits().forEach { row ->
+                    CategorizationPolicy.knownMerchantCategory(row.merchant)?.let { category ->
+                        dao.repairLocalCategory(row.smsId, category)
+                        resolved++
+                    }
+                }
+                _syncMessage.value = "Rechecked locally: $resolved categories resolved."
+            } catch (cancelled: CancellationException) { throw cancelled }
+            catch (_: Exception) { _syncMessage.value = "Local category recheck unavailable. Try again." }
         }
     }
 

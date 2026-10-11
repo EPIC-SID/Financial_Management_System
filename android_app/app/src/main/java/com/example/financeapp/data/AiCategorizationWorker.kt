@@ -49,6 +49,8 @@ class AiCategorizationWorker(
     }
 
     override suspend fun doWork(): Result {
+        if (!applicationContext.getSharedPreferences(RemoteCategorizationPolicy.PREFS, Context.MODE_PRIVATE)
+                .getBoolean(RemoteCategorizationPolicy.ENABLED, false)) return Result.success()
         val dao = AppDatabase.getInstance(applicationContext).transactionDao()
 
         return withContext(Dispatchers.IO) {
@@ -60,7 +62,7 @@ class AiCategorizationWorker(
 
                 // Prepare batch request items: List of (merchant, snippet)
                 val batchItems = miscTransactions.map { txn ->
-                    Pair(txn.merchant, txn.description ?: txn.merchant)
+                    Pair(txn.merchant, "")
                 }
 
                 // Call backend batch endpoint (handles local cache + backend shared DB cache + Gemini)
@@ -80,10 +82,10 @@ class AiCategorizationWorker(
                     val resolvedCategory = categoryMap[txn.merchant]
                     if (resolvedCategory != null && CategorizationPolicy.isCachableCategory(resolvedCategory)) {
                         dao.updateCategoryAndMarkAiProcessed(txn.smsId, resolvedCategory)
-                        Log.d(TAG, "Updated '${txn.merchant}' -> $resolvedCategory")
+                        Log.d(TAG, "Updated transaction category")
                         processedCount++
                     } else {
-                        Log.d(TAG, "Merchant '${txn.merchant}' received unconfirmed/transient category ($resolvedCategory); keeping eligible for retry.")
+                        Log.d(TAG, "Unconfirmed category; keeping eligible for retry")
                     }
                 }
 
