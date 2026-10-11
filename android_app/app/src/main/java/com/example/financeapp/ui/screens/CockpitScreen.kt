@@ -76,9 +76,12 @@ import com.example.financeapp.ui.viewmodel.CockpitUiState
 import com.example.financeapp.ui.viewmodel.CockpitViewModel
 
 @Composable
-fun CockpitRoute(viewModel: CockpitViewModel = viewModel()) {
+fun CockpitRoute(
+    viewModel: CockpitViewModel = viewModel(),
+    onAction: (String) -> Unit = {}
+) {
     val state by viewModel.uiState.collectAsState()
-    CockpitScreen(state, onScenarioSelected = viewModel::selectScenario)
+    CockpitScreen(state, onScenarioSelected = viewModel::selectScenario, onAction = onAction)
 }
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
@@ -86,29 +89,32 @@ fun CockpitRoute(viewModel: CockpitViewModel = viewModel()) {
 fun CockpitScreen(
     state: CockpitUiState,
     onScenarioSelected: (String) -> Unit = {},
-    onAction: (String) -> Unit = {}
+    onAction: (String) -> Unit = {},
+    showHeader: Boolean = true
 ) {
     var menuOpen by remember { mutableStateOf(false) }
     var sheet by remember { mutableStateOf<String?>(null) }
     Scaffold(
-        topBar = {
+        contentWindowInsets = if (showHeader) androidx.compose.material3.ScaffoldDefaults.contentWindowInsets else androidx.compose.foundation.layout.WindowInsets(0, 0, 0, 0),
+        topBar = { if (showHeader) {
             TopAppBar(
-                title = { Text("Cockpit") },
+                title = { Text("Overview") },
                 actions = {
                     Surface(shape = RoundedCornerShape(Radius.tag), color = SurfaceNeutral) {
                         Text(state.dataSource, Modifier.padding(horizontal = Spacing.xs, vertical = Spacing.xxs), style = MaterialTheme.typography.labelSmall)
                     }
                     Box {
-                        IconButton(onClick = { menuOpen = true }) { Icon(Icons.Outlined.MoreVert, "Open fixture scenarios") }
+                        IconButton(onClick = { menuOpen = true }) { Icon(Icons.Outlined.MoreVert, "Choose synthetic scenario") }
                         DropdownMenu(menuOpen, { menuOpen = false }) {
-                            DropdownMenuItem({ Text("Steady fixture") }, onClick = { menuOpen = false; onScenarioSelected("steady") })
-                            DropdownMenuItem({ Text("Pressure fixture") }, onClick = { menuOpen = false; onScenarioSelected("pressure") })
+                            com.example.financeapp.data.ingest.Scenario.entries.forEach { scenario ->
+                                DropdownMenuItem({ Text(scenario.label) }, onClick = { menuOpen = false; onScenarioSelected(scenario.name) })
+                            }
+                            DropdownMenuItem({ Text("Freelancer demo") }, onClick = { menuOpen = false; onScenarioSelected("freelancer") })
                         }
                     }
                 }
             )
-        },
-        bottomBar = { QuietNavigation(onAction) }
+        } }
     ) { inner ->
         if (state.contentState == CockpitContentState.SKELETON) CockpitSkeleton(Modifier.padding(inner)) else {
             LazyColumn(
@@ -118,12 +124,11 @@ fun CockpitScreen(
             ) {
                 item {
                     Column(verticalArrangement = Arrangement.spacedBy(Spacing.xxs)) {
-                        Text("Good morning, ${state.name}", style = MaterialTheme.typography.headlineLarge)
-                        Text(state.verdictReading, style = MaterialTheme.typography.bodyLarge)
+                        Text("Your money at a glance", style = MaterialTheme.typography.headlineSmall)
                     }
                 }
                 item { VerdictCard(state.verdict, state.verdictReading, state.p10, state.p50, state.p90, state.confidence.label,
-                    { sheet = "confidence" }, { onAction("plan") }) }
+                    { sheet = "confidence" }, { onAction("plan") }, heading = "Estimated bank balance after 6 months") }
                 item {
                     Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(Spacing.xs)) {
                         CockpitQuickActions.forEach { action -> QuickActionTile(action, { if (action.label == "Accounts") sheet = "accounts" else onAction(action.label) }) }
@@ -150,7 +155,7 @@ fun CockpitScreen(
         }
     }
     when (sheet) {
-        "accounts" -> AccountsSheet(state.accountDetails, "₹30,900", { sheet = null }, { onAction("edit accounts") })
+        "accounts" -> AccountsSheet(state.accountDetails, state.cashAfterCardBills, { sheet = null }, { onAction("edit accounts") })
         "score" -> ScoreExplainerSheet(state.healthComponents) { sheet = null }
         "confidence" -> ConfidenceExplainerSheet(state.confidence) { sheet = null }
     }
@@ -171,29 +176,6 @@ private fun CockpitSkeleton(modifier: Modifier = Modifier) {
     Column(modifier.padding(Spacing.md), verticalArrangement = Arrangement.spacedBy(Spacing.md)) {
         listOf(44.dp, 240.dp, 88.dp, 320.dp, 100.dp).forEach { height ->
             Surface(Modifier.fillMaxWidth().height(height), shape = MaterialTheme.shapes.large, color = SurfaceNeutral) {}
-        }
-    }
-}
-
-private data class NavItem(val label: String, val icon: ImageVector)
-
-@Composable
-private fun QuietNavigation(onAction: (String) -> Unit) {
-    val items = listOf(
-        NavItem("Cockpit", Icons.Outlined.AccountBalanceWallet), NavItem("Plan", Icons.Outlined.EventNote),
-        NavItem("Copilot", Icons.Outlined.AutoAwesome), NavItem("Activity", Icons.Outlined.ReceiptLong)
-    )
-    Surface(Modifier.fillMaxWidth().navigationBarsPadding().padding(Spacing.sm), shape = RoundedCornerShape(Radius.card), color = SurfaceNeutral) {
-        Row(Modifier.fillMaxWidth().padding(Spacing.xs), horizontalArrangement = Arrangement.SpaceEvenly) {
-            items.forEachIndexed { index, item ->
-                Surface(onClick = { onAction(item.label.lowercase()) }, color = if (index == 0) ActionGreen else Color.Transparent,
-                    shape = RoundedCornerShape(Radius.button), modifier = Modifier.weight(1f)) {
-                    Column(Modifier.padding(vertical = Spacing.xs), horizontalAlignment = Alignment.CenterHorizontally) {
-                        Icon(item.icon, contentDescription = null)
-                        Text(item.label, style = MaterialTheme.typography.labelSmall)
-                    }
-                }
-            }
         }
     }
 }

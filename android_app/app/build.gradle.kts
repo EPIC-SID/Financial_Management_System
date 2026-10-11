@@ -28,12 +28,12 @@ android {
         }
         val supabaseUrl = properties.getProperty("SUPABASE_URL") ?: ""
         val supabaseAnonKey = properties.getProperty("SUPABASE_ANON_KEY") ?: ""
-        val geminiApiKey = properties.getProperty("GEMINI_API_KEY") ?: ""
         val backendUrl = properties.getProperty("BACKEND_URL") ?: "http://10.0.2.2:8000"
 
         buildConfigField("String", "SUPABASE_URL", "\"$supabaseUrl\"")
         buildConfigField("String", "SUPABASE_ANON_KEY", "\"$supabaseAnonKey\"")
-        buildConfigField("String", "GEMINI_API_KEY", "\"$geminiApiKey\"")
+        // Legacy advisor stays disabled; provider secrets belong only on the backend.
+        buildConfigField("String", "GEMINI_API_KEY", "\"\"")
         buildConfigField("String", "BACKEND_URL", "\"$backendUrl\"")
     }
 

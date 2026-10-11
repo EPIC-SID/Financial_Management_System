@@ -67,7 +67,6 @@ private val BaseTypography = Typography(
     labelSmall = TextStyle(fontFamily = Inter, fontWeight = FontWeight.Medium, fontSize = 12.sp, lineHeight = 16.sp)
 )
 
-// Serif roles are for words only. Money uses NumberHero/NumberXL/NumberCompact, all Inter with tabular figures.
 val Typography = BaseTypography.run {
     fun TextStyle.tabular() = copy(fontFeatureSettings = "tnum, lnum")
     copy(
@@ -77,3 +76,12 @@ val Typography = BaseTypography.run {
         labelLarge = labelLarge.tabular(), labelMedium = labelMedium.tabular(), labelSmall = labelSmall.tabular()
     )
 }
+
+// Aliases for backward compatibility with existing components
+val HeadlineL = Typography.headlineMedium
+val HeadlineM = Typography.headlineSmall
+val Title = Typography.titleLarge
+val BodyL = Typography.bodyLarge
+val BodyM = Typography.bodyMedium
+val LabelL = Typography.labelLarge
+val LabelS = Typography.labelSmall

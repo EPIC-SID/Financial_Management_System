@@ -14,10 +14,6 @@ import com.example.financeapp.ui.viewmodel.OnboardingDataSource
 internal fun PermissionRecoveryActions(onAlternativeSelected: (OnboardingDataSource) -> Unit) {
     FlowRow(horizontalArrangement = Arrangement.spacedBy(Spacing.xs)) {
         AssistChip(
-            onClick = { onAlternativeSelected(OnboardingDataSource.CSV) },
-            label = { Text("Upload CSV") }
-        )
-        AssistChip(
             onClick = { onAlternativeSelected(OnboardingDataSource.SAMPLE) },
             label = { Text("Use sample") }
         )

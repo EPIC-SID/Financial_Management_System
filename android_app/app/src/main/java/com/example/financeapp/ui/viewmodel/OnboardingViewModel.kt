@@ -1,6 +1,8 @@
 package com.example.financeapp.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
+import com.example.financeapp.data.AccountSetup
+import com.example.financeapp.data.Resource
 import com.example.financeapp.ui.util.formatInr
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -32,30 +34,35 @@ data class OnboardingUiState(
     val goalDigits: String = "",
     val ingestRows: List<IngestRowUi> = emptyList(),
     val completeness: String? = null,
-    val ingestFailed: Boolean = false
+    val ingestFailed: Boolean = false,
+    val busy: Boolean = false,
+    val error: String? = null
 )
 
 class OnboardingViewModel : ViewModel() {
-    private val _uiState = MutableStateFlow(OnboardingFixtures.welcome())
+    private val _uiState = MutableStateFlow(OnboardingUiState())
     val uiState: StateFlow<OnboardingUiState> = _uiState.asStateFlow()
 
     fun next() {
         val state = _uiState.value
+        if (state.busy) return
         _uiState.value = when (state.page) {
             OnboardingPage.WELCOME -> state.copy(page = OnboardingPage.DATA_SOURCE)
-            OnboardingPage.DATA_SOURCE -> if (state.selectedSource == OnboardingDataSource.SMS) {
+            OnboardingPage.DATA_SOURCE -> if (state.selectedSource == null || state.selectedSource == OnboardingDataSource.CSV) state
+            else if (state.selectedSource == OnboardingDataSource.SMS) {
                 state.copy(page = OnboardingPage.SMS_CONSENT)
             } else state.copy(page = OnboardingPage.ABOUT_MONEY)
             OnboardingPage.SMS_CONSENT -> state.copy(page = OnboardingPage.ABOUT_MONEY)
             OnboardingPage.ABOUT_MONEY -> if (state.moneyStep < 2) state.copy(moneyStep = state.moneyStep + 1)
                 else state.copy(page = OnboardingPage.SAFETY_NET)
-            OnboardingPage.SAFETY_NET -> OnboardingFixtures.building()
+            OnboardingPage.SAFETY_NET -> state
             OnboardingPage.BUILDING -> state
         }
     }
 
     fun back() {
         val state = _uiState.value
+        if (state.busy) return
         _uiState.value = when {
             state.page == OnboardingPage.ABOUT_MONEY && state.moneyStep > 0 -> state.copy(moneyStep = state.moneyStep - 1)
             state.page == OnboardingPage.DATA_SOURCE -> state.copy(page = OnboardingPage.WELCOME)
@@ -66,21 +73,64 @@ class OnboardingViewModel : ViewModel() {
         }
     }
 
-    fun selectSource(source: OnboardingDataSource) { _uiState.value = _uiState.value.copy(selectedSource = source) }
+    private fun edit(change: (OnboardingUiState) -> OnboardingUiState) {
+        if (!_uiState.value.busy) _uiState.value = change(_uiState.value).copy(error = null)
+    }
+    fun selectSource(source: OnboardingDataSource) { edit { it.copy(selectedSource = source) } }
     fun chooseAlternative(source: OnboardingDataSource) {
-        _uiState.value = _uiState.value.copy(page = OnboardingPage.DATA_SOURCE, selectedSource = source, ingestFailed = false)
+        edit { it.copy(page = OnboardingPage.DATA_SOURCE, selectedSource = source, ingestFailed = false) }
     }
     fun setPermissionState(state: SmsPermissionState) { _uiState.value = _uiState.value.copy(permissionState = state) }
-    fun setMoneyArrival(value: String) { _uiState.value = _uiState.value.copy(moneyArrival = value) }
+    fun setMoneyArrival(value: String) { edit { it.copy(moneyArrival = value) } }
     fun toggleObligation(value: String) {
+        if (_uiState.value.busy) return
+        if (value !in AccountSetup.OBLIGATIONS && value != "None") return
         val choices = _uiState.value.obligations.toMutableSet()
-        if (!choices.add(value)) choices.remove(value)
+        if (value == "None") { choices.clear(); choices.add("None") }
+        else { choices.remove("None"); if (!choices.add(value)) choices.remove(value) }
         _uiState.value = _uiState.value.copy(obligations = choices)
     }
-    fun setAgeRange(value: String) { _uiState.value = _uiState.value.copy(ageRange = value) }
-    fun setCushion(value: String) { _uiState.value = _uiState.value.copy(cushionDigits = value.filter(Char::isDigit).take(9)) }
-    fun setGoalName(value: String) { _uiState.value = _uiState.value.copy(goalName = value) }
-    fun setGoalAmount(value: String) { _uiState.value = _uiState.value.copy(goalDigits = value.filter(Char::isDigit).take(9)) }
+    fun setAgeRange(value: String) { edit { it.copy(ageRange = value) } }
+    fun setCushion(value: String) {
+        if (value.length <= 9 && value.all { it in '0'..'9' }) edit { it.copy(cushionDigits = value) }
+    }
+    fun setGoalName(value: String) { edit { it.copy(goalName = value.take(80)) } }
+    fun setGoalAmount(value: String) {
+        if (value.length <= 9 && value.all { it in '0'..'9' }) edit { it.copy(goalDigits = value) }
+    }
+
+    fun load(setup: AccountSetup?) {
+        if (setup == null) return
+        _uiState.value = _uiState.value.copy(moneyArrival = setup.incomePattern,
+            obligations = setup.obligations.toSet(), cushionDigits = setup.minimumReserve?.toString().orEmpty(),
+            goalName = setup.goalName.orEmpty(), goalDigits = setup.goalAmount?.toString().orEmpty())
+    }
+
+    fun error(message: String?) { _uiState.value = _uiState.value.copy(error = message) }
+    fun busy(value: Boolean) { _uiState.value = _uiState.value.copy(busy = value) }
+
+    suspend fun finish(userId: String?, cloudConsent: Boolean, save: suspend (AccountSetup) -> Resource<Unit>) {
+        val state = _uiState.value
+        if (state.busy) return
+        val draft = AccountSetup(userId ?: "00000000-0000-0000-0000-000000000000", state.moneyArrival,
+            state.obligations.filter { it != "None" }.sorted(), state.cushionDigits.toLongOrNull(),
+            state.goalName.trim().takeIf { it.isNotEmpty() }, state.goalDigits.toLongOrNull())
+        val validation = draft.validationError()
+        if (validation != null) { error(validation); return }
+        if (cloudConsent && userId == null) { error("Sign in before saving to Supabase."); return }
+        busy(true)
+        error(null)
+        try {
+            val result = if (cloudConsent) save(draft) else Resource.Success(Unit)
+            when (result) {
+                is Resource.Success -> _uiState.value = _uiState.value.copy(page = OnboardingPage.BUILDING,
+                    ingestRows = emptyList(), completeness = if (cloudConsent) "Setup saved to your account. SMS transactions remain on this phone."
+                    else "No financial setup was saved. You can add it to your account later from Profile.")
+                is Resource.Error -> error(result.message)
+                Resource.Loading -> error("Please try saving again.")
+            }
+        } finally { busy(false) }
+    }
 }
 
 fun formatOnboardingCurrency(digits: String): String =

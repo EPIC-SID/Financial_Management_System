@@ -1,7 +1,9 @@
 package com.example.financeapp.ui.theme
 
 import android.app.Activity
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
@@ -14,8 +16,6 @@ private val LightColorScheme = lightColorScheme(
     onPrimary = OnAction,
     primaryContainer = SummaryGreen,
     onPrimaryContainer = Ink,
-    // Generic secondary actions stay neutral. Yellow has an explicit guidance
-    // token so controls cannot accidentally use it for status or text.
     secondary = Ink,
     onSecondary = CanvasWhite,
     secondaryContainer = SurfaceNeutral,
@@ -42,17 +42,34 @@ private val LightColorScheme = lightColorScheme(
     surfaceTint = CanvasWhite
 )
 
+private val DarkColorScheme = darkColorScheme(
+    primary = BronzePrimaryDark,
+    onPrimary = OnBronze,
+    primaryContainer = BronzeContainerDark,
+    onPrimaryContainer = BronzeTextDark,
+    background = BackgroundDark,
+    onBackground = TextPrimaryDark,
+    surface = SurfaceDark,
+    onSurface = TextPrimaryDark,
+    surfaceVariant = SurfaceVariantDark,
+    onSurfaceVariant = TextSecondaryDark,
+    outline = OutlineDark,
+    error = RiskRed,
+    onError = OnBronze
+)
+
 @Composable
 fun FinanceAppTheme(
-    content: @Composable () -> Unit
+    darkTheme: Boolean = isSystemInDarkTheme(),
+    content: @Composable () -> Unit,
 ) {
-    val colorScheme = LightColorScheme
+    val colorScheme = if (darkTheme) DarkColorScheme else LightColorScheme
     val view = LocalView.current
     if (!view.isInEditMode) {
         SideEffect {
             (view.context as? Activity)?.window?.let { window ->
                 window.statusBarColor = colorScheme.background.toArgb()
-                WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = true
+                WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !darkTheme
             }
         }
     }

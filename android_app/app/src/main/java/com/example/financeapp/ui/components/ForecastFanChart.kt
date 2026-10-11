@@ -40,7 +40,8 @@ import com.example.financeapp.ui.theme.GuidanceYellow
 import com.example.financeapp.ui.theme.Ink
 import com.example.financeapp.ui.theme.Spacing
 import com.example.financeapp.ui.util.formatInrCompact
-import com.example.financeapp.ui.util.formatPercent
+import com.example.financeapp.ui.util.formatRiskPercent
+import com.example.financeapp.ui.util.formatInr
 import com.example.financeapp.ui.viewmodel.ForecastPointUi
 import kotlin.math.roundToInt
 
@@ -56,9 +57,9 @@ fun ForecastFanChart(points: List<ForecastPointUi>, showTable: Boolean, onToggle
     Surface(modifier, shape = MaterialTheme.shapes.large, border = androidx.compose.foundation.BorderStroke(1.dp, Ink)) {
         Column(Modifier.padding(Spacing.md), verticalArrangement = Arrangement.spacedBy(Spacing.sm)) {
             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
-                Column {
-                    Text("Forecast range", style = MaterialTheme.typography.titleLarge)
-                    Text("P10–P90 with median and cushion", style = MaterialTheme.typography.bodySmall)
+                Column(Modifier.weight(1f)) {
+                    Text("Estimated cash", style = MaterialTheme.typography.titleMedium)
+                    Text("Middle 80% of simulated results", style = MaterialTheme.typography.bodySmall)
                 }
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text("Table", style = MaterialTheme.typography.labelMedium)
@@ -106,7 +107,7 @@ fun ForecastFanChart(points: List<ForecastPointUi>, showTable: Boolean, onToggle
             val selected = points[selectedIndex]
             Surface(shape = RoundedCornerShape(com.example.financeapp.ui.theme.Radius.field), color = MaterialTheme.colorScheme.surfaceVariant) {
                 Text(
-                    "${selected.period} · P10 ${formatInrCompact(selected.p10)} · P50 ${formatInrCompact(selected.p50)} · P90 ${formatInrCompact(selected.p90)} · ${formatPercent(selected.shortfallChance)} shortfall chance",
+                    "${selected.period}\nLow: ${formatInr(selected.p10)}\nTypical: ${formatInr(selected.p50)}\nHigh: ${formatInr(selected.p90)}\nChance of falling below the safety balance this month: ${formatRiskPercent(selected.shortfallChance)}",
                     Modifier.padding(Spacing.sm), style = MaterialTheme.typography.bodySmall
                 )
             }
@@ -119,5 +120,5 @@ private fun chartIndex(x: Float, width: Int, count: Int): Int = ((x / width.coer
 private fun talkBackSummary(points: List<ForecastPointUi>): String {
     val last = points.last()
     val safePeriods = points.count { it.p10 >= it.reserve }
-    return "Forecast through ${last.period}. Median ending balance ${formatInrCompact(last.p50)}. Balance stays above the cushion in $safePeriods of ${points.size} periods. Ending shortfall chance ${formatPercent(last.shortfallChance)}."
+    return "Estimate through ${last.period}. Typical ending balance ${formatInrCompact(last.p50)}. The low estimate is above the safety balance in $safePeriods of ${points.size} months. Risk of falling below the safety balance in the last month: ${formatRiskPercent(last.shortfallChance)}."
 }

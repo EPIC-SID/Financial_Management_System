@@ -41,7 +41,8 @@ data class CockpitUiState(
     val metrics: List<MetricUi>,
     val completeness: Int,
     val missingData: String?,
-    val alert: String?
+    val alert: String?,
+    val cashAfterCardBills: String = "Unavailable"
 )
 
 private data class CockpitScenario(

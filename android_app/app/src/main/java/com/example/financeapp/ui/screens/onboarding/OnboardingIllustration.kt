@@ -26,7 +26,7 @@ import com.example.financeapp.ui.viewmodel.OnboardingUiState
 @Composable
 internal fun OnboardingIllustration(state: OnboardingUiState) {
     Surface(
-        modifier = Modifier.fillMaxWidth().height(LocalConfiguration.current.screenHeightDp.dp * .4f),
+        modifier = Modifier.fillMaxWidth().height(160.dp),
         shape = RoundedCornerShape(Radius.card),
         color = illustrationTint(state.page)
     ) {

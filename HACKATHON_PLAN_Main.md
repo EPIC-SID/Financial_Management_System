@@ -78,6 +78,7 @@ To guarantee **zero merge conflicts** during the 24-hour hackathon, every teamma
 #### 1. Branch Creation (Run immediately at start of hackathon)
 ```bash
 # Member 1 (UI/UX Specialist):
+<<<<<<< HEAD
 git checkout -b Uday
 
 # Member 2 (Data & Persistence Specialist):
@@ -88,6 +89,18 @@ git checkout -b Siddhant
 
 # Member 4 (AI/Copilot & Actions Specialist):
 git checkout -b Roshan
+=======
+git checkout -b feat/track1-ui
+
+# Member 2 (Data & Persistence Specialist):
+git checkout -b feat/track2-data
+
+# Member 3 (Math & Forecasting Engine Specialist):
+git checkout -b feat/track3-math
+
+# Member 4 (AI/Copilot & Actions Specialist):
+git checkout -b feat/track4-copilot
+>>>>>>> 8921dbcb2c4fda4181853529e71ba70acaf7ee6c
 ```
 
 #### 2. Three Golden Git Rules for Every Teammate:
@@ -108,6 +121,7 @@ When individual phase tasks are completed, the Integration Lead merges branches 
 ```bash
 # 1. Merge Math Engines (Zero UI/Android dependencies)
 git checkout main
+<<<<<<< HEAD
 git merge Siddhant
 
 # 2. Merge Data & Seeder (In-memory models & scenarios)
@@ -118,6 +132,18 @@ git merge Roshan
 
 # 4. Merge UI Screens & Components
 git merge Uday
+=======
+git merge feat/track3-math
+
+# 2. Merge Data & Seeder (In-memory models & scenarios)
+git merge feat/track2-data
+
+# 3. Merge Copilot & Simulator (AI engines)
+git merge feat/track4-copilot
+
+# 4. Merge UI Screens & Components
+git merge feat/track1-ui
+>>>>>>> 8921dbcb2c4fda4181853529e71ba70acaf7ee6c
 
 # 5. Wire NavGraph.kt & verify full build
 ./gradlew assembleDebug

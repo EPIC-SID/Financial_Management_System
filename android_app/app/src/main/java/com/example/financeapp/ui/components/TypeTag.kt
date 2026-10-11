@@ -32,7 +32,11 @@ enum class StatementType(val glyph: String, val label: String) {
 }
 
 @Composable
-fun TypeTag(type: StatementType, modifier: Modifier = Modifier) {
+fun TypeTag(
+    type: StatementType,
+    modifier: Modifier = Modifier,
+    dark: Boolean = false
+) {
     Surface(
         modifier = modifier.semantics(mergeDescendants = true) {},
         shape = RoundedCornerShape(Radius.tag),

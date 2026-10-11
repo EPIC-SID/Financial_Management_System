@@ -56,7 +56,7 @@ object SmsReader {
     fun read(
         context: Context,
         startTimeMs: Long,
-        filterByBankSenders: Boolean = false
+        filterByBankSenders: Boolean = true
     ): List<RawSms> {
         val results = mutableListOf<RawSms>()
         val uri = Uri.parse("content://sms/inbox")
@@ -103,8 +103,9 @@ object SmsReader {
      */
     fun isBankSender(address: String): Boolean {
         val upper = address.uppercase().trim()
-        return bankSenders.any { upper.contains(it) } ||
-               // Also catch generic UPI keywords in address
-               upper.contains("UPI") || upper.contains("BANK")
+        // Sender headers are a relevance filter, not cryptographic proof of a bank.
+        val header = Regex("^(?:[A-Z]{2}-)?([A-Z0-9]{3,11})(?:-[A-Z])?$").matchEntire(upper)
+            ?.groupValues?.get(1) ?: return false
+        return header in bankSenders
     }
 }

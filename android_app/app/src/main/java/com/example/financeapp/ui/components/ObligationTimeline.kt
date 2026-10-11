@@ -24,7 +24,7 @@ import com.example.financeapp.ui.viewmodel.ObligationUi
 fun ObligationTimeline(items: List<ObligationUi>, modifier: Modifier = Modifier) {
     Column(modifier, verticalArrangement = Arrangement.spacedBy(Spacing.sm)) {
         Text("Next 30 days", style = MaterialTheme.typography.titleLarge)
-        if (items.isEmpty()) Text("No obligations yet", style = MaterialTheme.typography.bodyMedium)
+        if (items.isEmpty()) Text("No upcoming payments", style = MaterialTheme.typography.bodyMedium)
         items.forEach { item ->
             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(Spacing.sm)) {
                 Canvas(Modifier.size(16.dp)) { drawCircle(if (item.isToday) GuidanceYellow else Color.Transparent); drawCircle(Ink, radius = 4.dp.toPx()) }

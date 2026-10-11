@@ -26,13 +26,12 @@ import com.example.financeapp.ui.theme.Radius
 import com.example.financeapp.ui.theme.Spacing
 import com.example.financeapp.ui.theme.SurfaceNeutral
 import com.example.financeapp.ui.util.formatInr
-import com.example.financeapp.ui.util.formatPercent
+import com.example.financeapp.ui.util.formatRiskPercent
 import com.example.financeapp.ui.viewmodel.PlanKind
 import com.example.financeapp.ui.viewmodel.PlanSummaryUi
 
 @Composable
 fun PlanCard(plan: PlanKind, summary: PlanSummaryUi, modifier: Modifier = Modifier) {
-    val largeText = LocalDensity.current.fontScale >= 1.5f
     val dashed = plan == PlanKind.STATUS_QUO
     val fill = when (plan) { PlanKind.PLAN_A -> ActionGreen; PlanKind.PLAN_B -> MaterialTheme.colorScheme.surface; PlanKind.STATUS_QUO -> SurfaceNeutral }
     val dashedBorder = if (dashed) Modifier.drawBehind {
@@ -47,19 +46,12 @@ fun PlanCard(plan: PlanKind, summary: PlanSummaryUi, modifier: Modifier = Modifi
     ) {
         Column(Modifier.padding(Spacing.lg), verticalArrangement = Arrangement.spacedBy(Spacing.md)) {
             Text(plan.label, style = MaterialTheme.typography.titleLarge)
-            if (largeText) {
-                Column(verticalArrangement = Arrangement.spacedBy(Spacing.sm)) {
-                    PlanMetric("Ending reserve", formatInr(summary.endingReserve))
-                    PlanMetric("Interest saved", formatInr(summary.interestSaved))
-                    PlanMetric("Shortfall risk", formatPercent(summary.shortfallRisk))
-                }
-            } else {
-                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                    PlanMetric("Ending reserve", formatInr(summary.endingReserve))
-                    PlanMetric("Interest saved", formatInr(summary.interestSaved))
-                    PlanMetric("Shortfall risk", formatPercent(summary.shortfallRisk))
-                }
-            }
+            PlanMetric("Cash after 6 months", formatInr(summary.endingReserve))
+            PlanMetric("Interest saved", formatInr(summary.interestSaved))
+            PlanMetric("Risk of low cash", formatRiskPercent(summary.shortfallRisk))
+            if (summary.pathsEvaluated > 0) Text(
+                "${summary.breachedPaths} of ${summary.pathsEvaluated} simulations fell below the safety balance at least once in six months. This is not the chance of reaching your goal.",
+                style = MaterialTheme.typography.bodySmall)
             Text(summary.tradeOff, style = MaterialTheme.typography.bodyMedium)
         }
     }

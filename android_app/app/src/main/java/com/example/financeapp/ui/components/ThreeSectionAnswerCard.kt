@@ -67,7 +67,7 @@ fun ThreeSectionAnswerCard(
             Text("Numbers calculated on your device", style = MaterialTheme.typography.labelSmall, color = MutedInk)
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(Spacing.xs)) {
                 RupAiButton("Simulate this", onSimulate, Modifier.weight(1f), variant = RupAiButtonVariant.OUTLINE)
-                RupAiButton("Add to plan", onAddToPlan, Modifier.weight(1f))
+                RupAiButton("Review plan", onAddToPlan, Modifier.weight(1f))
             }
         }
     }

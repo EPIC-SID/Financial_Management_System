@@ -25,7 +25,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -41,6 +40,7 @@ import com.example.financeapp.ui.components.PlanCard
 import com.example.financeapp.ui.components.PlanSwitch
 import com.example.financeapp.ui.components.RupAiButton
 import com.example.financeapp.ui.components.RupAiButtonVariant
+import com.example.financeapp.ui.components.RupAiButtonState
 import com.example.financeapp.ui.components.StatementType
 import com.example.financeapp.ui.components.TypeTag
 import com.example.financeapp.ui.theme.FinanceAppTheme
@@ -54,7 +54,6 @@ import com.example.financeapp.ui.viewmodel.PlanKind
 import com.example.financeapp.ui.viewmodel.PlanPeriod
 import com.example.financeapp.ui.viewmodel.PlanUiState
 import com.example.financeapp.ui.viewmodel.PlanViewModel
-import kotlinx.coroutines.launch
 
 @Composable
 fun PlanRoute(viewModel: PlanViewModel = viewModel(), onTryWhatIf: () -> Unit = {}, onResolveConflict: () -> Unit = {}) {
@@ -70,12 +69,15 @@ fun PlanScreen(
     onPlanSelected: (PlanKind) -> Unit = {},
     onCompareChanged: (Boolean) -> Unit = {},
     onTryWhatIf: () -> Unit = {},
-    onResolveConflict: () -> Unit = {}
+    onResolveConflict: () -> Unit = {},
+    onApplyPlan: () -> Unit = {},
+    showHeader: Boolean = true
 ) {
     var showTable by remember { mutableStateOf(false) }
     val snackbar = remember { SnackbarHostState() }
-    val scope = rememberCoroutineScope()
-    Scaffold(topBar = { TopAppBar(title = { Text("Plan") }) }, snackbarHost = { SnackbarHost(snackbar) }) { inner ->
+    Scaffold(topBar = { if (showHeader) TopAppBar(title = { Text("Plans") }) },
+        contentWindowInsets = if (showHeader) androidx.compose.material3.ScaffoldDefaults.contentWindowInsets else androidx.compose.foundation.layout.WindowInsets(0, 0, 0, 0),
+        snackbarHost = { SnackbarHost(snackbar) }) { inner ->
         if (state.contentState == PlanContentState.COMPUTING) {
             PlanSkeleton(Modifier.padding(inner))
         } else {
@@ -86,42 +88,44 @@ fun PlanScreen(
             ) {
                 item {
                     Column(verticalArrangement = Arrangement.spacedBy(Spacing.xs)) {
-                        Text("Period", style = MaterialTheme.typography.labelLarge)
-                        PlanSwitch(PlanPeriod.entries, state.period, PlanPeriod::label, onPeriodSelected)
+                        Text("Planning ahead", style = MaterialTheme.typography.labelLarge)
+                        PlanSwitch(state.availablePeriods, state.period, PlanPeriod::label, onPeriodSelected)
                     }
                 }
                 item {
                     Column(verticalArrangement = Arrangement.spacedBy(Spacing.xs)) {
-                        Text("Approach", style = MaterialTheme.typography.labelLarge)
+                        Text("Choose a plan", style = MaterialTheme.typography.labelLarge)
                         PlanSwitch(PlanKind.entries, state.plan, PlanKind::label, onPlanSelected)
                     }
                 }
-                state.confidenceNote?.let { note -> item { LowConfidenceNote(note) } }
+                item { Text("Sample data only. Risk of low cash means falling below your safety balance, not the chance of reaching your goal.", style = MaterialTheme.typography.bodySmall) }
                 item { ForecastFanChart(state.forecast, showTable, { showTable = it }) }
                 item {
                     Column(verticalArrangement = Arrangement.spacedBy(Spacing.xs)) {
-                        TextButton(onClick = { showTable = !showTable }) { Text(if (showTable) "Hide period details" else "Show period details") }
+                        TextButton(onClick = { showTable = !showTable }) { Text(if (showTable) "Hide monthly details" else "Show monthly details") }
                         if (showTable) PeriodTable(state.rows)
                     }
                 }
                 item {
                     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
-                        Text("Compare mode", style = MaterialTheme.typography.titleMedium)
+                        Text("Compare all plans", style = MaterialTheme.typography.titleMedium)
                         Switch(checked = state.compareMode, onCheckedChange = onCompareChanged)
                     }
                 }
                 if (state.compareMode) {
-                    item { PlanCard(PlanKind.PLAN_A, PlanFixtures.state(state.period, PlanKind.PLAN_A).summary) }
-                    item { PlanCard(PlanKind.PLAN_B, PlanFixtures.state(state.period, PlanKind.PLAN_B).summary) }
+                    state.comparisons.forEach { (kind, summary) -> item { PlanCard(kind, summary) } }
                 } else item { PlanCard(state.plan, state.summary) }
                 item { WhyThisPlan(state.summary.why) }
                 state.conflict?.let { conflict -> item { ConflictBanner(conflict.statement, onResolveConflict) } }
                 item {
                     Column(verticalArrangement = Arrangement.spacedBy(Spacing.sm)) {
-                        RupAiButton("Apply plan", { scope.launch { snackbar.showSnackbar("Plan applied") } })
-                        RupAiButton("Try what-if", onTryWhatIf, variant = RupAiButtonVariant.OUTLINE)
+                        RupAiButton("Use demo plan", onApplyPlan,
+                            state = if (state.canApply) RupAiButtonState.DEFAULT else RupAiButtonState.DISABLED,
+                            disabledReason = if (state.canApply) null else "This plan needs a safer cash balance or a change to your goal.")
+                        RupAiButton("Try a change", onTryWhatIf, variant = RupAiButtonVariant.OUTLINE)
                     }
                 }
+                state.confidenceNote?.let { note -> item { LowConfidenceNote(note) } }
             }
         }
     }
@@ -140,8 +144,9 @@ private fun WhyThisPlan(text: String) {
 
 @Composable
 private fun LowConfidenceNote(text: String) {
-    Surface(shape = MaterialTheme.shapes.large, color = SurfaceNeutral, border = BorderStroke(1.dp, Ink)) {
-        Text(text, Modifier.padding(Spacing.md), style = MaterialTheme.typography.bodyMedium)
+    Column(verticalArrangement = Arrangement.spacedBy(Spacing.xs)) {
+        Text("About this estimate", style = MaterialTheme.typography.titleMedium)
+        Text(text, style = MaterialTheme.typography.bodyMedium)
     }
 }
 

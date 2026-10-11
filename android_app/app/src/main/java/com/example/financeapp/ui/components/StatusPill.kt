@@ -32,7 +32,11 @@ import com.example.financeapp.ui.theme.SummaryGreen
 import com.example.financeapp.ui.theme.WatchInk
 import com.example.financeapp.ui.theme.WatchWash
 
-enum class HealthStatus { SAFE, WATCH, RISK }
+enum class HealthStatus(val label: String) {
+    SAFE("Safe"),
+    WATCH("Watch"),
+    RISK("Risk"),
+}
 
 @Composable
 fun StatusPill(status: HealthStatus, modifier: Modifier = Modifier) {

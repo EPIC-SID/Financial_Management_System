@@ -21,6 +21,8 @@ import com.example.financeapp.ui.theme.FinanceAppTheme
 import com.example.financeapp.ui.theme.NumberCompact
 import com.example.financeapp.ui.theme.NumberXL
 import com.example.financeapp.ui.theme.Spacing
+import com.example.financeapp.ui.util.formatInr
+import com.example.financeapp.ui.util.formatInrCompact
 
 /** Callers supply formatted engine values, ranges, percentages, or explicit missing-data copy. */
 @OptIn(ExperimentalLayoutApi::class)
@@ -68,6 +70,28 @@ fun MetricCard(
             }
         }
     }
+}
+
+/** Convenience overload taking raw numeric Double. */
+@Composable
+fun MetricCard(
+    title: String,
+    value: Double,
+    modifier: Modifier = Modifier,
+    subtitle: String? = null,
+    delta: Double? = null,
+    type: StatementType = StatementType.FACT,
+    compact: Boolean = false,
+) {
+    MetricCard(
+        title = title,
+        value = if (compact) formatInrCompact(value) else formatInr(value),
+        type = type,
+        modifier = modifier,
+        subtitle = subtitle,
+        delta = delta?.let { "${if (it >= 0) "+" else ""}${formatInrCompact(it)}" },
+        status = delta?.let { if (it < 0) HealthStatus.RISK else HealthStatus.SAFE }
+    )
 }
 
 @Preview(name = "Metric cards · 100%", widthDp = 320, heightDp = 1000, fontScale = 1f, showBackground = true)

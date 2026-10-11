@@ -4,36 +4,24 @@ Recurring transaction detection — Endpoint 6.
 POST /api/v1/analytics/recurring
 
 Identifies subscription and recurring payments from a user's transaction history.
-Uses Gemini to understand patterns that simple regex can't catch
+Uses Groq LPU LLM to understand patterns that simple regex can't catch
 (e.g., "Jio Platforms" every ~28 days = monthly phone recharge).
 """
-import asyncio
 import json
 import logging
-import os
 from collections import defaultdict
-from typing import Optional
 
-from google import genai
-
+from llm import call_llm
 from models import TransactionContext, RecurringItem, RecurringDetectionResponse
 
 logger = logging.getLogger(__name__)
-
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
-
-
-def _get_client() -> Optional[genai.Client]:
-    if not GEMINI_API_KEY:
-        return None
-    return genai.Client(api_key=GEMINI_API_KEY)
 
 
 def _pre_filter_candidates(transactions: list[TransactionContext]) -> list[dict]:
     """
     Pre-filter transactions to find candidates for recurring detection.
     Groups by merchant and returns merchants that appear 2+ times.
-    This reduces the data sent to Gemini.
+    This reduces the data sent to the LLM.
     """
     merchant_groups: dict[str, list] = defaultdict(list)
     for txn in transactions:
@@ -73,7 +61,7 @@ async def detect_recurring(
             summary="No recurring payment patterns detected in your transaction history."
         )
 
-    # Build candidate summary for Gemini
+    # Build candidate summary for LLM
     candidate_lines = "\n".join(
         f"- {c['merchant']}: appears {c['occurrences']} times, amounts: {c['amounts']}, dates: {c['dates']}"
         for c in candidates[:20]  # Cap at 20 to stay within token limits
@@ -108,25 +96,12 @@ Rules:
 - LOW confidence: merchant appears multiple times but pattern is unclear
 - Common Indian recurring payments: Jio/Airtel recharge, Netflix, Amazon Prime, EMIs, insurance premiums, rent"""
 
-    client = _get_client()
-    if not client:
-        return RecurringDetectionResponse(
-            recurring=[],
-            total_monthly_commitments=0.0,
-            summary="AI analysis unavailable. Please check back later."
-        )
-
     try:
-        loop = asyncio.get_event_loop()
-        response = await loop.run_in_executor(
-            None,
-            lambda: client.models.generate_content(
-                model="gemini-2.0-flash",
-                contents=prompt,
-            )
-        )
-        raw = response.text or "{}"
-        raw = raw.strip().removeprefix("```json").removeprefix("```").removesuffix("```").strip()
+        raw_reply, _ = await call_llm(prompt, timeout=8.0)
+        if not raw_reply:
+            raise RuntimeError("LLM returned empty response or timed out")
+
+        raw = raw_reply.strip().removeprefix("```json").removeprefix("```").removesuffix("```").strip()
         parsed = json.loads(raw)
 
         recurring_items = []
@@ -150,20 +125,19 @@ Rules:
                 merchant=item.get("merchant", ""),
                 amount=amount,
                 frequency=freq,
-                next_expected=item.get("next_expected"),
                 confidence=item.get("confidence", "MEDIUM"),
+                next_expected=item.get("next_expected"),
             ))
 
         return RecurringDetectionResponse(
             recurring=recurring_items,
             total_monthly_commitments=round(total_monthly, 2),
-            summary=parsed.get("summary", f"Found {len(recurring_items)} recurring payment(s).")
+            summary=parsed.get("summary", f"Found {len(recurring_items)} recurring payments."),
         )
-
     except Exception as e:
-        logger.error(f"Recurring detection failed: {e}")
+        logger.error("Recurring payment detection unavailable")
         return RecurringDetectionResponse(
             recurring=[],
             total_monthly_commitments=0.0,
-            summary="Could not analyze recurring payments. Please try again."
+            summary="Could not detect recurring payments at this time. Please try again."
         )

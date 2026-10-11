@@ -18,6 +18,12 @@ object Elevation {
     val sheet = 0.dp
 }
 
+val TagRadius = RoundedCornerShape(Radius.tag)
+val ButtonRadius = RoundedCornerShape(Radius.button)
+val CardRadius = RoundedCornerShape(Radius.card)
+val SheetRadius = RoundedCornerShape(topStart = Radius.sheet, topEnd = Radius.sheet)
+val PillRadius = RoundedCornerShape(percent = 50)
+
 val AppShapes = Shapes(
     extraSmall = RoundedCornerShape(Radius.tag),
     small = RoundedCornerShape(Radius.field),

@@ -16,10 +16,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.financeapp.ui.theme.Ink
 import com.example.financeapp.ui.theme.Spacing
-import com.example.financeapp.ui.util.formatInrCompact
+import com.example.financeapp.ui.util.formatInr
+import com.example.financeapp.ui.util.formatRiskPercent
 import com.example.financeapp.ui.viewmodel.PeriodRowUi
 
-private val tableHeaders = listOf("Period", "Income", "Essentials", "Debt", "SIP", "Discretionary", "Ending balance")
+private val tableHeaders = listOf("Month", "Income", "Essential costs", "Debt payments", "Monthly investing", "Other spending", "Planned balance", "Low estimate", "Typical estimate", "High estimate", "Risk of low cash")
 
 @Composable
 fun PeriodTable(rows: List<PeriodRowUi>, modifier: Modifier = Modifier) {
@@ -27,7 +28,11 @@ fun PeriodTable(rows: List<PeriodRowUi>, modifier: Modifier = Modifier) {
         Column(Modifier.horizontalScroll(rememberScrollState()).padding(Spacing.sm), verticalArrangement = Arrangement.spacedBy(Spacing.xs)) {
             TableRow(tableHeaders, header = true)
             rows.forEach { row ->
-                TableRow(listOf(row.period, formatInrCompact(row.income), formatInrCompact(row.essentials), formatInrCompact(row.debt), formatInrCompact(row.sip), formatInrCompact(row.discretionary), formatInrCompact(row.endingBalance)))
+                val forecast = row.forecast
+                TableRow(listOf(row.period, formatInr(row.income), formatInr(row.essentials), formatInr(row.debt),
+                    formatInr(row.sip), formatInr(row.discretionary), formatInr(row.endingBalance),
+                    forecast?.let { formatInr(it.p10) } ?: "-", forecast?.let { formatInr(it.p50) } ?: "-",
+                    forecast?.let { formatInr(it.p90) } ?: "-", forecast?.let { formatRiskPercent(it.shortfallChance) } ?: "-"))
             }
         }
     }

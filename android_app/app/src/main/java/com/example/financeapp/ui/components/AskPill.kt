@@ -24,7 +24,7 @@ fun AskPill(onClick: () -> Unit, modifier: Modifier = Modifier) {
         Row(Modifier.padding(horizontal = Spacing.md, vertical = Spacing.sm), verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(Spacing.xs)) {
             Icon(Icons.Outlined.AutoAwesome, contentDescription = null)
-            Text("Ask Copilot", Modifier.weight(1f), style = MaterialTheme.typography.labelLarge)
+            Text("Ask AI about this plan", Modifier.weight(1f), style = MaterialTheme.typography.labelLarge)
             Icon(Icons.Outlined.ChevronRight, contentDescription = null)
         }
     }

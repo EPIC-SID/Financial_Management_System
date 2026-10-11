@@ -1,8 +1,9 @@
 """
 Pydantic models for all RupAI API request and response payloads.
 """
-from typing import List, Optional
-from pydantic import BaseModel, Field
+import re
+from typing import List, Literal, Optional
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
 # ─────────────────────────────────────────────
@@ -10,8 +11,20 @@ from pydantic import BaseModel, Field
 # ─────────────────────────────────────────────
 
 class CategorizeRequest(BaseModel):
-    merchant: str = Field(..., description="Merchant name extracted from SMS")
-    sms_snippet: str = Field(default="", description="Raw SMS text (first 150 chars)")
+    model_config = ConfigDict(extra="forbid")
+    merchant: str = Field(..., strict=True, min_length=1, max_length=80)
+    # Preserve current Android payload compatibility without accepting any raw SMS.
+    sms_snippet: Literal[""] = ""
+
+    @field_validator("merchant")
+    @classmethod
+    def safe_merchant(cls, value: str) -> str:
+        if any(ord(c) < 32 or 127 <= ord(c) <= 159 for c in value) or "@" in value or re.search(r"\d{4,}", value):
+            raise ValueError("Invalid merchant label")
+        value = value.strip()
+        if not value:
+            raise ValueError("Invalid merchant label")
+        return value
 
 
 class CategorizeResponse(BaseModel):
@@ -24,14 +37,14 @@ class CategorizeResponse(BaseModel):
 #  Categorize — Batch
 # ─────────────────────────────────────────────
 
-class BatchCategorizeItem(BaseModel):
-    merchant: str
-    sms_snippet: str = ""
+class BatchCategorizeItem(CategorizeRequest):
+    pass
 
 
 class BatchCategorizeRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
     transactions: List[BatchCategorizeItem] = Field(
-        ..., description="List of transactions to categorize"
+        ..., min_length=1, max_length=100, description="Merchant labels only"
     )
 
 

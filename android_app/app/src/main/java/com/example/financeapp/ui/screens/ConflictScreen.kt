@@ -20,6 +20,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.financeapp.ui.components.RupAiButton
 import com.example.financeapp.ui.components.RupAiButtonVariant
+import com.example.financeapp.ui.components.RupAiButtonState
 import com.example.financeapp.ui.theme.ErrorInk
 import com.example.financeapp.ui.theme.ErrorPink
 import com.example.financeapp.ui.theme.FinanceAppTheme
@@ -33,8 +34,9 @@ import com.example.financeapp.ui.viewmodel.PlanFixtures
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ConflictScreen(conflict: ConflictUi, onApply: (ConflictOptionUi) -> Unit = {}, onKeepTarget: () -> Unit = {}) {
-    Scaffold(topBar = { TopAppBar(title = { Text("Resolve goal conflict") }) }) { inner ->
+fun ConflictScreen(conflict: ConflictUi, onApply: (ConflictOptionUi) -> Unit = {}, onKeepTarget: () -> Unit = {}, showHeader: Boolean = true) {
+    Scaffold(topBar = { if (showHeader) TopAppBar(title = { Text("Adjust your goal") }) },
+        contentWindowInsets = if (showHeader) androidx.compose.material3.ScaffoldDefaults.contentWindowInsets else androidx.compose.foundation.layout.WindowInsets(0, 0, 0, 0)) { inner ->
         LazyColumn(
             Modifier.fillMaxSize().padding(inner),
             contentPadding = PaddingValues(Spacing.md),
@@ -47,11 +49,14 @@ fun ConflictScreen(conflict: ConflictUi, onApply: (ConflictOptionUi) -> Unit = {
             }
             items(conflict.options.size) { index ->
                 val option = conflict.options[index]
-                ConflictOptionCard(option, { onApply(option) })
+                ConflictOptionCard(option, { if (option.feasible) onApply(option) })
             }
             item {
                 Column(verticalArrangement = Arrangement.spacedBy(Spacing.sm)) {
-                    RupAiButton("Apply proposed relaxation", { onApply(conflict.options.first()) })
+                    val feasible = conflict.options.firstOrNull { it.feasible }
+                    RupAiButton("Apply proposed relaxation", { feasible?.let(onApply) },
+                        state = if (feasible != null) RupAiButtonState.DEFAULT else RupAiButtonState.DISABLED,
+                        disabledReason = if (feasible == null) "No proposed option is feasible in this horizon." else null)
                     RupAiButton("Keep my target and show what breaks", onKeepTarget, variant = RupAiButtonVariant.OUTLINE)
                 }
             }
@@ -70,7 +75,8 @@ private fun ConflictOptionCard(option: ConflictOptionUi, onClick: () -> Unit) {
                 }
             }
             Text(option.detail, style = MaterialTheme.typography.bodyMedium)
-            Text("Shortfall risk after · ${formatPercent(option.shortfallRiskAfter)}", style = MaterialTheme.typography.labelLarge)
+            if (!option.feasible) Text("This change is not enough to meet the goal", style = MaterialTheme.typography.labelLarge)
+            Text("Chance of falling below your safety balance: ${formatPercent(option.shortfallRiskAfter)}", style = MaterialTheme.typography.labelLarge)
         }
     }
 }

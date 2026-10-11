@@ -15,6 +15,42 @@ FastAPI backend that powers the AI categorization and financial insights for the
 
 API docs available at `/docs` (Swagger UI) when running locally.
 
+## Copilot proxy (Phase 2G)
+
+`POST /api/v1/copilot/interpret` accepts `{"intent":"ACCOUNT_OVERVIEW"}` and returns
+`{"intent":"ACCOUNT_OVERVIEW","params":{}}`. The Android client routes questions locally;
+raw questions never cross the proxy boundary. Supported intents are `ACCOUNT_OVERVIEW`,
+`PLAN_COMPARISON`, `RISK_EXPLANATION`, `WHAT_IF_QUERY`, and `GENERAL_INQUIRY`.
+
+`POST /api/v1/copilot/narrate` accepts `{"intent":"ACCOUNT_OVERVIEW","bundle":{...}}`.
+The typed bundle fields are documented in `/docs`: numeric aggregates, `horizonMonths`
+(1-24), `confidenceLabel` (High/Medium/Low), and `recommendedPlanId`
+(Plan A/Plan B/Status quo). Unknown fields and arbitrary text labels are rejected.
+Responses use the observed/predicted/recommended schema. The model supplies section
+text only; ranges and impact metadata come from trusted inputs. Android verifies every
+narrated number and substitutes `LocalAdvisor` on verification or transport failure.
+
+All `/api/v1/` routes require Supabase HS256 JWTs with a valid expiry, UUID subject,
+`authenticated` audience, and issuer `${SUPABASE_URL}/auth/v1`. Missing auth configuration
+fails closed. Asymmetric Supabase signing keys require a JWKS verifier before use.
+Requests are capped at 32 KB, including chunked bodies, and 30 calls/user/minute across
+all authenticated routes. The limiter is process-local: deploy one worker or enforce a shared gateway
+limit before scaling. Copilot request bodies are not stored, cached, or logged.
+Missing or invalid tokens are rejected; there is no development-user bypass.
+Categorization accepts only a bounded merchant label and an optional empty
+`sms_snippet` for Android compatibility. Nonempty snippets and unknown fields are
+rejected, with generic validation errors that do not echo submitted data.
+
+Set `GEMINI_API_KEY`, `SUPABASE_URL`, and `SUPABASE_JWT_SECRET` on the server.
+`COPILOT_GEMINI_MODEL` defaults to the requested `gemini-1.5-flash`, which Google shut
+down on September 29, 2025. Configure an available model for live narration; the retired
+default safely causes local fallback. Provider calls time out after five seconds and
+return generic 502/503/504 errors. Client requests require HTTPS except for debug loopback
+and Android emulator connections. Android callers should use `BackendClient.answer`
+or `narrate` only after AI-sharing consent is granted; no consent state is stored here.
+
+Run offline proxy tests from `backend/`: `python -m unittest test_copilot -v`.
+
 ## Local Development Setup
 
 ### 1. Prerequisites
@@ -59,7 +95,7 @@ curl http://localhost:8000/health
 curl -X POST http://localhost:8000/api/v1/categorize \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_SUPABASE_JWT" \
-  -d '{"merchant": "Zomato", "sms_snippet": "Rs 250 debited at Zomato"}'
+  -d '{"merchant": "Zomato", "sms_snippet": ""}'
 ```
 
 ## Deployment on Railway (Free)

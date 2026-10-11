@@ -77,39 +77,13 @@ import com.example.financeapp.ui.viewmodel.SmsPermissionState
 import com.example.financeapp.ui.viewmodel.formatOnboardingCurrency
 
 @Composable
-fun OnboardingRoute(
-    viewModel: OnboardingViewModel = viewModel(),
-    onExistingAccount: () -> Unit = {},
-    onComplete: () -> Unit = {},
-    onOpenSettings: () -> Unit = {}
-) {
-    val state by viewModel.uiState.collectAsState()
-    OnboardingScreen(
-        state = state,
-        onPrimary = {
-            if (state.page == OnboardingPage.BUILDING && state.completeness != null) onComplete()
-            else if (state.page == OnboardingPage.SMS_CONSENT && state.permissionState == SmsPermissionState.PERMANENTLY_DENIED) onOpenSettings()
-            else viewModel.next()
-        },
-        onBack = viewModel::back,
-        onExistingAccount = onExistingAccount,
-        onSourceSelected = viewModel::selectSource,
-        onAlternativeSelected = viewModel::chooseAlternative,
-        onMoneyArrivalSelected = viewModel::setMoneyArrival,
-        onObligationToggled = viewModel::toggleObligation,
-        onAgeRangeSelected = viewModel::setAgeRange,
-        onCushionChanged = viewModel::setCushion,
-        onGoalNameChanged = viewModel::setGoalName,
-        onGoalAmountChanged = viewModel::setGoalAmount
-    )
-}
-
-@Composable
 fun OnboardingScreen(
     state: OnboardingUiState,
     onPrimary: () -> Unit = {},
     onBack: () -> Unit = {},
     onExistingAccount: () -> Unit = {},
+    onCreateAccount: () -> Unit = {},
+    showAccountActions: Boolean = true,
     onSourceSelected: (OnboardingDataSource) -> Unit = {},
     onAlternativeSelected: (OnboardingDataSource) -> Unit = {},
     onMoneyArrivalSelected: (String) -> Unit = {},
@@ -118,7 +92,8 @@ fun OnboardingScreen(
     onCushionChanged: (String) -> Unit = {},
     onGoalNameChanged: (String) -> Unit = {},
     onGoalAmountChanged: (String) -> Unit = {},
-    showSmsOption: Boolean = true
+    showSmsOption: Boolean = true,
+    privacyContent: @Composable () -> Unit = {}
 ) {
     val primaryEnabled = when (state.page) {
         OnboardingPage.DATA_SOURCE -> state.selectedSource != null &&
@@ -134,7 +109,9 @@ fun OnboardingScreen(
                 primaryEnabled = primaryEnabled,
                 onPrimary = onPrimary,
                 onBack = onBack,
-                onExistingAccount = onExistingAccount
+                onExistingAccount = onExistingAccount,
+                onCreateAccount = onCreateAccount,
+                showAccountActions = showAccountActions
             )
         }
     ) { innerPadding ->
@@ -144,11 +121,12 @@ fun OnboardingScreen(
             verticalArrangement = Arrangement.spacedBy(Spacing.md)
         ) {
             item { SegmentedProgress(state.page) }
+            state.error?.let { error -> item { Text(error, color = ErrorInk) } }
             item { OnboardingIllustration(state) }
             item {
                 Text(
                     headlineFor(state),
-                    style = MaterialTheme.typography.headlineLarge,
+                    style = MaterialTheme.typography.headlineMedium,
                     color = Ink
                 )
             }
@@ -160,9 +138,10 @@ fun OnboardingScreen(
                     OnboardingPage.ABOUT_MONEY -> AboutMoneyContent(
                         state, onMoneyArrivalSelected, onObligationToggled, onAgeRangeSelected
                     )
-                    OnboardingPage.SAFETY_NET -> SafetyNetContent(
-                        state, onCushionChanged, onGoalNameChanged, onGoalAmountChanged
-                    )
+                    OnboardingPage.SAFETY_NET -> Column {
+                        SafetyNetContent(state, onCushionChanged, onGoalNameChanged, onGoalAmountChanged)
+                        privacyContent()
+                    }
                     OnboardingPage.BUILDING -> BuildingContent(state, onAlternativeSelected)
                 }
             }
@@ -176,10 +155,12 @@ private fun OnboardingActions(
     primaryEnabled: Boolean,
     onPrimary: () -> Unit,
     onBack: () -> Unit,
-    onExistingAccount: () -> Unit
+    onExistingAccount: () -> Unit,
+    onCreateAccount: () -> Unit,
+    showAccountActions: Boolean
 ) {
     val label = when (state.page) {
-        OnboardingPage.WELCOME -> "Get started"
+        OnboardingPage.WELCOME -> if (showAccountActions) "Continue without an account" else "Continue setup"
         OnboardingPage.DATA_SOURCE -> "Continue"
         OnboardingPage.SMS_CONSENT -> when (state.permissionState) {
             SmsPermissionState.EXPLAINER -> "Allow SMS access"
@@ -187,8 +168,8 @@ private fun OnboardingActions(
             SmsPermissionState.PERMANENTLY_DENIED -> "Open Android settings"
         }
         OnboardingPage.ABOUT_MONEY -> "Next"
-        OnboardingPage.SAFETY_NET -> "Build my picture"
-        OnboardingPage.BUILDING -> "See my picture"
+        OnboardingPage.SAFETY_NET -> "Continue"
+        OnboardingPage.BUILDING -> "Open RupAI"
     }
     Surface(shadowElevation = 3.dp, color = CanvasWhite) {
         Column(
@@ -199,7 +180,7 @@ private fun OnboardingActions(
                 label = label,
                 onClick = onPrimary,
                 size = RupAiButtonSize.LARGE,
-                state = if (primaryEnabled) RupAiButtonState.DEFAULT else RupAiButtonState.DISABLED,
+                state = if (state.busy) RupAiButtonState.LOADING else if (primaryEnabled) RupAiButtonState.DEFAULT else RupAiButtonState.DISABLED,
                 disabledReason = when (state.page) {
                     OnboardingPage.DATA_SOURCE -> "Choose one option to continue."
                     OnboardingPage.BUILDING -> "We’re still building your picture."
@@ -207,9 +188,12 @@ private fun OnboardingActions(
                 }
             )
             when (state.page) {
-                OnboardingPage.WELCOME -> TextButton(onClick = onExistingAccount) { Text("I already have an account") }
+                OnboardingPage.WELCOME -> if (showAccountActions) {
+                    TextButton(onClick = onCreateAccount, enabled = !state.busy) { Text("Create account", color = Ink) }
+                    TextButton(onClick = onExistingAccount, enabled = !state.busy) { Text("Already registered? Sign in", color = Ink) }
+                }
                 OnboardingPage.SMS_CONSENT -> TextButton(onClick = onBack) { Text("Not now") }
-                OnboardingPage.ABOUT_MONEY, OnboardingPage.SAFETY_NET -> TextButton(onClick = onBack) { Text("Back") }
+                OnboardingPage.ABOUT_MONEY, OnboardingPage.SAFETY_NET -> TextButton(onClick = onBack, enabled = !state.busy) { Text("Back") }
                 else -> Unit
             }
         }
@@ -241,7 +225,7 @@ private fun SegmentedProgress(page: OnboardingPage) {
 private fun WelcomeContent() {
     Column(verticalArrangement = Arrangement.spacedBy(Spacing.sm)) {
         Text("Bring your balances, dues and plans into one clear picture.", style = MaterialTheme.typography.bodyLarge)
-        listOf("Stays on your phone", "Never asks for bank passwords", "Delete anytime").forEach {
+        listOf("SMS transactions stay on this phone", "Never asks for bank passwords", "Cloud setup is optional").forEach {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(Spacing.xs)) {
                 Icon(Icons.Outlined.CheckCircle, null, tint = ActionGreen)
                 Text(it, style = MaterialTheme.typography.bodyLarge)
@@ -257,7 +241,7 @@ private fun DataSourceContent(
     showSmsOption: Boolean
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(Spacing.sm)) {
-        OnboardingDataSource.entries.filter { showSmsOption || it != OnboardingDataSource.SMS }.forEach { source ->
+        OnboardingDataSource.entries.filter { it != OnboardingDataSource.CSV && (showSmsOption || it != OnboardingDataSource.SMS) }.forEach { source ->
             SelectableCard(source, selected = state.selectedSource == source, onClick = { onSelected(source) })
         }
         if (state.selectedSource == OnboardingDataSource.SAMPLE) {
@@ -309,11 +293,11 @@ private fun SmsConsentContent(
             )
         }
         ReadList("What we read", listOf("Supported bank alerts", "Amount, date and merchant"), SummaryGreen)
-        ReadList("What we never read", listOf("Personal chats", "OTPs", "Contacts"), SurfaceNeutral)
+        ReadList("What we do not store", listOf("Personal chats", "OTPs", "Contacts"), SurfaceNeutral)
         if (permissionState != SmsPermissionState.EXPLAINER) {
             PermissionRecoveryActions(onAlternativeSelected)
         }
-        Text("RupAI filters bank alerts in the app. AI categorization may send merchant details and message snippets to our backend.", style = MaterialTheme.typography.bodySmall, color = MutedInk)
+        Text("Android grants access to SMS. RupAI filters supported bank alerts on this phone. Import starts only when you tap Sync in Activity. Cloud categorization requires separate consent; raw SMS is not sent to the AI provider.", style = MaterialTheme.typography.bodySmall, color = MutedInk)
     }
 }
 
@@ -346,7 +330,7 @@ private fun AboutMoneyContent(
     onAgeRange: (String) -> Unit
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(Spacing.sm)) {
-        Text("Question ${state.moneyStep + 1} of 3", style = MaterialTheme.typography.labelLarge, color = MutedInk)
+        Text("Question ${state.moneyStep + 1} of 3 (optional)", style = MaterialTheme.typography.labelLarge, color = MutedInk)
         when (state.moneyStep) {
             0 -> ChoiceChips("How does your money arrive?", listOf("Fixed salary", "Varies month to month", "A mix"), setOfNotNull(state.moneyArrival), onArrival)
             1 -> ChoiceChips(
@@ -356,8 +340,8 @@ private fun AboutMoneyContent(
                 onObligation
             )
             else -> {
-                ChoiceChips("Age range (optional)", listOf("18–25", "26–38", "39–50", "Prefer not to say"), setOfNotNull(state.ageRange), onAgeRange)
-                Text("Only used to tune wording.", style = MaterialTheme.typography.bodySmall, color = MutedInk)
+                Text("One profile for Demo and My Transactions", style = MaterialTheme.typography.titleMedium)
+                Text("Demo plans use sample assumptions, not your personal setup. SMS activity remains separate from planning.", style = MaterialTheme.typography.bodyLarge)
             }
         }
     }
@@ -401,7 +385,7 @@ private fun SafetyNetContent(
     Column(verticalArrangement = Arrangement.spacedBy(Spacing.md)) {
         Text("Skip anything you don’t know. We’ll show how sure we are.", style = MaterialTheme.typography.bodyLarge)
         OutlinedTextField(
-            value = formatOnboardingCurrency(state.cushionDigits),
+            value = state.cushionDigits,
             onValueChange = onCushionChanged,
             modifier = Modifier.fillMaxWidth(),
             label = { Text("Minimum cash cushion") },
@@ -409,8 +393,8 @@ private fun SafetyNetContent(
             singleLine = true
         )
         FlowRow(horizontalArrangement = Arrangement.spacedBy(Spacing.xs)) {
-            AssistChip(onClick = { onCushionChanged("30000") }, label = { Text("1 month essentials") })
-            AssistChip(onClick = { onCushionChanged("60000") }, label = { Text("2 months") })
+            AssistChip(onClick = { onCushionChanged("30000") }, label = { Text("INR 30,000") })
+            AssistChip(onClick = { onCushionChanged("60000") }, label = { Text("INR 60,000") })
             AssistChip(onClick = { onCushionChanged("") }, label = { Text("Custom") })
         }
         Text("Optional goal", style = MaterialTheme.typography.titleMedium)
@@ -422,7 +406,7 @@ private fun SafetyNetContent(
             singleLine = true
         )
         OutlinedTextField(
-            value = formatOnboardingCurrency(state.goalDigits),
+            value = state.goalDigits,
             onValueChange = onGoalAmountChanged,
             modifier = Modifier.fillMaxWidth(),
             label = { Text("Goal amount") },
@@ -443,7 +427,7 @@ private fun BuildingContent(
         state.completeness?.let {
             Surface(shape = RoundedCornerShape(Radius.card), color = SummaryGreen) {
                 Column(Modifier.fillMaxWidth().padding(Spacing.md), verticalArrangement = Arrangement.spacedBy(Spacing.xs)) {
-                    Text("Your picture is ready", style = MaterialTheme.typography.titleMedium)
+                    Text("Setup complete", style = MaterialTheme.typography.titleMedium)
                     Text(it, style = MaterialTheme.typography.bodyMedium)
                 }
             }
@@ -491,7 +475,7 @@ private fun headlineFor(state: OnboardingUiState): String = when (state.page) {
     OnboardingPage.SMS_CONSENT -> "Your messages stay under your control."
     OnboardingPage.ABOUT_MONEY -> "Tell us what shapes your month."
     OnboardingPage.SAFETY_NET -> "What keeps you comfortable?"
-    OnboardingPage.BUILDING -> if (state.ingestFailed) "Let’s try another way." else "Building your picture"
+    OnboardingPage.BUILDING -> if (state.ingestFailed) "Let’s try another way." else "Ready to continue"
 }
 
 private class OnboardingPreviewProvider : CollectionPreviewParameterProvider<OnboardingUiState>(OnboardingFixtures.previews)

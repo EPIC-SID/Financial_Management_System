@@ -23,9 +23,9 @@ import com.example.financeapp.ui.theme.Spacing
 data class QuickAction(val label: String, val icon: ImageVector)
 
 val CockpitQuickActions = listOf(
-    QuickAction("Add entry", Icons.Outlined.AddCircleOutline),
-    QuickAction("What-if", Icons.Outlined.Tune),
-    QuickAction("Ask Copilot", Icons.Outlined.AutoAwesome),
+    QuickAction("Transactions", Icons.Outlined.AddCircleOutline),
+    QuickAction("Try a change", Icons.Outlined.Tune),
+    QuickAction("Ask AI", Icons.Outlined.AutoAwesome),
     QuickAction("Accounts", Icons.Outlined.Payments)
 )
 
