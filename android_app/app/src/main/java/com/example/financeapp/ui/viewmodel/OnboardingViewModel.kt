@@ -30,7 +30,6 @@ data class OnboardingUiState(
     val obligations: Set<String> = emptySet(),
     val ageRange: String? = null,
     val cushionDigits: String = "",
-    val cushionSelected: Boolean = false,
     val goalName: String = "",
     val goalDigits: String = "",
     val ingestRows: List<IngestRowUi> = emptyList(),
@@ -54,9 +53,8 @@ class OnboardingViewModel : ViewModel() {
                 state.copy(page = OnboardingPage.SMS_CONSENT)
             } else state.copy(page = OnboardingPage.ABOUT_MONEY)
             OnboardingPage.SMS_CONSENT -> state.copy(page = OnboardingPage.ABOUT_MONEY)
-            OnboardingPage.ABOUT_MONEY -> if (state.moneyStep == 0 && state.moneyArrival != null) state.copy(moneyStep = 1)
-                else if (state.moneyStep == 1 && state.obligations.isNotEmpty()) state.copy(page = OnboardingPage.SAFETY_NET)
-                else state
+            OnboardingPage.ABOUT_MONEY -> if (state.moneyStep == 0) state.copy(moneyStep = 1)
+                else state.copy(page = OnboardingPage.SAFETY_NET)
             OnboardingPage.SAFETY_NET -> state
             OnboardingPage.BUILDING -> state
         }
@@ -94,7 +92,7 @@ class OnboardingViewModel : ViewModel() {
     }
     fun setAgeRange(value: String) { edit { it.copy(ageRange = value) } }
     fun setCushion(value: String) {
-        if (value.length <= 9 && value.all { it in '0'..'9' }) edit { it.copy(cushionDigits = value, cushionSelected = true) }
+        if (value.length <= 9 && value.all { it in '0'..'9' }) edit { it.copy(cushionDigits = value) }
     }
     fun setGoalName(value: String) { edit { it.copy(goalName = value.take(80)) } }
     fun setGoalAmount(value: String) {
@@ -105,7 +103,6 @@ class OnboardingViewModel : ViewModel() {
         if (setup == null) return
         _uiState.value = _uiState.value.copy(moneyArrival = setup.incomePattern,
             obligations = setup.obligations.toSet(), cushionDigits = setup.minimumReserve?.toString().orEmpty(),
-            cushionSelected = setup.minimumReserve != null,
             goalName = setup.goalName.orEmpty(), goalDigits = setup.goalAmount?.toString().orEmpty())
     }
 
@@ -150,7 +147,7 @@ object OnboardingFixtures {
         page = OnboardingPage.ABOUT_MONEY, moneyStep = step, moneyArrival = "A mix",
         obligations = setOf("Rent", "Credit card"), ageRange = "26–38"
     )
-    fun safetyNet() = sample.copy(page = OnboardingPage.SAFETY_NET, cushionDigits = "50000", cushionSelected = true)
+    fun safetyNet() = sample.copy(page = OnboardingPage.SAFETY_NET, cushionDigits = "50000")
     fun building() = sample.copy(
         page = OnboardingPage.BUILDING,
         ingestRows = listOf(

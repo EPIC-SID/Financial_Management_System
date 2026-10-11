@@ -5,7 +5,11 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
-import com.example.financeapp.ui.icons.Icons
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.AddCircleOutline
+import androidx.compose.material.icons.outlined.AutoAwesome
+import androidx.compose.material.icons.outlined.Payments
+import androidx.compose.material.icons.outlined.Tune
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -19,7 +23,9 @@ import com.example.financeapp.ui.theme.Spacing
 data class QuickAction(val label: String, val icon: ImageVector)
 
 val CockpitQuickActions = listOf(
+    QuickAction("Transactions", Icons.Outlined.AddCircleOutline),
     QuickAction("Try a change", Icons.Outlined.Tune),
+    QuickAction("Ask AI", Icons.Outlined.AutoAwesome),
     QuickAction("Accounts", Icons.Outlined.Payments)
 )
 

@@ -5,6 +5,8 @@ import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -16,7 +18,12 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import com.example.financeapp.ui.icons.Icons
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.AccountBalanceWallet
+import androidx.compose.material.icons.outlined.AutoAwesome
+import androidx.compose.material.icons.outlined.EventNote
+import androidx.compose.material.icons.outlined.MoreVert
+import androidx.compose.material.icons.outlined.ReceiptLong
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
@@ -37,6 +44,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.datasource.CollectionPreviewParameterProvider
@@ -45,12 +53,12 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.financeapp.ui.components.AccountsRow
 import com.example.financeapp.ui.components.AccountsSheet
 import com.example.financeapp.ui.components.AskPill
-import com.example.financeapp.ui.components.BrandImageBackground
 import com.example.financeapp.ui.components.CockpitQuickActions
 import com.example.financeapp.ui.components.CompletenessCard
 import com.example.financeapp.ui.components.ConfidenceExplainerSheet
 import com.example.financeapp.ui.components.HealthGauge
-import com.example.financeapp.ui.components.Next30DaysSummary
+import com.example.financeapp.ui.components.MetricCard
+import com.example.financeapp.ui.components.ObligationTimeline
 import com.example.financeapp.ui.components.QuickActionTile
 import com.example.financeapp.ui.components.ScoreExplainerSheet
 import com.example.financeapp.ui.components.StatusPill
@@ -76,7 +84,7 @@ fun CockpitRoute(
     CockpitScreen(state, onScenarioSelected = viewModel::selectScenario, onAction = onAction)
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun CockpitScreen(
     state: CockpitUiState,
@@ -86,9 +94,7 @@ fun CockpitScreen(
 ) {
     var menuOpen by remember { mutableStateOf(false) }
     var sheet by remember { mutableStateOf<String?>(null) }
-    BrandImageBackground(com.example.financeapp.R.drawable.bg_white, Modifier.fillMaxSize()) {
     Scaffold(
-        containerColor = Color.Transparent,
         contentWindowInsets = if (showHeader) androidx.compose.material3.ScaffoldDefaults.contentWindowInsets else androidx.compose.foundation.layout.WindowInsets(0, 0, 0, 0),
         topBar = { if (showHeader) {
             TopAppBar(
@@ -121,7 +127,7 @@ fun CockpitScreen(
                         Text("Your money at a glance", style = MaterialTheme.typography.headlineSmall)
                     }
                 }
-                item { VerdictCard(state.verdict, state.verdictReading, state.confidence.label,
+                item { VerdictCard(state.verdict, state.verdictReading, state.p10, state.p50, state.p90, state.confidence.label,
                     { sheet = "confidence" }, { onAction("plan") }, heading = "Estimated bank balance after 6 months") }
                 item {
                     Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(Spacing.xs)) {
@@ -130,7 +136,16 @@ fun CockpitScreen(
                 }
                 item { HealthGauge(state.healthScore, state.healthStatus, state.healthComponents, { sheet = "score" }) }
                 item { AccountsRow(state.accounts, { sheet = "accounts" }) }
-                item { Next30DaysSummary(state.obligations, state.metrics) }
+                item { ObligationTimeline(state.obligations) }
+                item {
+                    val oneColumn = LocalDensity.current.fontScale >= 1.5f
+                    FlowRow(horizontalArrangement = Arrangement.spacedBy(Spacing.xs), verticalArrangement = Arrangement.spacedBy(Spacing.xs), maxItemsInEachRow = if (oneColumn) 1 else 2) {
+                        state.metrics.forEach { metric ->
+                            MetricCard(metric.title, metric.value, metric.type,
+                                Modifier.fillMaxWidth(if (oneColumn) 1f else .48f), metric.subtitle)
+                        }
+                    }
+                }
                 state.alert?.let { alert -> item { AlertBanner(alert) } }
                 state.missingData?.let { reason -> item {
                     CompletenessCard(state.completeness, reason, state.contentState in listOf(CockpitContentState.NO_DATA, CockpitContentState.LOW_COMPLETENESS), { onAction("add data") })
@@ -138,7 +153,6 @@ fun CockpitScreen(
                 item { AskPill(onClick = { onAction("copilot") }) }
             }
         }
-    }
     }
     when (sheet) {
         "accounts" -> AccountsSheet(state.accountDetails, state.cashAfterCardBills, { sheet = null }, { onAction("edit accounts") })

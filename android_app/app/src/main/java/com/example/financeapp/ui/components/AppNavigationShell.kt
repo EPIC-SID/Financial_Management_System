@@ -24,8 +24,14 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
-import com.example.financeapp.ui.icons.Icons
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.AccountCircle
+import androidx.compose.material.icons.outlined.ArrowBack
+import androidx.compose.material.icons.outlined.AutoAwesome
+import androidx.compose.material.icons.outlined.EventNote
+import androidx.compose.material.icons.outlined.Home
+import androidx.compose.material.icons.outlined.Person
+import androidx.compose.material.icons.outlined.ReceiptLong
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -39,13 +45,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.platform.LocalDensity
 import com.example.financeapp.R
 import com.example.financeapp.ui.navigation.NavigationChoice
 import com.example.financeapp.ui.navigation.Screen
@@ -79,7 +83,6 @@ fun AppNavigationShell(
     }
     val nested = route in listOf(Screen.EditProfile.route, Screen.Conflict.route)
 
-    BrandImageBackground(R.drawable.bg_white, Modifier.fillMaxWidth()) {
     Scaffold(
         topBar = {
             TopAppBar(
@@ -96,10 +99,9 @@ fun AppNavigationShell(
             )
         },
         bottomBar = { FloatingBottomNavigation(choices, route, onNavigate) },
-        containerColor = Color.Transparent,
+        containerColor = CanvasWhite,
         content = content
     )
-    }
 }
 
 @Composable
@@ -108,7 +110,6 @@ private fun FloatingBottomNavigation(
     route: String?,
     onNavigate: (String) -> Unit
 ) {
-    val navHeight = if (LocalDensity.current.fontScale >= 1.5f) 80.dp else 64.dp
     Box(
         Modifier.fillMaxWidth().navigationBarsPadding()
             .padding(horizontal = Spacing.md, vertical = Spacing.sm)
@@ -121,7 +122,7 @@ private fun FloatingBottomNavigation(
             border = BorderStroke(1.dp, OutlineNeutral.copy(alpha = .12f))
         ) {
             BoxWithConstraints(
-                Modifier.fillMaxWidth().height(navHeight).padding(4.dp).selectableGroup()
+                Modifier.fillMaxWidth().height(64.dp).padding(4.dp).selectableGroup()
             ) {
                 val selectedIndex = choices.indexOfFirst { it.route == route }.coerceAtLeast(0)
                 val itemWidth = maxWidth / choices.size
@@ -132,7 +133,7 @@ private fun FloatingBottomNavigation(
                 )
                 Box(
                     Modifier.offset(x = indicatorOffset).width(itemWidth).fillMaxHeight()
-                        .padding(2.dp).background(ActionGreen, RoundedCornerShape(28.dp))
+                        .padding(2.dp).background(ActionGreen, CircleShape)
                 )
                 Row(Modifier.fillMaxWidth().fillMaxHeight()) {
                     choices.forEach { choice ->
@@ -166,7 +167,7 @@ private fun BottomNavigationItem(
         contentAlignment = Alignment.Center
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(2.dp)) {
-            Icon(iconFor(choice.route, selected), contentDescription = null, tint = contentColor, modifier = Modifier.size(20.dp))
+            Icon(iconFor(choice.route), contentDescription = null, tint = contentColor, modifier = Modifier.size(20.dp))
             Text(
                 choice.label,
                 style = MaterialTheme.typography.labelSmall,
@@ -178,11 +179,11 @@ private fun BottomNavigationItem(
     }
 }
 
-private fun iconFor(route: String, selected: Boolean): ImageVector = when (route) {
-    Screen.Cockpit.route -> if (selected) Icons.Filled.Home else Icons.Outlined.Home
-    Screen.Plan.route -> if (selected) Icons.Filled.CalendarDots else Icons.Outlined.EventNote
-    Screen.Copilot.route -> if (selected) Icons.Filled.Sparkle else Icons.Outlined.AutoAwesome
-    Screen.Transactions.route -> if (selected) Icons.Filled.Receipt else Icons.Outlined.ReceiptLong
-    Screen.Profile.route -> if (selected) Icons.Filled.Person else Icons.Outlined.Person
+private fun iconFor(route: String): ImageVector = when (route) {
+    Screen.Cockpit.route -> Icons.Outlined.Home
+    Screen.Plan.route -> Icons.Outlined.EventNote
+    Screen.Copilot.route -> Icons.Outlined.AutoAwesome
+    Screen.Transactions.route -> Icons.Outlined.ReceiptLong
+    Screen.Profile.route -> Icons.Outlined.Person
     else -> Icons.Outlined.AccountCircle
 }

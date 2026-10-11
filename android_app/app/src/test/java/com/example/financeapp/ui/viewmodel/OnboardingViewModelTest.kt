@@ -88,19 +88,8 @@ class OnboardingViewModelTest {
         vm.next()
         assertEquals(OnboardingPage.ABOUT_MONEY, vm.uiState.value.page)
         vm.next()
-        assertEquals(0, vm.uiState.value.moneyStep)
-        vm.setMoneyArrival("A mix")
-        vm.next()
         assertEquals(1, vm.uiState.value.moneyStep)
-        vm.toggleObligation("None")
         vm.next()
         assertEquals(OnboardingPage.SAFETY_NET, vm.uiState.value.page)
-    }
-    @Test fun safetyNetNeedsExplicitConfirmationChoice() {
-        val vm = OnboardingViewModel()
-        assertFalse(vm.uiState.value.cushionSelected)
-        vm.setCushion("")
-        assertTrue(vm.uiState.value.cushionSelected)
-        assertEquals("", vm.uiState.value.cushionDigits)
     }
 }

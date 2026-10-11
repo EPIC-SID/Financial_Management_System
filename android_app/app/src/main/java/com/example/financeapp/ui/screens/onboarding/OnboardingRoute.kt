@@ -84,8 +84,8 @@ private fun AccountOnboarding(owner: String?, onExistingAccount: () -> Unit, onC
     }, onBack = vm::back, onExistingAccount = onExistingAccount,
         onCreateAccount = onCreateAccount, showAccountActions = owner == null,
         onSourceSelected = { vm.selectSource(it); vm.next() }, onAlternativeSelected = vm::chooseAlternative,
-        onMoneyArrivalSelected = vm::setMoneyArrival, onObligationToggled = vm::toggleObligation,
-        onCushionChanged = vm::setCushion,
+        onMoneyArrivalSelected = { vm.setMoneyArrival(it); vm.next() }, onObligationToggled = vm::toggleObligation,
+        onCushionChanged = { vm.setCushion(it); finishSetup() },
         privacyContent = {
             Column(Modifier.padding(top = 16.dp)) {
                 if (owner == null) {

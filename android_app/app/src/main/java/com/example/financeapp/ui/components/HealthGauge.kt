@@ -29,8 +29,6 @@ import com.example.financeapp.ui.theme.ActionGreen
 import com.example.financeapp.ui.theme.Ink
 import com.example.financeapp.ui.theme.NumberHero
 import com.example.financeapp.ui.theme.Spacing
-import com.example.financeapp.ui.theme.MutedInk
-import kotlin.math.roundToInt
 
 @Composable
 fun HealthGauge(score: Int, status: HealthStatus, components: List<HealthScoreComponent>, onExplain: () -> Unit, modifier: Modifier = Modifier) {
@@ -40,14 +38,9 @@ fun HealthGauge(score: Int, status: HealthStatus, components: List<HealthScoreCo
                 Text("Money health", style = MaterialTheme.typography.titleLarge)
                 StatusPill(status)
             }
-            Text(
-                "A simple view of your cash buffer, debt, required spending and income stability.",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MutedInk
-            )
             Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                Canvas(Modifier.size(144.dp).semantics { contentDescription = "Money health score $score out of 100" }) {
-                    val stroke = 12.dp.toPx(); val pad = stroke / 2
+                Canvas(Modifier.size(180.dp).semantics { contentDescription = "Money health score $score out of 100" }) {
+                    val stroke = 15.dp.toPx(); val pad = stroke / 2
                     drawArc(Ink.copy(alpha = .12f), 150f, 240f, false, Offset(pad, pad), Size(size.width - stroke, size.height - stroke), style = Stroke(stroke, cap = StrokeCap.Round))
                     drawArc(ActionGreen, 150f, 240f * score / 100f, false, Offset(pad, pad), Size(size.width - stroke, size.height - stroke), style = Stroke(stroke, cap = StrokeCap.Round))
                 }
@@ -60,12 +53,12 @@ fun HealthGauge(score: Int, status: HealthStatus, components: List<HealthScoreCo
                 Column(verticalArrangement = Arrangement.spacedBy(Spacing.xxs)) {
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                         Text(it.label, style = MaterialTheme.typography.bodyMedium)
-                        Text("${it.score.roundToInt()} / 25", style = MaterialTheme.typography.labelMedium)
+                        Text("${it.score}/25", style = MaterialTheme.typography.labelMedium)
                     }
                     LinearProgressIndicator(progress = (it.score / 25.0).toFloat(), modifier = Modifier.fillMaxWidth().height(8.dp), color = ActionGreen)
                 }
             }
-            TextButton(onClick = onExplain) { Text("See how this score works") }
+            TextButton(onClick = onExplain) { Text("How this is calculated") }
         }
     }
 }
