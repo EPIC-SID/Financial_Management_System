@@ -27,11 +27,18 @@ interface TransactionDao {
     @Query("SELECT * FROM transactions WHERE category = 'MISCELLANEOUS' AND isCategorizedByAi = 0")
     suspend fun getMiscellaneousNotAiProcessed(): List<TransactionEntity>
 
+    @Query("SELECT * FROM transactions WHERE category = 'MISCELLANEOUS' AND amount < 0")
+    suspend fun getUnclassifiedDebits(): List<TransactionEntity>
+
+    @Query("UPDATE transactions SET category = :category WHERE smsId = :smsId AND category = 'MISCELLANEOUS'")
+    suspend fun repairLocalCategory(smsId: String, category: String)
+
     /**
      * Called by AiCategorizationWorker after processing a transaction.
      * Marks it as done so it is never sent to an AI API again.
      */
-    @Query("UPDATE transactions SET category = :category, isCategorizedByAi = 1 WHERE smsId = :smsId")
+    // A late cloud response must not overwrite a user's correction or a local repair.
+    @Query("UPDATE transactions SET category = :category, isCategorizedByAi = 1 WHERE smsId = :smsId AND category = 'MISCELLANEOUS' AND isCategorizedByAi = 0")
     suspend fun updateCategoryAndMarkAiProcessed(smsId: String, category: String)
 
     /**

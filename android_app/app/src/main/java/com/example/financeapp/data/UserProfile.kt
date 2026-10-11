@@ -41,4 +41,13 @@ data class UserProfileUpdate(
     val avatarUrl: String? = null,
     @SerialName("date_of_birth")
     val dateOfBirth: String? = null
-)
+) {
+    fun validationError(): String? = when {
+        fullName != null && (fullName.isBlank() || fullName.length > 100 || fullName.any(Char::isISOControl)) -> "Enter a name with 1 to 100 characters."
+        phoneNumber != null && !Regex("\\+?[0-9]{7,15}").matches(phoneNumber) -> "Enter a valid phone number or leave it empty."
+        monthlyIncome != null && (!monthlyIncome.isFinite() || monthlyIncome !in 0.0..999_999_999.0) -> "Enter a valid monthly income."
+        currency != null && currency != "INR" -> "Only INR is supported."
+        avatarUrl != null || dateOfBirth != null -> "This profile field is not editable here."
+        else -> null
+    }
+}

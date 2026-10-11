@@ -24,6 +24,43 @@ data class LocalizedAdvice(
 /** Offline three-section advice. Numbers come from snapshot / view / verdict; only the prose changes. */
 object LocalizedAdvisor {
 
+    /** ResultBundle bridge: keeps the verified engine metadata unchanged across languages. */
+    fun adviseBundle(
+        intent: com.example.financeapp.domain.model.CopilotIntent,
+        bundle: com.example.financeapp.domain.model.ResultBundle,
+        languageCode: String
+    ): StructuredResponse {
+        require(NarrationLanguage.fromCode(languageCode) != null)
+        val local = com.example.financeapp.domain.ai.LocalAdvisor().advise(intent, bundle)
+        if (languageCode == "en") return local
+        fun money(value: Double) = "INR " + java.math.BigDecimal.valueOf(value).stripTrailingZeros().toPlainString()
+        val cash = money(bundle.bankCash)
+        val dues = money(bundle.cardDues)
+        val balance = money(bundle.forecastP50)
+        val risk = java.math.BigDecimal.valueOf(bundle.projectedShortfallRisk * 100)
+            .setScale(1, java.math.RoundingMode.HALF_UP).toPlainString() + "%"
+        val copy = when (languageCode) {
+            "hi-Latn" -> listOf(
+                "Demo bank cash $cash hai. Card dues $dues alag hain; abhi cash se minus nahi hue.",
+                "${bundle.horizon} mein reserve se neeche jaane ka risk $risk hai. Ant mein median cash $balance hai.",
+                "Koi action lene se pehle computed plan, reserve aur risk warnings dekhein.",
+                "Yeh synthetic demo hai, aapke personal finances ki prediction nahi.")
+            "hi-Deva" -> listOf(
+                "डेमो बैंक में नकद $cash है। कार्ड का बकाया $dues अलग है; अभी नकद से नहीं घटा है।",
+                "${bundle.horizon} में रिज़र्व से नीचे जाने का जोखिम $risk है। अंत में अनुमानित मध्य नकद $balance है।",
+                "कोई कदम लेने से पहले गणना की गई योजना, रिज़र्व और जोखिम की चेतावनियाँ देखें।",
+                "यह कृत्रिम डेमो है, आपके व्यक्तिगत वित्त का अनुमान नहीं।")
+            else -> listOf(
+                "डेमो बँकेत रोख $cash आहे. कार्डची थकबाकी $dues वेगळी आहे; अद्याप रोख रकमेतून वजा केलेली नाही.",
+                "${bundle.horizon} मध्ये राखीव रकमेपेक्षा खाली जाण्याचा धोका $risk आहे. शेवटी अंदाजित मध्य रोख $balance आहे.",
+                "कृती करण्यापूर्वी गणना केलेली योजना, राखीव रक्कम आणि धोक्याच्या सूचना तपासा.",
+                "हे कृत्रिम डेमो आहे, तुमच्या वैयक्तिक आर्थिक स्थितीचा अंदाज नाही.")
+        }
+        return local.copy(observed = listOf(local.observed.single().copy(text = copy[0])),
+            predicted = listOf(local.predicted.single().copy(text = copy[1])),
+            recommended = listOf(local.recommended.single().copy(text = copy[2], tradeOff = copy[3])))
+    }
+
     fun advise(
         language: NarrationLanguage,
         intent: CopilotIntent,

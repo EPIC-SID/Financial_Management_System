@@ -13,8 +13,12 @@ import logging
 import os
 from contextlib import asynccontextmanager
 
+from pathlib import Path
 from dotenv import load_dotenv
-load_dotenv()  # Load .env file before any os.getenv() calls
+
+# Load .env file from the current directory regardless of execution CWD
+_ENV_FILE = Path(__file__).resolve().parent / ".env"
+load_dotenv(_ENV_FILE)
 
 from fastapi import Depends, FastAPI, HTTPException, Request, status
 from fastapi.middleware.cors import CORSMiddleware
@@ -24,6 +28,7 @@ from analytics import detect_recurring
 from auth import get_user_id
 from categorizer import categorize_batch, categorize_merchant
 from insights import analyze_spending, get_advisor_response
+from copilot import install_copilot
 from models import (
     AdvisorRequest,
     AdvisorResponse,
@@ -58,6 +63,7 @@ VERSION = "1.0.0"
 async def lifespan(app: FastAPI):
     """Startup and shutdown events."""
     logger.info(f"RupAI Backend v{VERSION} starting up")
+    logger.info(f"Groq API key configured:   {bool(os.getenv('GROQ_API_KEY'))}")
     logger.info(f"Gemini API key configured: {bool(os.getenv('GEMINI_API_KEY'))}")
     logger.info(f"Places API key configured: {bool(os.getenv('PLACES_API_KEY'))}")
     logger.info(f"Supabase URL configured:   {bool(os.getenv('SUPABASE_URL'))}")
@@ -73,6 +79,8 @@ app = FastAPI(
     docs_url="/docs",     # Swagger UI at /docs
     redoc_url="/redoc",   # ReDoc UI at /redoc
 )
+
+install_copilot(app)
 
 # CORS — allow the Android app and any web frontend to call this API
 app.add_middleware(
@@ -116,6 +124,7 @@ async def health_check() -> HealthResponse:
         status="ok",
         version=VERSION,
         services={
+            "groq": "configured" if os.getenv("GROQ_API_KEY") else "missing_key",
             "gemini": "configured" if os.getenv("GEMINI_API_KEY") else "missing_key",
             "places": "configured" if os.getenv("PLACES_API_KEY") else "missing_key",
             "supabase": "configured" if os.getenv("SUPABASE_URL") else "missing_key",

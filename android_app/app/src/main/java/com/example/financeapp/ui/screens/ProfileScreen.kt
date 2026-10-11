@@ -1,314 +1,163 @@
 package com.example.financeapp.ui.screens
 
-import android.widget.Toast
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import com.example.financeapp.data.Resource
-import com.example.financeapp.data.SupabaseClient
-import com.example.financeapp.data.UserProfile
-import com.example.financeapp.data.UserRepository
-import com.example.financeapp.ui.components.AppBottomBar
-import com.example.financeapp.ui.components.Tab
-import com.example.financeapp.ui.theme.*
+import com.example.financeapp.data.*
+import com.example.financeapp.ui.util.formatInr
 import io.github.jan.supabase.gotrue.SessionStatus
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import java.text.NumberFormat
-import java.util.Locale
+import kotlinx.coroutines.withContext
 
 @Composable
-fun ProfileScreen(
-    onNavigateToHome: () -> Unit,
-    onNavigateToTransactions: () -> Unit,
-    onNavigateToLogin: () -> Unit,
-    onNavigateToEditProfile: () -> Unit
-) {
+fun ProfileScreen(onNavigateToHome: () -> Unit, onNavigateToTransactions: () -> Unit,
+    onNavigateToLogin: () -> Unit, onNavigateToEditProfile: () -> Unit, onEditSetup: () -> Unit = {}, showHeader: Boolean = true) {
+    val status by SupabaseClient.auth.sessionStatus.collectAsState()
+    if (status is SessionStatus.LoadingFromStorage) {
+        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { CircularProgressIndicator() }
+        return
+    }
+    val owner = SupabaseClient.auth.currentUserOrNull()?.id
+    key(owner) { SharedProfile(owner, onNavigateToHome, onNavigateToTransactions,
+        onNavigateToLogin, onNavigateToEditProfile, onEditSetup, showHeader) }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun SharedProfile(owner: String?, onBack: () -> Unit, onActivity: () -> Unit,
+    onLogin: () -> Unit, onEdit: () -> Unit, onSetup: () -> Unit, showHeader: Boolean) {
     val context = LocalContext.current
-    val coroutineScope = rememberCoroutineScope()
-    var isLoading by remember { mutableStateOf(false) }
-    var isSigningOut by remember { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
     var profile by remember { mutableStateOf<UserProfile?>(null) }
-    var isLoadingProfile by remember { mutableStateOf(true) }
-
-    // Wait for Supabase session to be fully authenticated before fetching profile.
-    // Avoids a race condition where getProfile() fires while session is still
-    // being restored from SharedPreferences (LoadingFromStorage state).
-    val sessionStatus by SupabaseClient.auth.sessionStatus.collectAsState()
-    LaunchedEffect(sessionStatus) {
-        if (sessionStatus is SessionStatus.Authenticated) {
-            try {
-                val result = UserRepository.getProfile()
-                if (result is Resource.Success) {
-                    profile = result.data
-                } else if (result is Resource.Error) {
-                    Toast.makeText(context, result.message, Toast.LENGTH_SHORT).show()
-                }
-            } catch (e: Exception) {
-                // Fallback to auth metadata if profile fetch fails
-            } finally {
-                isLoadingProfile = false
+    var setup by remember { mutableStateOf<AccountSetup?>(null) }
+    var loading by remember { mutableStateOf(owner != null) }
+    var busy by remember { mutableStateOf(false) }
+    var message by remember { mutableStateOf<String?>(null) }
+    var retry by remember { mutableIntStateOf(0) }
+    var confirmation by remember { mutableStateOf<String?>(null) }
+    LaunchedEffect(owner, retry) {
+        if (owner != null) {
+            loading = true
+            message = null
+            when (val result = UserRepository.getProfile()) {
+                is Resource.Success -> profile = result.data
+                is Resource.Error -> message = result.message
+                Resource.Loading -> Unit
             }
+            when (val result = AccountSetupRepository.load()) {
+                is Resource.Success -> setup = result.data
+                is Resource.Error -> message = result.message
+                Resource.Loading -> Unit
+            }
+            loading = false
         }
     }
-
-    // Fallback values from auth metadata
-    val user = SupabaseClient.auth.currentUserOrNull()
-    val displayName = profile?.fullName
-        ?: user?.userMetadata?.get("full_name")?.toString()?.replace("\"", "")
-        ?: "No Name"
-    val displayEmail = profile?.email ?: user?.email ?: "Unknown"
-    val displayPhone = profile?.phoneNumber ?: "Not provided"
-    val displayIncome = profile?.monthlyIncome
-    val displayCurrency = profile?.currency ?: "INR"
-    val memberSince = profile?.createdAt?.take(10) ?: "Unknown"
-    val lastUpdated = profile?.updatedAt?.take(10) ?: "Unknown"
-
-    Scaffold(
-        containerColor = BackgroundWhite,
-        topBar = {
-            @OptIn(ExperimentalMaterial3Api::class)
-            TopAppBar(
-                title = {
-                    Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                        Text("Profile", fontWeight = FontWeight.Bold, color = BronzePrimary, fontSize = 20.sp)
-                    }
-                },
-                actions = {
-                    IconButton(onClick = onNavigateToEditProfile) {
-                        Icon(Icons.Filled.Edit, contentDescription = "Edit Profile", tint = BronzePrimary)
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = BackgroundWhite)
-            )
-        },
-        bottomBar = {
-            AppBottomBar(
-                selectedTab = Tab.PROFILE,
-                onTabSelected = { tab ->
-                    when (tab) {
-                        Tab.HOME -> onNavigateToHome()
-                        Tab.TRANSACTIONS -> onNavigateToTransactions()
-                        else -> { }
-                    }
-                }
-            )
-        }
-    ) { paddingValues ->
-        if (isLoadingProfile) {
-            Box(
-                modifier = Modifier.fillMaxSize().padding(paddingValues),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator(color = BronzePrimary)
+    Scaffold(contentWindowInsets = if (showHeader) ScaffoldDefaults.contentWindowInsets else WindowInsets(0, 0, 0, 0),
+        topBar = { if (showHeader) TopAppBar(title = { Text("Profile") }, navigationIcon = {
+        IconButton(onClick = onBack) { Icon(Icons.Default.ArrowBack, "Back") }
+    }, actions = {
+        if (owner != null) IconButton(onClick = onEdit, enabled = !busy) { Icon(Icons.Default.Edit, "Edit profile") }
+    }) }) { padding ->
+        Column(Modifier.fillMaxSize().padding(padding).verticalScroll(rememberScrollState()).padding(20.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                Text("Your account", Modifier.weight(1f), style = MaterialTheme.typography.titleLarge)
+                if (!showHeader && owner != null) IconButton(onClick = onEdit, enabled = !busy) { Icon(Icons.Default.Edit, "Edit profile") }
             }
-        } else {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
-                    .verticalScroll(rememberScrollState())
-                    .padding(horizontal = 24.dp, vertical = 16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                // ── Avatar ──────────────────────────────
-                Box(
-                    modifier = Modifier
-                        .size(100.dp)
-                        .border(2.dp, BorderBlack, RectangleShape),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = displayName.take(1).uppercase(),
-                        fontSize = 40.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = BronzePrimary
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                Text(text = displayName, fontSize = 24.sp, fontWeight = FontWeight.Bold, color = TextBlack)
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(text = displayEmail, fontSize = 14.sp, color = TextGray)
-
-                Spacer(modifier = Modifier.height(32.dp))
-
-                // ── Account Info Section ────────────────
-                ProfileSectionHeader("ACCOUNT INFORMATION")
-
-                ProfileInfoRow("Full Name", displayName)
-                ProfileDivider()
-                ProfileInfoRow("Email", displayEmail)
-                ProfileDivider()
-                ProfileInfoRow("Phone", displayPhone)
-
-                Spacer(modifier = Modifier.height(24.dp))
-
-                // ── Financial Setup Section ─────────────
-                ProfileSectionHeader("FINANCIAL SETUP")
-
-                ProfileInfoRow(
-                    label = "Monthly Income",
-                    value = if (displayIncome != null && displayIncome > 0) {
-                        "₹${NumberFormat.getNumberInstance(Locale("en", "IN")).format(displayIncome)}"
-                    } else {
-                        "Not set"
-                    }
-                )
-                ProfileDivider()
-                ProfileInfoRow("Currency", displayCurrency)
-
-                Spacer(modifier = Modifier.height(24.dp))
-
-                // ── Account Details Section ─────────────
-                ProfileSectionHeader("ACCOUNT DETAILS")
-
-                ProfileInfoRow("Member Since", memberSince)
-                ProfileDivider()
-                ProfileInfoRow("Last Updated", lastUpdated)
-
-                Spacer(modifier = Modifier.height(32.dp))
-
-                // ── Edit Profile Button ─────────────────
-                OutlinedButton(
-                    onClick = onNavigateToEditProfile,
-                    modifier = Modifier.fillMaxWidth().height(52.dp),
-                    border = BorderStroke(2.dp, BronzePrimary),
-                    colors = ButtonDefaults.outlinedButtonColors(contentColor = BronzePrimary),
-                    shape = RectangleShape
-                ) {
-                    Icon(Icons.Filled.Edit, contentDescription = null, modifier = Modifier.size(18.dp))
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("EDIT PROFILE", fontSize = 14.sp, fontWeight = FontWeight.Bold)
-                }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // ── Reset Data & AI Cache Button ───────
-                var isResetting by remember { mutableStateOf(false) }
-                OutlinedButton(
-                    onClick = {
-                        isResetting = true
-                        coroutineScope.launch(kotlinx.coroutines.Dispatchers.IO) {
-                            try {
-                                val db = com.example.financeapp.data.AppDatabase.getInstance(context)
-                                db.transactionDao().deleteAll()
-                                context.getSharedPreferences("BackendCategorizerCache", android.content.Context.MODE_PRIVATE).edit().clear().apply()
-                                context.getSharedPreferences("GeminiCategorizerCache", android.content.Context.MODE_PRIVATE).edit().clear().apply()
-                                context.getSharedPreferences("PlacesCategorizerCache", android.content.Context.MODE_PRIVATE).edit().clear().apply()
-                                kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
-                                    Toast.makeText(context, "DB & AI Backend Caches Cleared! Syncing SMS will trigger AI backend.", Toast.LENGTH_LONG).show()
-                                }
-                            } catch (e: Exception) {
-                                kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
-                                    Toast.makeText(context, "Reset failed: ${e.message}", Toast.LENGTH_SHORT).show()
-                                }
-                            } finally {
-                                isResetting = false
-                            }
+            if (loading) LinearProgressIndicator(Modifier.fillMaxWidth())
+            message?.let {
+                Text(it)
+                TextButton(onClick = { retry++ }, enabled = !loading && !busy) { Text("Retry") }
+            }
+            if (owner == null) {
+                Text("You are not signed in. Your SMS transactions stay on this phone. Sign in to save your profile and, if you choose, your financial setup.")
+                Button(onClick = onLogin) { Text("Sign in") }
+                OutlinedButton(onClick = onSetup) { Text("Review setup") }
+            } else {
+                ProfileField("Name", profile?.fullName ?: "Not available")
+                ProfileField("Email", profile?.email ?: SupabaseClient.auth.currentUserOrNull()?.email.orEmpty())
+                ProfileField("Phone", profile?.phoneNumber ?: "Not provided")
+                ProfileField("Monthly income you entered", profile?.monthlyIncome?.let(::formatInr) ?: "Not set")
+                Divider()
+                Text("Financial setup", style = MaterialTheme.typography.titleMedium)
+                ProfileField("Income pattern", setup?.incomePattern ?: "Not set")
+                ProfileField("Regular payments", setup?.obligations?.joinToString()?.ifEmpty { "None entered" } ?: "Not set")
+                ProfileField("Safety balance", setup?.minimumReserve?.toDouble()?.let(::formatInr) ?: "Not set")
+                ProfileField("Goal", setup?.goalName ?: "Not set")
+                setup?.goalAmount?.let { ProfileField("Goal amount", formatInr(it.toDouble())) }
+                Text("Plans currently use sample data. The details saved here do not verify your bank balance or create a plan from your SMS.", style = MaterialTheme.typography.bodySmall)
+                OutlinedButton(onClick = onSetup, enabled = !loading && !busy) { Text("Edit financial setup") }
+                if (setup != null) TextButton(onClick = { confirmation = "setup" }, enabled = !busy) { Text("Delete saved financial setup") }
+                TextButton(onClick = {
+                    busy = true
+                    scope.launch {
+                        try {
+                            context.getSharedPreferences(RemoteCategorizationPolicy.PREFS, android.content.Context.MODE_PRIVATE)
+                                .edit().putBoolean(RemoteCategorizationPolicy.ENABLED, false).apply()
+                            androidx.work.WorkManager.getInstance(context).cancelUniqueWork("ai_categorization")
+                            UserRepository.signOut()
+                            onLogin()
                         }
-                    },
-                    modifier = Modifier.fillMaxWidth().height(52.dp),
-                    border = BorderStroke(2.dp, Color(0xFFC05621)),
-                    colors = ButtonDefaults.outlinedButtonColors(contentColor = Color(0xFFC05621)),
-                    shape = RectangleShape,
-                    enabled = !isResetting
-                ) {
-                    if (isResetting) {
-                        CircularProgressIndicator(modifier = Modifier.size(24.dp), color = Color(0xFFC05621))
-                    } else {
-                        Text("RESET DATA & AI CACHE", fontSize = 14.sp, fontWeight = FontWeight.Bold)
+                        catch (e: CancellationException) { throw e }
+                        catch (e: Exception) { message = "Could not sign out. Please retry." }
+                        finally { busy = false }
                     }
-                }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // ── Sign Out Button ─────────────────────
-                OutlinedButton(
-                    onClick = {
-                        isSigningOut = true
-                        coroutineScope.launch {
-                            try {
-                                UserRepository.signOut()
-                                onNavigateToLogin()
-                            } catch (e: Exception) {
-                                Toast.makeText(context, "Sign out failed: ${e.message}", Toast.LENGTH_SHORT).show()
-                            } finally {
-                                isSigningOut = false
-                            }
-                        }
-                    },
-                    modifier = Modifier.fillMaxWidth().height(52.dp),
-                    border = BorderStroke(2.dp, BorderBlack),
-                    colors = ButtonDefaults.outlinedButtonColors(contentColor = TextBlack),
-                    shape = RectangleShape,
-                    enabled = !isSigningOut
-                ) {
-                    if (isSigningOut) {
-                        CircularProgressIndicator(modifier = Modifier.size(24.dp), color = TextBlack)
-                    } else {
-                        Text("SIGN OUT", fontSize = 14.sp, fontWeight = FontWeight.Bold)
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(24.dp))
+                }, enabled = !busy) { Text("Sign out") }
             }
+            Divider()
+            Text("Device data", style = MaterialTheme.typography.titleMedium)
+            Text("Imported SMS transactions and category corrections are stored on this phone, not in your cloud profile.")
+            TextButton(onClick = onActivity) { Text("Open Activity") }
+            TextButton(onClick = { confirmation = "local" }, enabled = !busy) { Text("Reset local transactions and category cache") }
         }
     }
-}
-
-// ── Profile UI Components ──────────────────────────────────────
-
-@Composable
-fun ProfileSectionHeader(title: String) {
-    Column(modifier = Modifier.fillMaxWidth()) {
-        Text(
-            text = title,
-            fontSize = 12.sp,
-            fontWeight = FontWeight.Bold,
-            color = TextGray,
-            letterSpacing = 1.sp
-        )
-        Spacer(modifier = Modifier.height(4.dp))
-        Divider(color = BorderBlack, thickness = 2.dp)
-        Spacer(modifier = Modifier.height(12.dp))
+    confirmation?.let { action ->
+        AlertDialog(onDismissRequest = { if (!busy) confirmation = null },
+            title = { Text(if (action == "setup") "Delete saved setup?" else "Reset imported device data?") },
+            text = { Text(if (action == "setup")
+                "Removes your income pattern, payment types, reserve and goal from Supabase. Sign-in profile and phone transactions are kept. Provider backups follow their own retention period."
+                else "Deletes imported transactions, manual category corrections and category caches. Original SMS and cloud profile are kept. Nothing is re-imported automatically.") },
+            confirmButton = { TextButton(onClick = {
+                busy = true
+                scope.launch {
+                    try {
+                        if (action == "setup") when (val result = AccountSetupRepository.delete()) {
+                            is Resource.Success -> { setup = null; message = "Saved financial setup deleted." }
+                            is Resource.Error -> message = result.message
+                            Resource.Loading -> Unit
+                        } else {
+                            withContext(Dispatchers.IO) {
+                                AppDatabase.getInstance(context).transactionDao().deleteAll()
+                                listOf("BackendCategorizerCache", "GeminiCategorizerCache", "PlacesCategorizerCache").forEach {
+                                    context.getSharedPreferences(it, android.content.Context.MODE_PRIVATE).edit().clear().commit()
+                                }
+                            }
+                            message = "Local data cleared. Use Sync in Activity to import again."
+                        }
+                    } catch (e: CancellationException) { throw e }
+                    catch (e: Exception) { message = "The operation could not be completed. Please retry." }
+                    finally { busy = false; confirmation = null }
+                }
+            }, enabled = !busy) { Text(if (action == "setup") "Delete setup" else "Reset local data") } },
+            dismissButton = { TextButton(onClick = { confirmation = null }, enabled = !busy) { Text("Cancel") } })
     }
 }
 
 @Composable
-fun ProfileInfoRow(label: String, value: String) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 10.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(text = label, fontSize = 14.sp, color = TextGray, fontWeight = FontWeight.Medium)
-        Text(
-            text = value,
-            fontSize = 14.sp,
-            color = TextBlack,
-            fontWeight = FontWeight.SemiBold
-        )
+private fun ProfileField(label: String, value: String) {
+    Column(Modifier.fillMaxWidth()) {
+        Text(label, style = MaterialTheme.typography.labelMedium)
+        Text(value, style = MaterialTheme.typography.bodyLarge)
     }
-}
-
-@Composable
-fun ProfileDivider() {
-    Divider(color = SurfaceGray, thickness = 1.dp)
 }

@@ -12,19 +12,34 @@ import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
 private val LightColorScheme = lightColorScheme(
-    primary = BronzePrimaryLight,
-    onPrimary = OnBronze,
-    primaryContainer = BronzeContainerLight,
-    onPrimaryContainer = BronzeTextLight,
-    background = BackgroundLight,
-    onBackground = TextPrimaryLight,
-    surface = SurfaceLight,
-    onSurface = TextPrimaryLight,
-    surfaceVariant = SurfaceVariantLight,
-    onSurfaceVariant = TextSecondaryLight,
-    outline = OutlineLight,
-    error = RiskRed,
-    onError = OnBronze,
+    primary = ActionGreen,
+    onPrimary = OnAction,
+    primaryContainer = SummaryGreen,
+    onPrimaryContainer = Ink,
+    secondary = Ink,
+    onSecondary = CanvasWhite,
+    secondaryContainer = SurfaceNeutral,
+    onSecondaryContainer = Ink,
+    tertiary = Ink,
+    onTertiary = CanvasWhite,
+    tertiaryContainer = SurfaceNeutral,
+    onTertiaryContainer = Ink,
+    background = CanvasWhite,
+    onBackground = Ink,
+    surface = CanvasWhite,
+    onSurface = Ink,
+    surfaceVariant = SurfaceNeutral,
+    onSurfaceVariant = MutedInk,
+    error = ErrorInk,
+    onError = CanvasWhite,
+    errorContainer = ErrorPink,
+    onErrorContainer = ErrorInk,
+    outline = OutlineNeutral,
+    outlineVariant = OutlineNeutral,
+    inverseSurface = Ink,
+    inverseOnSurface = CanvasWhite,
+    inversePrimary = SummaryGreen,
+    surfaceTint = CanvasWhite
 )
 
 private val DarkColorScheme = darkColorScheme(
@@ -40,7 +55,7 @@ private val DarkColorScheme = darkColorScheme(
     onSurfaceVariant = TextSecondaryDark,
     outline = OutlineDark,
     error = RiskRed,
-    onError = OnBronze,
+    onError = OnBronze
 )
 
 @Composable
@@ -52,9 +67,10 @@ fun FinanceAppTheme(
     val view = LocalView.current
     if (!view.isInEditMode) {
         SideEffect {
-            val window = (view.context as Activity).window
-            window.statusBarColor = colorScheme.background.toArgb()
-            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !darkTheme
+            (view.context as? Activity)?.window?.let { window ->
+                window.statusBarColor = colorScheme.background.toArgb()
+                WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !darkTheme
+            }
         }
     }
 
@@ -62,6 +78,6 @@ fun FinanceAppTheme(
         colorScheme = colorScheme,
         typography = Typography,
         shapes = AppShapes,
-        content = content,
+        content = content
     )
 }

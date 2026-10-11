@@ -28,12 +28,12 @@ android {
         }
         val supabaseUrl = properties.getProperty("SUPABASE_URL") ?: ""
         val supabaseAnonKey = properties.getProperty("SUPABASE_ANON_KEY") ?: ""
-        val geminiApiKey = properties.getProperty("GEMINI_API_KEY") ?: ""
         val backendUrl = properties.getProperty("BACKEND_URL") ?: "http://10.0.2.2:8000"
 
         buildConfigField("String", "SUPABASE_URL", "\"$supabaseUrl\"")
         buildConfigField("String", "SUPABASE_ANON_KEY", "\"$supabaseAnonKey\"")
-        buildConfigField("String", "GEMINI_API_KEY", "\"$geminiApiKey\"")
+        // Legacy advisor stays disabled; provider secrets belong only on the backend.
+        buildConfigField("String", "GEMINI_API_KEY", "\"\"")
         buildConfigField("String", "BACKEND_URL", "\"$backendUrl\"")
     }
 
@@ -72,6 +72,7 @@ dependencies {
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.ui:ui-graphics")
     implementation("androidx.compose.ui:ui-tooling-preview")
+    debugImplementation("androidx.compose.ui:ui-tooling")
     implementation("androidx.compose.material3:material3")
     implementation("androidx.compose.material:material-icons-extended")
     implementation("androidx.navigation:navigation-compose:2.7.7")

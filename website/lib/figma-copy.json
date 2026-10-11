@@ -1,0 +1,16 @@
+{
+  "eyebrow": "RUPAI / CTA V2 ONLY",
+  "headline": "Clear actions.",
+  "intro": "16 sp labels. 48 dp default; 56 dp Large. Controls grow with text.",
+  "default": "Default",
+  "pressed": "Pressed",
+  "focused": "Focused",
+  "disabled": "Disabled",
+  "loading": "Loading",
+  "primary": "See plan",
+  "outline": "Explore demo",
+  "disabledReason": "Add an account to enable this action.",
+  "loadingLabel": "Saving…",
+  "scaleNote": "130% / 200%: wrap labels, stack rows and grow heights.",
+  "foundationHeadline": "Calm, clear and considered."
+}

@@ -4,7 +4,6 @@ import android.content.Context
 import android.util.Log
 import androidx.work.*
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 
 /**
@@ -28,9 +27,6 @@ class AiCategorizationWorker(
         private const val TAG = "AiCategorizationWorker"
         private const val WORK_NAME = "ai_categorization"
 
-        // Free tier allows ~15 requests/min → 1 req per 4 seconds to stay safe
-        private const val GEMINI_RATE_LIMIT_MS = 4_000L
-
         /**
          * Enqueues the worker. If already running or pending, does nothing (KEEP policy).
          */
@@ -53,6 +49,8 @@ class AiCategorizationWorker(
     }
 
     override suspend fun doWork(): Result {
+        if (!applicationContext.getSharedPreferences(RemoteCategorizationPolicy.PREFS, Context.MODE_PRIVATE)
+                .getBoolean(RemoteCategorizationPolicy.ENABLED, false)) return Result.success()
         val dao = AppDatabase.getInstance(applicationContext).transactionDao()
 
         return withContext(Dispatchers.IO) {
@@ -64,7 +62,7 @@ class AiCategorizationWorker(
 
                 // Prepare batch request items: List of (merchant, snippet)
                 val batchItems = miscTransactions.map { txn ->
-                    Pair(txn.merchant, txn.description ?: txn.merchant)
+                    Pair(txn.merchant, "")
                 }
 
                 // Call backend batch endpoint (handles local cache + backend shared DB cache + Gemini)
@@ -78,13 +76,17 @@ class AiCategorizationWorker(
                     return@withContext Result.retry()
                 }
 
-                // Update Room database with resolved categories
+                // Update Room database with resolved categories (only for confident non-transient classifications)
                 var processedCount = 0
                 for (txn in miscTransactions) {
-                    val resolvedCategory = categoryMap[txn.merchant] ?: "MISCELLANEOUS"
-                    dao.updateCategoryAndMarkAiProcessed(txn.smsId, resolvedCategory)
-                    Log.d(TAG, "Updated '${txn.merchant}' -> $resolvedCategory")
-                    processedCount++
+                    val resolvedCategory = categoryMap[txn.merchant]
+                    if (resolvedCategory != null && CategorizationPolicy.isCachableCategory(resolvedCategory)) {
+                        dao.updateCategoryAndMarkAiProcessed(txn.smsId, resolvedCategory)
+                        Log.d(TAG, "Updated transaction category")
+                        processedCount++
+                    } else {
+                        Log.d(TAG, "Unconfirmed category; keeping eligible for retry")
+                    }
                 }
 
                 Log.d(TAG, "AI categorization worker run complete. Processed $processedCount transactions.")
