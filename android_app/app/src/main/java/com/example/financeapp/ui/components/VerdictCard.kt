@@ -1,6 +1,7 @@
 package com.example.financeapp.ui.components
 
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -16,13 +17,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.text.font.FontWeight
+import com.example.financeapp.R
 import com.example.financeapp.ui.theme.ActionGreen
+import com.example.financeapp.ui.theme.CanvasWhite
 import com.example.financeapp.ui.theme.GuidanceYellow
-import com.example.financeapp.ui.theme.Ink
-import com.example.financeapp.ui.theme.NumberXL
+import com.example.financeapp.ui.theme.NumberHero
 import com.example.financeapp.ui.theme.Radius
 import com.example.financeapp.ui.theme.Spacing
 
@@ -39,10 +44,18 @@ fun VerdictCard(
     modifier: Modifier = Modifier,
     heading: String = "Month-end cushion"
 ) {
-    Surface(modifier, shape = RoundedCornerShape(Radius.card), color = ActionGreen, contentColor = Ink) {
+    Surface(modifier, shape = RoundedCornerShape(Radius.card), color = ActionGreen, contentColor = CanvasWhite) {
         Column(Modifier.padding(Spacing.lg), verticalArrangement = Arrangement.spacedBy(Spacing.md)) {
-            Text(heading, style = MaterialTheme.typography.labelMedium)
-            Text(verdict, style = NumberXL)
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(Spacing.xs)) {
+                Image(
+                    painter = painterResource(R.drawable.rupai_logo_mono),
+                    contentDescription = null,
+                    colorFilter = ColorFilter.tint(CanvasWhite),
+                    modifier = Modifier.height(24.dp)
+                )
+                Text(heading, style = MaterialTheme.typography.labelMedium)
+            }
+            Text(verdict, style = NumberHero.copy(fontWeight = FontWeight.Bold))
             Text(reading, style = MaterialTheme.typography.bodyMedium)
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(Spacing.xs)) {
                 TypeTag(StatementType.PREDICTION)
@@ -65,8 +78,8 @@ private fun ForecastBand(p10: Double, p50: Double, p90: Double) {
         }
     ) {
         val y = size.height / 2
-        drawLine(Ink.copy(alpha = .3f), Offset(0f, y), Offset(size.width, y), 8.dp.toPx(), StrokeCap.Round)
-        drawLine(Ink, Offset(size.width * fraction, 5.dp.toPx()), Offset(size.width * fraction, size.height - 5.dp.toPx()), 2.dp.toPx())
+        drawLine(CanvasWhite.copy(alpha = .45f), Offset(0f, y), Offset(size.width, y), 8.dp.toPx(), StrokeCap.Round)
+        drawLine(CanvasWhite, Offset(size.width * fraction, 5.dp.toPx()), Offset(size.width * fraction, size.height - 5.dp.toPx()), 2.dp.toPx())
         drawCircle(GuidanceYellow, 7.dp.toPx(), Offset(size.width * .28f, y))
     }
 }

@@ -11,9 +11,9 @@ import kotlinx.coroutines.flow.asStateFlow
 enum class OnboardingPage { WELCOME, DATA_SOURCE, SMS_CONSENT, ABOUT_MONEY, SAFETY_NET, BUILDING }
 
 enum class OnboardingDataSource(val title: String, val detail: String) {
-    SMS("Read bank SMS", "Find payments from supported bank alerts on this phone."),
+    SMS("Use bank alerts on this phone", "Find amounts, dates and merchants from supported alerts."),
     CSV("Upload a bank statement", "Import a CSV from your bank."),
-    SAMPLE("Try a sample profile", "Explore RupAI with realistic demo data.")
+    SAMPLE("Explore with sample data", "See how RupAI works before adding anything personal.")
 }
 
 enum class SmsPermissionState { EXPLAINER, DENIED, PERMANENTLY_DENIED }
@@ -53,7 +53,7 @@ class OnboardingViewModel : ViewModel() {
                 state.copy(page = OnboardingPage.SMS_CONSENT)
             } else state.copy(page = OnboardingPage.ABOUT_MONEY)
             OnboardingPage.SMS_CONSENT -> state.copy(page = OnboardingPage.ABOUT_MONEY)
-            OnboardingPage.ABOUT_MONEY -> if (state.moneyStep < 2) state.copy(moneyStep = state.moneyStep + 1)
+            OnboardingPage.ABOUT_MONEY -> if (state.moneyStep == 0) state.copy(moneyStep = 1)
                 else state.copy(page = OnboardingPage.SAFETY_NET)
             OnboardingPage.SAFETY_NET -> state
             OnboardingPage.BUILDING -> state
@@ -68,7 +68,7 @@ class OnboardingViewModel : ViewModel() {
             state.page == OnboardingPage.DATA_SOURCE -> state.copy(page = OnboardingPage.WELCOME)
             state.page == OnboardingPage.SMS_CONSENT -> state.copy(page = OnboardingPage.DATA_SOURCE)
             state.page == OnboardingPage.ABOUT_MONEY -> state.copy(page = OnboardingPage.DATA_SOURCE)
-            state.page == OnboardingPage.SAFETY_NET -> state.copy(page = OnboardingPage.ABOUT_MONEY, moneyStep = 2)
+            state.page == OnboardingPage.SAFETY_NET -> state.copy(page = OnboardingPage.ABOUT_MONEY, moneyStep = 1)
             else -> state
         }
     }
@@ -167,6 +167,6 @@ object OnboardingFixtures {
     )
     val previews get() = listOf(
         welcome(), source(), source(OnboardingDataSource.SAMPLE), sms(), sms(SmsPermissionState.DENIED), sms(SmsPermissionState.PERMANENTLY_DENIED),
-        aboutMoney(0), aboutMoney(1), aboutMoney(2), safetyNet(), building(), complete(), failed()
+        aboutMoney(0), aboutMoney(1), safetyNet(), building(), complete(), failed()
     )
 }

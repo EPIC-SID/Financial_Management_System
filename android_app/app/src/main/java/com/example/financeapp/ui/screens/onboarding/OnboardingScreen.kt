@@ -2,8 +2,8 @@ package com.example.financeapp.ui.screens.onboarding
 
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -18,6 +18,8 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -42,14 +44,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.datasource.CollectionPreviewParameterProvider
 import androidx.compose.ui.unit.dp
+import com.example.financeapp.R
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.financeapp.ui.components.RupAiButton
 import com.example.financeapp.ui.components.RupAiButtonSize
@@ -88,19 +93,11 @@ fun OnboardingScreen(
     onAlternativeSelected: (OnboardingDataSource) -> Unit = {},
     onMoneyArrivalSelected: (String) -> Unit = {},
     onObligationToggled: (String) -> Unit = {},
-    onAgeRangeSelected: (String) -> Unit = {},
     onCushionChanged: (String) -> Unit = {},
-    onGoalNameChanged: (String) -> Unit = {},
-    onGoalAmountChanged: (String) -> Unit = {},
     showSmsOption: Boolean = true,
     privacyContent: @Composable () -> Unit = {}
 ) {
-    val primaryEnabled = when (state.page) {
-        OnboardingPage.DATA_SOURCE -> state.selectedSource != null &&
-            (showSmsOption || state.selectedSource != OnboardingDataSource.SMS)
-        OnboardingPage.BUILDING -> state.completeness != null
-        else -> true
-    }
+    val primaryEnabled = state.page != OnboardingPage.BUILDING || state.completeness != null
     Scaffold(
         containerColor = CanvasWhite,
         bottomBar = {
@@ -109,7 +106,6 @@ fun OnboardingScreen(
                 primaryEnabled = primaryEnabled,
                 onPrimary = onPrimary,
                 onBack = onBack,
-                onExistingAccount = onExistingAccount,
                 onCreateAccount = onCreateAccount,
                 showAccountActions = showAccountActions
             )
@@ -117,32 +113,44 @@ fun OnboardingScreen(
     ) { innerPadding ->
         LazyColumn(
             Modifier.fillMaxSize().padding(innerPadding),
-            contentPadding = PaddingValues(horizontal = Spacing.md, vertical = Spacing.sm),
-            verticalArrangement = Arrangement.spacedBy(Spacing.md)
+            contentPadding = PaddingValues(top = Spacing.lg, bottom = Spacing.sm),
+            verticalArrangement = Arrangement.spacedBy(Spacing.sm)
         ) {
-            item { SegmentedProgress(state.page) }
-            state.error?.let { error -> item { Text(error, color = ErrorInk) } }
+            item {
+                OnboardingHeader(
+                    showSignIn = state.page == OnboardingPage.WELCOME,
+                    onSignIn = onExistingAccount
+                )
+            }
+            item { SegmentedProgress(state.page, Modifier.padding(horizontal = Spacing.md)) }
+            state.error?.let { error -> item {
+                Text(error, Modifier.padding(horizontal = Spacing.md), color = ErrorInk)
+            } }
             item { OnboardingIllustration(state) }
             item {
                 Text(
                     headlineFor(state),
-                    style = MaterialTheme.typography.headlineMedium,
+                    modifier = Modifier.padding(horizontal = Spacing.md),
+                    style = MaterialTheme.typography.headlineLarge,
+                    fontWeight = FontWeight.Bold,
                     color = Ink
                 )
             }
             item {
-                when (state.page) {
-                    OnboardingPage.WELCOME -> WelcomeContent()
-                    OnboardingPage.DATA_SOURCE -> DataSourceContent(state, onSourceSelected, showSmsOption)
-                    OnboardingPage.SMS_CONSENT -> SmsConsentContent(state.permissionState, onAlternativeSelected)
-                    OnboardingPage.ABOUT_MONEY -> AboutMoneyContent(
-                        state, onMoneyArrivalSelected, onObligationToggled, onAgeRangeSelected
-                    )
-                    OnboardingPage.SAFETY_NET -> Column {
-                        SafetyNetContent(state, onCushionChanged, onGoalNameChanged, onGoalAmountChanged)
-                        privacyContent()
+                Box(Modifier.padding(horizontal = Spacing.md)) {
+                    when (state.page) {
+                        OnboardingPage.WELCOME -> WelcomeContent()
+                        OnboardingPage.DATA_SOURCE -> DataSourceContent(state, onSourceSelected, showSmsOption)
+                        OnboardingPage.SMS_CONSENT -> SmsConsentContent(state.permissionState, onAlternativeSelected)
+                        OnboardingPage.ABOUT_MONEY -> AboutMoneyContent(
+                            state, onMoneyArrivalSelected, onObligationToggled
+                        )
+                        OnboardingPage.SAFETY_NET -> Column {
+                            SafetyNetContent(state, onCushionChanged)
+                            privacyContent()
+                        }
+                        OnboardingPage.BUILDING -> BuildingContent(state, onAlternativeSelected)
                     }
-                    OnboardingPage.BUILDING -> BuildingContent(state, onAlternativeSelected)
                 }
             }
         }
@@ -155,20 +163,22 @@ private fun OnboardingActions(
     primaryEnabled: Boolean,
     onPrimary: () -> Unit,
     onBack: () -> Unit,
-    onExistingAccount: () -> Unit,
     onCreateAccount: () -> Unit,
     showAccountActions: Boolean
 ) {
+    if (state.page == OnboardingPage.DATA_SOURCE || state.page == OnboardingPage.SAFETY_NET ||
+        (state.page == OnboardingPage.ABOUT_MONEY && state.moneyStep == 0)
+    ) return
     val label = when (state.page) {
-        OnboardingPage.WELCOME -> if (showAccountActions) "Continue without an account" else "Continue setup"
-        OnboardingPage.DATA_SOURCE -> "Continue"
+        OnboardingPage.WELCOME -> if (showAccountActions) "Explore RupAI" else "Start setup"
+        OnboardingPage.DATA_SOURCE -> error("Handled above")
         OnboardingPage.SMS_CONSENT -> when (state.permissionState) {
             SmsPermissionState.EXPLAINER -> "Allow SMS access"
             SmsPermissionState.DENIED -> "Try again"
             SmsPermissionState.PERMANENTLY_DENIED -> "Open Android settings"
         }
-        OnboardingPage.ABOUT_MONEY -> "Next"
-        OnboardingPage.SAFETY_NET -> "Continue"
+        OnboardingPage.ABOUT_MONEY -> "That’s everything"
+        OnboardingPage.SAFETY_NET -> error("Handled above")
         OnboardingPage.BUILDING -> "Open RupAI"
     }
     Surface(shadowElevation = 3.dp, color = CanvasWhite) {
@@ -179,18 +189,16 @@ private fun OnboardingActions(
             RupAiButton(
                 label = label,
                 onClick = onPrimary,
-                size = RupAiButtonSize.LARGE,
+                size = RupAiButtonSize.DEFAULT,
                 state = if (state.busy) RupAiButtonState.LOADING else if (primaryEnabled) RupAiButtonState.DEFAULT else RupAiButtonState.DISABLED,
                 disabledReason = when (state.page) {
-                    OnboardingPage.DATA_SOURCE -> "Choose one option to continue."
                     OnboardingPage.BUILDING -> "We’re still building your picture."
                     else -> "Complete this step to continue."
                 }
             )
             when (state.page) {
-                OnboardingPage.WELCOME -> if (showAccountActions) {
+                OnboardingPage.BUILDING -> if (showAccountActions && state.completeness != null) {
                     TextButton(onClick = onCreateAccount, enabled = !state.busy) { Text("Create account", color = Ink) }
-                    TextButton(onClick = onExistingAccount, enabled = !state.busy) { Text("Already registered? Sign in", color = Ink) }
                 }
                 OnboardingPage.SMS_CONSENT -> TextButton(onClick = onBack) { Text("Not now") }
                 OnboardingPage.ABOUT_MONEY, OnboardingPage.SAFETY_NET -> TextButton(onClick = onBack, enabled = !state.busy) { Text("Back") }
@@ -201,10 +209,30 @@ private fun OnboardingActions(
 }
 
 @Composable
-private fun SegmentedProgress(page: OnboardingPage) {
+private fun OnboardingHeader(showSignIn: Boolean, onSignIn: () -> Unit) {
+    Row(
+        Modifier.fillMaxWidth().padding(horizontal = Spacing.md),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Image(
+            painter = painterResource(R.drawable.rupai_logo_color),
+            contentDescription = "RupAI",
+            modifier = Modifier.size(36.dp)
+        )
+        if (showSignIn) {
+            TextButton(onClick = onSignIn) {
+                Text("Sign in", style = MaterialTheme.typography.labelMedium, color = Ink)
+            }
+        }
+    }
+}
+
+@Composable
+private fun SegmentedProgress(page: OnboardingPage, modifier: Modifier = Modifier) {
     val current = page.ordinal
     Row(
-        Modifier.fillMaxWidth().semantics { contentDescription = "Step ${current + 1} of 6" },
+        modifier.fillMaxWidth().semantics { contentDescription = "Step ${current + 1} of 6" },
         horizontalArrangement = Arrangement.spacedBy(Spacing.xs)
     ) {
         repeat(6) { index ->
@@ -224,11 +252,11 @@ private fun SegmentedProgress(page: OnboardingPage) {
 @Composable
 private fun WelcomeContent() {
     Column(verticalArrangement = Arrangement.spacedBy(Spacing.sm)) {
-        Text("Bring your balances, dues and plans into one clear picture.", style = MaterialTheme.typography.bodyLarge)
-        listOf("SMS transactions stay on this phone", "Never asks for bank passwords", "Cloud setup is optional").forEach {
+        Text("See your spending, bills and goals in one simple view.", style = MaterialTheme.typography.bodyMedium)
+        listOf("No bank passwords", "Bank alerts are read on this phone", "You choose what gets saved").forEach {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(Spacing.xs)) {
-                Icon(Icons.Outlined.CheckCircle, null, tint = ActionGreen)
-                Text(it, style = MaterialTheme.typography.bodyLarge)
+                Icon(Icons.Outlined.CheckCircle, null, Modifier.size(18.dp), tint = ActionGreen)
+                Text(it, style = MaterialTheme.typography.bodyMedium)
             }
         }
     }
@@ -245,7 +273,7 @@ private fun DataSourceContent(
             SelectableCard(source, selected = state.selectedSource == source, onClick = { onSelected(source) })
         }
         if (state.selectedSource == OnboardingDataSource.SAMPLE) {
-            Text("Sample: Mid-career with EMIs", style = MaterialTheme.typography.bodyMedium, color = MutedInk)
+            Text("Sample profile: regular income, EMIs and monthly bills", style = MaterialTheme.typography.bodyMedium, color = MutedInk)
         }
     }
 }
@@ -253,7 +281,8 @@ private fun DataSourceContent(
 @Composable
 private fun SelectableCard(source: OnboardingDataSource, selected: Boolean, onClick: () -> Unit) {
     Surface(
-        Modifier.fillMaxWidth().heightIn(min = 96.dp).clickable(role = Role.RadioButton, onClick = onClick),
+        Modifier.fillMaxWidth().heightIn(min = 96.dp)
+            .selectable(selected = selected, role = Role.RadioButton, onClick = onClick),
         shape = RoundedCornerShape(Radius.card),
         color = if (selected) SummaryGreen else CanvasWhite,
         border = BorderStroke(if (selected) 2.dp else 1.dp, if (selected) ActionGreen else Ink)
@@ -268,7 +297,7 @@ private fun SelectableCard(source: OnboardingDataSource, selected: Boolean, onCl
                     Text(source.title, style = MaterialTheme.typography.titleMedium)
                     if (source == OnboardingDataSource.SMS) {
                         Surface(shape = CircleShape, color = GuidanceYellow) {
-                            Text("Recommended", Modifier.padding(horizontal = Spacing.xs, vertical = Spacing.xxs), style = MaterialTheme.typography.labelSmall)
+                            Text("Fastest", Modifier.padding(horizontal = Spacing.xs, vertical = Spacing.xxs), style = MaterialTheme.typography.labelSmall)
                         }
                     }
                 }
@@ -287,17 +316,17 @@ private fun SmsConsentContent(
     Column(verticalArrangement = Arrangement.spacedBy(Spacing.md)) {
         if (permissionState != SmsPermissionState.EXPLAINER) {
             Notice(
-                title = if (permissionState == SmsPermissionState.DENIED) "SMS access wasn’t allowed" else "Allow access in Android settings",
-                detail = if (permissionState == SmsPermissionState.DENIED) "You can try again, upload a CSV or use a sample profile."
-                else "Permission was turned off permanently. Open settings to change it, or choose another way to add data."
+                title = if (permissionState == SmsPermissionState.DENIED) "SMS access is still off" else "Turn on SMS access in Android settings",
+                detail = if (permissionState == SmsPermissionState.DENIED) "Try again, or start with a sample profile."
+                else "You can turn it on in Settings, or start with a sample profile."
             )
         }
-        ReadList("What we read", listOf("Supported bank alerts", "Amount, date and merchant"), SummaryGreen)
-        ReadList("What we do not store", listOf("Personal chats", "OTPs", "Contacts"), SurfaceNeutral)
+        ReadList("Used to find transactions", listOf("Supported bank alerts", "Amount, date and merchant"), SummaryGreen)
+        ReadList("Left out", listOf("Personal chats", "OTPs", "Contacts"), SurfaceNeutral)
         if (permissionState != SmsPermissionState.EXPLAINER) {
             PermissionRecoveryActions(onAlternativeSelected)
         }
-        Text("Android grants access to SMS. RupAI filters supported bank alerts on this phone. Import starts only when you tap Sync in Activity. Cloud categorization requires separate consent; raw SMS is not sent to the AI provider.", style = MaterialTheme.typography.bodySmall, color = MutedInk)
+        Text("The first scan starts only when you tap Sync. Raw messages stay on this phone and are never sent to the AI provider.", style = MaterialTheme.typography.bodySmall, color = MutedInk)
     }
 }
 
@@ -326,22 +355,19 @@ private fun Notice(title: String, detail: String) {
 private fun AboutMoneyContent(
     state: OnboardingUiState,
     onArrival: (String) -> Unit,
-    onObligation: (String) -> Unit,
-    onAgeRange: (String) -> Unit
+    onObligation: (String) -> Unit
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(Spacing.sm)) {
-        Text("Question ${state.moneyStep + 1} of 3 (optional)", style = MaterialTheme.typography.labelLarge, color = MutedInk)
+        Text("Optional, ${state.moneyStep + 1} of 2", style = MaterialTheme.typography.labelLarge, color = MutedInk)
         when (state.moneyStep) {
-            0 -> ChoiceChips("How does your money arrive?", listOf("Fixed salary", "Varies month to month", "A mix"), setOfNotNull(state.moneyArrival), onArrival)
-            1 -> ChoiceChips(
-                "What payments are fixed?",
-                listOf("Rent", "Home loan", "Vehicle EMI", "Credit card", "Gadget EMI", "Insurance", "Subscriptions", "Mutual fund SIP", "None"),
-                state.obligations,
-                onObligation
-            )
+            0 -> ChoiceChips("Choose one", listOf("Fixed salary", "Varies month to month", "A mix"), setOfNotNull(state.moneyArrival), onArrival)
             else -> {
-                Text("One profile for Demo and My Transactions", style = MaterialTheme.typography.titleMedium)
-                Text("Demo plans use sample assumptions, not your personal setup. SMS activity remains separate from planning.", style = MaterialTheme.typography.bodyLarge)
+                ChoiceChips(
+                    "Choose all that apply",
+                    listOf("Rent", "Home loan", "Vehicle EMI", "Credit card", "Gadget EMI", "Insurance", "Subscriptions", "Mutual fund SIP", "None"),
+                    state.obligations,
+                    onObligation
+                )
             }
         }
     }
@@ -356,7 +382,7 @@ private fun ChoiceChips(title: String, choices: List<String>, selected: Set<Stri
             val isSelected = choice in selected
             Surface(
                 modifier = Modifier.heightIn(min = Spacing.minimumTouchTarget)
-                    .clickable(role = Role.Checkbox) { onClick(choice) },
+                    .toggleable(value = isSelected, role = Role.Checkbox) { onClick(choice) },
                 shape = CircleShape,
                 color = if (isSelected) SummaryGreen else CanvasWhite,
                 border = BorderStroke(if (isSelected) 2.dp else 1.dp, if (isSelected) ActionGreen else Ink)
@@ -378,43 +404,28 @@ private fun ChoiceChips(title: String, choices: List<String>, selected: Set<Stri
 @Composable
 private fun SafetyNetContent(
     state: OnboardingUiState,
-    onCushionChanged: (String) -> Unit,
-    onGoalNameChanged: (String) -> Unit,
-    onGoalAmountChanged: (String) -> Unit
+    onCushionChanged: (String) -> Unit
 ) {
-    Column(verticalArrangement = Arrangement.spacedBy(Spacing.md)) {
-        Text("Skip anything you don’t know. We’ll show how sure we are.", style = MaterialTheme.typography.bodyLarge)
-        OutlinedTextField(
-            value = state.cushionDigits,
-            onValueChange = onCushionChanged,
-            modifier = Modifier.fillMaxWidth(),
-            label = { Text("Minimum cash cushion") },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-            singleLine = true
-        )
-        FlowRow(horizontalArrangement = Arrangement.spacedBy(Spacing.xs)) {
-            AssistChip(onClick = { onCushionChanged("30000") }, label = { Text("INR 30,000") })
-            AssistChip(onClick = { onCushionChanged("60000") }, label = { Text("INR 60,000") })
-            AssistChip(onClick = { onCushionChanged("") }, label = { Text("Custom") })
-        }
-        Text("Optional goal", style = MaterialTheme.typography.titleMedium)
-        OutlinedTextField(
-            value = state.goalName,
-            onValueChange = onGoalNameChanged,
-            modifier = Modifier.fillMaxWidth(),
-            label = { Text("Goal name") },
-            singleLine = true
-        )
-        OutlinedTextField(
-            value = state.goalDigits,
-            onValueChange = onGoalAmountChanged,
-            modifier = Modifier.fillMaxWidth(),
-            label = { Text("Goal amount") },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-            singleLine = true
-        )
-        Text("Loan, card and SIP details can be added later if you know them.", style = MaterialTheme.typography.bodySmall, color = MutedInk)
+    val selected = when (state.cushionDigits) {
+        "30000" -> setOf("₹30,000")
+        "60000" -> setOf("₹60,000")
+        else -> emptySet()
     }
+    Column(verticalArrangement = Arrangement.spacedBy(Spacing.sm)) {
+        Text("Choose one. You can change it later from Profile.", style = MaterialTheme.typography.bodyMedium, color = MutedInk)
+        ChoiceChips(
+            title = "One tap and you’re done",
+            choices = listOf("₹30,000", "₹60,000", "Decide later"),
+            selected = selected,
+            onClick = { choice -> onCushionChanged(cushionValueFor(choice)) }
+        )
+    }
+}
+
+internal fun cushionValueFor(choice: String): String = when (choice) {
+    "₹30,000" -> "30000"
+    "₹60,000" -> "60000"
+    else -> ""
 }
 
 @Composable
@@ -433,7 +444,7 @@ private fun BuildingContent(
             }
         }
         if (state.ingestFailed) {
-            Notice("We couldn’t find enough to build your picture", "Your choices are safe. Upload a CSV or start with a sample profile.")
+            Notice("We couldn’t build a picture from those alerts", "Nothing was changed. Start with a sample profile instead.")
             Row(horizontalArrangement = Arrangement.spacedBy(Spacing.xs)) {
                 AssistChip(onClick = { onAlternativeSelected(OnboardingDataSource.CSV) }, label = { Text("Upload CSV") })
                 AssistChip(onClick = { onAlternativeSelected(OnboardingDataSource.SAMPLE) }, label = { Text("Use sample") })
@@ -470,12 +481,12 @@ private fun IngestRow(row: IngestRowUi) {
 }
 
 private fun headlineFor(state: OnboardingUiState): String = when (state.page) {
-    OnboardingPage.WELCOME -> "Know where you stand before the month ends."
-    OnboardingPage.DATA_SOURCE -> "Start with the picture you have today."
-    OnboardingPage.SMS_CONSENT -> "Your messages stay under your control."
-    OnboardingPage.ABOUT_MONEY -> "Tell us what shapes your month."
-    OnboardingPage.SAFETY_NET -> "What keeps you comfortable?"
-    OnboardingPage.BUILDING -> if (state.ingestFailed) "Let’s try another way." else "Ready to continue"
+    OnboardingPage.WELCOME -> "See your money clearly."
+    OnboardingPage.DATA_SOURCE -> "How would you like to begin?"
+    OnboardingPage.SMS_CONSENT -> "Use bank alerts without uploading messages."
+    OnboardingPage.ABOUT_MONEY -> if (state.moneyStep == 0) "How predictable is your income?" else "Which bills come back every month?"
+    OnboardingPage.SAFETY_NET -> "How much would you like to keep untouched?"
+    OnboardingPage.BUILDING -> if (state.ingestFailed) "No problem. Try another way." else "Your starting picture is ready."
 }
 
 private class OnboardingPreviewProvider : CollectionPreviewParameterProvider<OnboardingUiState>(OnboardingFixtures.previews)

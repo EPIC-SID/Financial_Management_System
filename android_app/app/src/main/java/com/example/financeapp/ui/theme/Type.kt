@@ -54,7 +54,7 @@ private val BaseTypography = Typography(
     displayMedium = TextStyle(fontFamily = HeadlineSerif, fontWeight = FontWeight.Normal, fontSize = 36.sp, lineHeight = 48.sp),
     displaySmall = TextStyle(fontFamily = HeadlineSerif, fontWeight = FontWeight.Normal, fontSize = 32.sp, lineHeight = 42.sp),
     headlineLarge = TextStyle(fontFamily = HeadlineSerif, fontWeight = FontWeight.Normal, fontSize = 32.sp, lineHeight = 42.sp),
-    headlineMedium = TextStyle(fontFamily = Inter, fontWeight = FontWeight.Medium, fontSize = 24.sp, lineHeight = 32.sp),
+    headlineMedium = TextStyle(fontFamily = Inter, fontWeight = FontWeight.Bold, fontSize = 24.sp, lineHeight = 32.sp),
     headlineSmall = TextStyle(fontFamily = Inter, fontWeight = FontWeight.Normal, fontSize = 20.sp, lineHeight = 28.sp),
     titleLarge = TextStyle(fontFamily = Inter, fontWeight = FontWeight.Medium, fontSize = 20.sp, lineHeight = 28.sp),
     titleMedium = TextStyle(fontFamily = Inter, fontWeight = FontWeight.Medium, fontSize = 16.sp, lineHeight = 24.sp),

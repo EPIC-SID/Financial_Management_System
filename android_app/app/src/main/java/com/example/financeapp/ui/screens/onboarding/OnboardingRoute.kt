@@ -64,6 +64,11 @@ private fun AccountOnboarding(owner: String?, onExistingAccount: () -> Unit, onC
         }
     }
     BackHandler(enabled = state.busy || state.page != OnboardingPage.WELCOME) { if (!state.busy) vm.back() }
+    fun finishSetup() = scope.launch {
+        try { vm.finish(owner, consent && loaded, AccountSetupRepository::save) }
+        catch (e: CancellationException) { throw e }
+        catch (e: Exception) { vm.error("We couldn’t save this yet. Try again.") }
+    }
     OnboardingScreen(state, onPrimary = {
         when (state.page) {
             OnboardingPage.SMS_CONSENT -> {
@@ -72,29 +77,26 @@ private fun AccountOnboarding(owner: String?, onExistingAccount: () -> Unit, onC
                     context.startActivity(Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:${context.packageName}")))
                 } else permission.launch(Manifest.permission.READ_SMS)
             }
-            OnboardingPage.SAFETY_NET -> scope.launch {
-                try { vm.finish(owner, consent && loaded, AccountSetupRepository::save) }
-                catch (e: CancellationException) { throw e }
-                catch (e: Exception) { vm.error("Setup could not be saved. Please retry.") }
-            }
+            OnboardingPage.SAFETY_NET -> finishSetup()
             OnboardingPage.BUILDING -> if (state.completeness != null) onComplete(state.selectedSource ?: OnboardingDataSource.SAMPLE)
             else -> vm.next()
         }
     }, onBack = vm::back, onExistingAccount = onExistingAccount,
         onCreateAccount = onCreateAccount, showAccountActions = owner == null,
-        onSourceSelected = vm::selectSource, onAlternativeSelected = vm::chooseAlternative,
-        onMoneyArrivalSelected = vm::setMoneyArrival, onObligationToggled = vm::toggleObligation,
-        onAgeRangeSelected = vm::setAgeRange, onCushionChanged = vm::setCushion,
-        onGoalNameChanged = vm::setGoalName, onGoalAmountChanged = vm::setGoalAmount,
+        onSourceSelected = { vm.selectSource(it); vm.next() }, onAlternativeSelected = vm::chooseAlternative,
+        onMoneyArrivalSelected = { vm.setMoneyArrival(it); vm.next() }, onObligationToggled = vm::toggleObligation,
+        onCushionChanged = { vm.setCushion(it); finishSetup() },
         privacyContent = {
-            Column(Modifier.padding(vertical = 16.dp)) {
-                Text("Optional account storage", style = MaterialTheme.typography.titleMedium)
-                Text("Save your income pattern, fixed-payment types, cash cushion and goal in Supabase until you delete it from Profile or delete your account. This setup is shared across both modes. No SMS, account numbers or demo records are included. It is not sent to the AI provider.")
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Checkbox(consent, { consent = it }, enabled = owner != null && loaded && !state.busy)
-                    Text("Save this setup to my account", Modifier.weight(1f))
+            Column(Modifier.padding(top = 16.dp)) {
+                if (owner == null) {
+                    Text("Create an account at the end if you want to save these answers.", style = MaterialTheme.typography.bodyMedium)
+                } else {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Checkbox(consent, { consent = it }, enabled = loaded && !state.busy)
+                        Text("Save these setup answers", Modifier.weight(1f), style = MaterialTheme.typography.bodyMedium)
+                    }
                 }
-                if (owner == null) Text("Sign in from the welcome step to save. Without signing in, these answers are discarded after setup.")
+                Text("Messages and account numbers are never saved here.", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 if (loadError != null) {
                     Text(loadError!!, color = MaterialTheme.colorScheme.error)
                     TextButton(onClick = { retry++ }, enabled = !state.busy) { Text("Retry account storage") }

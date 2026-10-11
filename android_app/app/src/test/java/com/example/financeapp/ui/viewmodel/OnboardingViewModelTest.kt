@@ -81,4 +81,15 @@ class OnboardingViewModelTest {
             Resource.Success(Unit)
         }
     }
+    @Test fun moneyQuestionsFinishAfterTwoAnswers() {
+        val vm = OnboardingViewModel()
+        vm.next()
+        vm.selectSource(OnboardingDataSource.SAMPLE)
+        vm.next()
+        assertEquals(OnboardingPage.ABOUT_MONEY, vm.uiState.value.page)
+        vm.next()
+        assertEquals(1, vm.uiState.value.moneyStep)
+        vm.next()
+        assertEquals(OnboardingPage.SAFETY_NET, vm.uiState.value.page)
+    }
 }

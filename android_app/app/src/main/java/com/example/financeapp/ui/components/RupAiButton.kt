@@ -75,6 +75,7 @@ fun RupAiButton(
         RupAiButtonSize.LARGE -> Spacing.md
     }
     val fill = if (variant == RupAiButtonVariant.PRIMARY) ActionGreen else CanvasWhite
+    val content = if (variant == RupAiButtonVariant.PRIMARY) CanvasWhite else Ink
     val border = when {
         emphasized -> BorderStroke(2.dp, Ink)
         variant == RupAiButtonVariant.OUTLINE -> BorderStroke(1.dp, if (disabled) MutedInk else Ink)
@@ -97,15 +98,15 @@ fun RupAiButton(
             contentPadding = PaddingValues(horizontal = Spacing.lg, vertical = verticalPadding),
             colors = ButtonDefaults.buttonColors(
                 containerColor = fill,
-                contentColor = Ink,
+                contentColor = content,
                 disabledContainerColor = if (loading) fill else SurfaceNeutral,
-                disabledContentColor = if (loading) Ink else MutedInk
+                disabledContentColor = if (loading) content else MutedInk
             )
         ) {
             if (loading) {
                 CircularProgressIndicator(
                     Modifier.size(20.dp).clearAndSetSemantics { },
-                    color = Ink,
+                    color = content,
                     strokeWidth = 2.dp
                 )
                 Spacer(Modifier.width(Spacing.xs))

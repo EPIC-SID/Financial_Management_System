@@ -11,7 +11,7 @@ fun navigationChoices(mode: AppDataMode): List<NavigationChoice> = buildList {
         add(NavigationChoice(Screen.Plan.route, "Plans"))
         add(NavigationChoice(Screen.Copilot.route, "Ask AI"))
     }
-    add(NavigationChoice(Screen.Transactions.route, "Transactions"))
+    add(NavigationChoice(Screen.Transactions.route, "Activity"))
     add(NavigationChoice(Screen.Profile.route, "Profile"))
 }
 

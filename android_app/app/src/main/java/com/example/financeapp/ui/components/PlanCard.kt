@@ -19,6 +19,7 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import com.example.financeapp.ui.theme.ActionGreen
+import com.example.financeapp.ui.theme.CanvasWhite
 import com.example.financeapp.ui.theme.Ink
 import com.example.financeapp.ui.theme.MutedInk
 import com.example.financeapp.ui.theme.NumberCompact
@@ -41,7 +42,7 @@ fun PlanCard(plan: PlanKind, summary: PlanSummaryUi, modifier: Modifier = Modifi
         modifier.then(dashedBorder),
         shape = RoundedCornerShape(Radius.card),
         color = fill,
-        contentColor = Ink,
+        contentColor = if (plan == PlanKind.PLAN_A) CanvasWhite else Ink,
         border = if (dashed) null else BorderStroke(1.dp, Ink)
     ) {
         Column(Modifier.padding(Spacing.lg), verticalArrangement = Arrangement.spacedBy(Spacing.md)) {

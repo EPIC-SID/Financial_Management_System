@@ -18,6 +18,7 @@ import androidx.compose.ui.semantics.selectableGroup
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.example.financeapp.ui.theme.ActionGreen
+import com.example.financeapp.ui.theme.CanvasWhite
 import com.example.financeapp.ui.theme.Ink
 import com.example.financeapp.ui.theme.Radius
 import com.example.financeapp.ui.theme.Spacing
@@ -39,7 +40,7 @@ fun <T> PlanSwitch(options: List<T>, selected: T, label: (T) -> String, onSelect
                     bottomEnd = if (index == options.lastIndex) Radius.button else Spacing.xxs
                 ),
                 color = if (selected == option) ActionGreen else MaterialTheme.colorScheme.surface,
-                contentColor = Ink,
+                contentColor = if (selected == option) CanvasWhite else Ink,
                 border = BorderStroke(1.dp, Ink)
             ) {
                 androidx.compose.foundation.layout.Box(Modifier.fillMaxWidth().padding(vertical = Spacing.sm), contentAlignment = Alignment.Center) {

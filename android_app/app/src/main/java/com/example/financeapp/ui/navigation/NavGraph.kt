@@ -66,18 +66,6 @@ fun FinanceAppNavGraph() {
         val destination = destinationFor(mode, route)
         navController.navigate(destination) { launchSingleTop = true }
     }
-    fun selectMode(next: AppDataMode) {
-        if (next == mode) return
-        copilot.invalidate()
-        hybrid.clearSessionSelections()
-        showWhatIf = false
-        mode = next
-        navController.navigate(if (next == AppDataMode.LIVE) Screen.Transactions.route else Screen.Cockpit.route) {
-            popUpTo(navController.graph.id)
-            launchSingleTop = true
-        }
-    }
-
     fun replaceLegacy(route: String, target: String) {
         val destination = if (mode == AppDataMode.LIVE && target == Screen.Copilot.route ||
             mode == AppDataMode.LIVE && target == Screen.Cockpit.route) Screen.Transactions.route else target
@@ -96,10 +84,7 @@ fun FinanceAppNavGraph() {
     val setupOrAuth = entry?.destination?.route in listOf(Screen.Onboarding.route, Screen.Login.route, Screen.SignUp.route)
 
     AppNavigationShell(visible = !setupOrAuth, mode = mode, route = entry?.destination?.route,
-        scenario = state.scenario, freelancer = state.persona == Persona.A, loading = state.loading,
-        onNavigate = ::navigate, onMode = ::selectMode,
-        onScenario = { scenario, freelancer -> hybrid.selectScenario(scenario, if (freelancer) Persona.A else Persona.B) },
-        onBack = { navController.popBackStack() }) { shellPadding ->
+        onNavigate = ::navigate, onBack = { navController.popBackStack() }) { shellPadding ->
     NavHost(navController = navController, startDestination = startDestination, modifier = Modifier.fillMaxSize().padding(shellPadding)) {
         composable(Screen.Onboarding.route) {
             OnboardingRoute(onExistingAccount = { navigate(Screen.Login.route) },

@@ -109,7 +109,7 @@ fun ChatInputBar(
                 Surface(
                     shape = CircleShape,
                     color = if (listening) ActionGreen else SurfaceNeutral,
-                    contentColor = Ink,
+                    contentColor = if (listening) CanvasWhite else Ink,
                     modifier = Modifier.size(Spacing.minimumTouchTarget).alpha(if (listening) pulse else 1f)
                 ) {
                     IconButton(

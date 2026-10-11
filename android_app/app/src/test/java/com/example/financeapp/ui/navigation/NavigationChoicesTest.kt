@@ -8,7 +8,7 @@ import org.junit.Test
 class NavigationChoicesTest {
     @Test fun sampleModeContainsEveryMainScreenOnce() {
         val choices = navigationChoices(AppDataMode.DEMO)
-        assertEquals(listOf("Overview", "Plans", "Ask AI", "Transactions", "Profile"), choices.map { it.label })
+        assertEquals(listOf("Overview", "Plans", "Ask AI", "Activity", "Profile"), choices.map { it.label })
         assertEquals(choices.size, choices.map { it.route }.distinct().size)
     }
     @Test fun liveModeNeverOffersSamplePlanning() {
